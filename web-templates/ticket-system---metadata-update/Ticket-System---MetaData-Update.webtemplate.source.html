@@ -1,0 +1,1351 @@
+<!-- Add Condition here to check if Logged in User has any Backend Roles such as HR, Tech, Manager etc -->
+<script>
+  const modifiedByUserName = "{{ user.fullname }}";
+  const modifiedByUserEmail = "{{ user.emailaddress1 }}";
+</script>
+
+{% assign canEditVendor = false %}
+{% assign canEditPO     = false %}
+{% if user.roles contains "Starlinks Procurement Team" %}
+  {% if requestType == "Vendor Selection" %}{% assign canEditVendor = true %}{% endif %}
+  {% if requestType == "PO Creation"      %}{% assign canEditPO     = true %}{% endif %}
+{% endif %}
+
+{% if user.roles contains "Starlinks Procurement Team" and requestType == "Vendor Selection" or user.roles contains "Starlinks Procurement Team" and requestType == "PO Creation" %}
+<div class="container border p-4 mt-3">
+  <fieldset class="p-4 mb-3">
+    <!-- <legend>Vendor Selection<small class="text-muted fw-normal fst-italic" style="font-size: 0.85rem;"> (To be filled by Procurement Team)</small></legend> -->
+    <legend class="d-flex justify-content-between align-items-center">
+      <span>Vendor Selection<small class="text-muted fw-normal fst-italic" style="font-size: 0.85rem;"> (To be filled by
+          Procurement Team)</small></span>
+      <a href="/View-Ticket/?id={{ ticket.sh_parentticket.id }}" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:5px;padding:4px 10px;font-size:12px;
+         font-weight:500;border:1px solid #d1d5db;border-radius:6px;color:#374151;
+         text-decoration:none;background:#ffffff;white-space:nowrap"
+        onmouseover="this.style.background='#f9fafb';this.style.borderColor='#9ca3af'"
+        onmouseout="this.style.background='#ffffff';this.style.borderColor='#d1d5db'">
+        <svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8">
+          <path d="M5 2H2a1 1 0 0 0-1 1v7a1 1 0 0 0 1 1h7a1 1 0 0 0 1-1V7" />
+          <path d="M8 1h3m0 0v3m0-3L5 7" />
+        </svg>
+        View Parent Ticket
+      </a>
+    </legend>
+    <div class="row">
+      <div class="col-12 col-md-8 mb-3">
+        <label for="vendorSearch" class="form-label">Vendor *</label>
+        <input type="text" class="form-control" id="vendorSearch" autocomplete="off"
+          
+        value="{% if metadata['sh_vendorid'] %}{{ metadata['sh_vendorid'] }} | {{ metadata['sh_Vendor.sh_vendorname'] }}{% endif %}"
+        {% unless canEditVendor %}readonly{% endunless %}
+        required>
+        <!-- value="{{ metadata['sh_vendorid'] }} | {{ metadata['sh_Vendor.sh_vendorname'] }}" -->
+          <!-- value="{{ metadata['sh_Vendor.sh_vendorname'] }}"  -->
+          <!-- {% if currentValue == "126450002" %}readonly{% endif %}  -->
+          
+        <ul id="vendorSearchResults" class="list-group position-absolute w-100 mt-1 shadow-sm"
+          style="z-index:2000; display:none; max-height:220px; overflow-y:auto;"></ul>
+      
+        <input type="hidden" id="vendorIdHidden" value="{{ metadata.sh_vendor.id }}"/>
+
+      
+      </div>
+      <div class="col-12 col-md-4 mb-3">
+        <label class="form-label">Procurement Sub Category *</label>
+        <div class="dropdown w-100">
+          <!-- <button class="btn btn-light border w-100 text-start dropdown-toggle"
+                  type="button" data-bs-toggle="dropdown" id="procurementSubCategoryBtn"> -->
+          <button class="btn btn-light border w-100 text-start 
+          {% if canEditVendor %}dropdown-toggle{% endif %}"
+        type="button" {% if canEditVendor %}data-bs-toggle="dropdown"{% endif %} id="procurementSubCategoryBtn">
+            Select Procurement Sub Category
+          </button>
+
+          <!-- <ul class="dropdown-menu w-100 p-2"
+              style="max-height: 250px; overflow-y: auto;"
+              id="procurementSubCategoryList">
+          </ul> -->
+
+          <ul class="dropdown-menu w-100 p-2"
+              style="max-height: 250px; overflow-y: auto;"
+              id="procurementSubCategoryList">
+          </ul>
+
+          <!-- <ul class="dropdown-menu w-100 p-2" style="max-height: 250px; overflow-y: auto;" id="procurementSubCategoryList">
+            <li class="mb-2">
+              <input type="text" class="form-control form-control-sm" placeholder="Search..." id="procurementSubCategorySearch"
+                oninput="filterDropdown('procurementSubCategoryList', this.value)">
+            </li>
+          </ul> -->
+
+        </div>
+      </div>
+      <input type="hidden" id="procurementSubCategorylabel" value="{{ metadata.sh_subcategory }}">
+
+      <div class="col-12 col-md-4 mb-3">
+        <label class="form-label d-block"></label>
+        <div class="form-check mt-1">
+          <input class="form-check-input" type="checkbox" id="sh_prepaymentrequired"
+                  {% if metadata.sh_prepaymentrequired %}checked{% endif %}
+                  {% unless canEditVendor %}disabled{% endunless %}
+                  onchange="document.getElementById('prepaymentAmountCol').style.display = this.checked ? 'block' : 'none'">
+                  <label class="form-label form-check-label" for="sh_prepaymentrequired">Prepayment Required</label>
+                  <!-- {% if mode == "view" %}disabled{% endif %} -->
+        </div>
+      </div>
+
+      <div class="col-12 col-md-4 mb-3" id="prepaymentAmountCol" style="display:none;">
+        <label for="sh_prepaymentamount" class="form-label">Prepayment Amount</label>
+        <input type="number" class="form-control" id="sh_prepaymentamount" min="0" value="{{ metadata.sh_prepaymentamount }}" 
+        {% unless canEditVendor %}readonly{% endunless %}
+        >
+        <!-- {% if mode == "view" %}readonly{% endif %} -->
+      </div>
+    </div>
+  </fieldset>
+</div>
+
+<script>
+  const el = id => document.getElementById(id);
+  function filterDropdown(listId, query) {
+    const list = document.getElementById(listId);
+    const q = query.toLowerCase().trim();
+    list.querySelectorAll("li:not(:first-child)").forEach(li => {
+      const text = li.textContent.toLowerCase();
+      li.style.display = (!q || text.includes(q)) ? "" : "none";
+    });
+  }
+
+  function syncPONumber() {
+    const seg2 = document.getElementById('sh_ponumber_seg2').value.trim();
+    document.getElementById('sh_ponumber').value = seg2 ? `PO-SLK26-${seg2}` : '';
+  }
+
+  function syncVendorCode() {
+    const seg1 = document.getElementById('sh_vendorcode_seg1').value.trim();
+    const seg2 = document.getElementById('sh_vendorcode_seg2').value.trim();
+    const seg3 = document.getElementById('sh_vendorcode_seg3').value.trim();
+    document.getElementById('sh_vendorcode').value = (seg1 && seg2 && seg3) ? `${seg1}-${seg2}-${seg3}` : '';
+  }
+
+  function validateVendorSelection() {
+    const isCompleted = el("sh_ticketstatus").value == STATUS_MAP["Completed"];
+    if (!isCompleted) return true; // allow save with empty values
+    
+    if (!el("vendorIdHidden").value)
+      return showToast("Please select a Vendor before marking as Completed.", "danger"), false;
+    if (el("procurementSubCategoryBtn").textContent.trim() === "Select Procurement Sub Category")
+      return showToast("Please select a Procurement Sub Category before marking as Completed.", "danger"), false;
+    
+    return true;
+  }
+
+  function validatePOCreation() {
+    const poSeg2 = document.getElementById("sh_ponumber_seg2").value.trim();
+    if (!poSeg2 || poSeg2 === "000000") {
+      showToast("Please enter a valid PO Number.", "danger"); return false;
+    }
+    return true;
+  }
+
+  document.addEventListener("DOMContentLoaded", function () {
+    if (document.getElementById("sh_prepaymentrequired").checked)
+      document.getElementById("prepaymentAmountCol").style.display = "block";
+
+    if (document.getElementById("sh_partialdeliveryallowed").checked)
+      document.getElementById("partialDeliveryCol").style.display = "block";
+
+    document.getElementById("vendorSearch")?.addEventListener("input", function () {
+      if (!this.value.trim()) document.getElementById("vendorIdHidden").value = "";
+    });
+
+    document.getElementById("sh_prepaymentrequired").addEventListener("change", function () {
+      document.getElementById("prepaymentPanel").style.display = this.checked ? "block" : "none";
+    });
+
+    document.getElementById("sh_recurringpurchase").addEventListener("change", function () {
+      document.getElementById("recurringPanel").style.display = this.checked ? "block" : "none";
+    });
+  
+  
+  });
+
+  document.addEventListener("change", function (e) {
+      if (!e.target.classList.contains("dd-check")) return;
+      const menu = e.target.closest(".dropdown-menu");
+      const btnId = menu.id.replace("List", "Btn");
+      const btn = document.getElementById(btnId);
+
+      const selected = [...menu.querySelectorAll(".dd-check:checked")]
+          .map(x => x.value);
+
+      btn.textContent = selected.length ? selected.join(", ") : "Select Options";
+  });
+</script>
+
+<!-- <script>
+  document.getElementById("sh_prepaymentrequired").addEventListener("change", function () {
+    document.getElementById("prepaymentPanel").style.display = this.checked ? "block" : "none";
+  });
+
+  document.getElementById("sh_recurringpurchase").addEventListener("change", function () {
+    document.getElementById("recurringPanel").style.display = this.checked ? "block" : "none";
+  });
+
+
+
+</script> -->
+{% endif %}
+
+{% if user.roles contains "Starlinks Procurement Team" and requestType == "PO Creation" %}
+<div class="container border p-4 mt-3">
+  <fieldset class="p-4 mb-3">
+    <!-- <legend>P2P PO Details <small class="text-muted fw-normal fst-italic" style="font-size: 0.85rem;">(To be filled by P2P Team)</small></legend> -->
+    <legend class="d-flex justify-content-between align-items-center">
+      <span>P2P PO Details<small class="text-muted fw-normal fst-italic" style="font-size: 0.85rem;"> (To be filled by P2P
+          Team)</small></span>
+      <a href="/View-Ticket/?id={{ ticket.sh_parentticket.id }}" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:5px;padding:4px 10px;font-size:12px;
+         font-weight:500;border:1px solid #d1d5db;border-radius:6px;color:#374151;
+         text-decoration:none;background:#ffffff;white-space:nowrap"
+        onmouseover="this.style.background='#f9fafb';this.style.borderColor='#9ca3af'"
+        onmouseout="this.style.background='#ffffff';this.style.borderColor='#d1d5db'">
+        <svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8">
+          <path d="M5 2H2a1 1 0 0 0-1 1v7a1 1 0 0 0 1 1h7a1 1 0 0 0 1-1V7" />
+          <path d="M8 1h3m0 0v3m0-3L5 7" />
+        </svg>
+        View Parent Ticket
+      </a>
+    </legend>
+    <div class="col-12 col-md-4 mb-3">
+    <label class="form-label">PO Number</label>
+
+    {% if metadata.sh_ponumber %}
+      {% assign poParts = metadata.sh_ponumber | split: '-' %}
+    {% endif %}
+
+    <span class="chip" id="poStatusChip">Status
+      <span class="dot"></span>
+      {{ metadata.sh_postatus | default: "Unavailable" }}
+    </span>
+
+    <div class="d-flex align-items-center gap-2">
+      <input type="text" class="form-control text-center"
+            id="sh_ponumber_seg1" readonly
+            value="PO-SLK26"
+            style="background-color: #e9ecef;">
+
+      <span class="text-muted">-</span>
+
+      <input type="text" class="form-control text-center"
+            id="sh_ponumber_seg2" maxlength="6" placeholder="000000"
+            value="{% if metadata.sh_ponumber %}{{ poParts[2] }}{% endif %}"
+            {% if currentValue == "126450002" %}readonly{% endif %}
+            oninput="this.value = this.value.replace(/\D/g, ''); syncPONumber()">
+    </div>
+
+    <input type="hidden" id="sh_ponumber" value="{{ metadata.sh_ponumber }}">
+    </div>
+  </fieldset>
+</div>
+{% endif %}
+
+{% if requestType == "GRN Entry" and user.emailaddress1 | downcase == ticket.sh_requestoremail | downcase %}
+<div class="container border p-4 mt-3">
+  <fieldset class="p-4 mb-3">
+    <legend class="d-flex justify-content-between align-items-center">
+      <span style="color: #006F4A; font-family: 'Gotham Narrow', Arial, sans-serif; font-weight: 700;">
+        GRN Entry
+        <small style="color: #94A0A9; font-weight: 400; font-size: 0.8rem; font-style: italic;">
+          (To be filled by Requestor)
+        </small>
+      </span>
+      <a href="/View-Ticket/?id={{ ticket.sh_parentticket.id }}" target="_blank" rel="noopener noreferrer"
+        style="display:inline-flex;align-items:center;gap:5px;padding:4px 10px;font-size:12px;
+               font-weight:500;border:1px solid #d1d5db;border-radius:6px;color:#374151;
+               text-decoration:none;background:#ffffff;white-space:nowrap"
+        onmouseover="this.style.background='#f9fafb';this.style.borderColor='#9ca3af'"
+        onmouseout="this.style.background='#ffffff';this.style.borderColor='#d1d5db'">
+        <svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8">
+          <path d="M5 2H2a1 1 0 0 0-1 1v7a1 1 0 0 0 1 1h7a1 1 0 0 0 1-1V7" />
+          <path d="M8 1h3m0 0v3m0-3L5 7" />
+        </svg>
+        View Parent Ticket
+      </a>
+    </legend>
+
+    <!-- Instructions -->
+    <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px;">
+
+      <!-- Step 1 -->
+      <div style="display: flex; gap: 12px; align-items: flex-start; padding: 12px 14px; background: #f8fffe; border: 1px solid rgba(0,111,74,0.15); border-radius: 8px;">
+        <div style="background: #006F4A; color: white; border-radius: 50%; width: 24px; height: 24px; min-width: 24px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; margin-top: 1px;">1</div>
+        <div>
+          <p style="font-size: 13px; font-weight: 600; color: #006F4A; margin: 0 0 2px; font-family: 'Gotham Narrow', Arial, sans-serif;">Upload Goods Receipt Note</p>
+          <p style="font-size: 12px; color: #58595B; margin: 0; line-height: 1.5;">Attach the GRN document using the attachment section above.</p>
+        </div>
+      </div>
+
+      <!-- Step 2 -->
+      <div style="display: flex; gap: 12px; align-items: flex-start; padding: 12px 14px; background: #f8fffe; border: 1px solid rgba(0,111,74,0.15); border-radius: 8px;">
+        <div style="background: #006F4A; color: white; border-radius: 50%; width: 24px; height: 24px; min-width: 24px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; margin-top: 1px;">2</div>
+        <div>
+          <p style="font-size: 13px; font-weight: 600; color: #006F4A; margin: 0 0 2px; font-family: 'Gotham Narrow', Arial, sans-serif;">Confirm Final Delivery</p>
+          <p style="font-size: 12px; color: #58595B; margin: 0; line-height: 1.5;">Check the box below <strong>only if all goods have been received in full</strong>. If any items are still pending, leave it unchecked — a new GRN step will be created automatically.</p>
+        </div>
+      </div>
+
+      <!-- Step 3 -->
+      <div style="display: flex; gap: 12px; align-items: flex-start; padding: 12px 14px; background: #f8fffe; border: 1px solid rgba(0,111,74,0.15); border-radius: 8px;">
+        <div style="background: #006F4A; color: white; border-radius: 50%; width: 24px; height: 24px; min-width: 24px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; margin-top: 1px;">3</div>
+        <div>
+          <p style="font-size: 13px; font-weight: 600; color: #006F4A; margin: 0 0 2px; font-family: 'Gotham Narrow', Arial, sans-serif;">Mark as Completed</p>
+          <p style="font-size: 12px; color: #58595B; margin: 0; line-height: 1.5;">Mark the <strong>Ticket Status as Completed from the Ticket Section</strong> below once the GRN is uploaded and delivery status is confirmed.</p>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Checkbox -->
+    <div style="padding: 14px 16px; border: 1px solid #d1d5db; border-radius: 8px; margin-bottom: 12px;">
+      <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
+        <input type="checkbox" id="final-delivery"
+               style="width: 16px; height: 16px; cursor: pointer; accent-color: #A32D2D;"
+               onchange="toggleWarning(this)" />
+        <label for="final-delivery" style="font-size: 14px; font-weight: 500; cursor: pointer; color: #58595B; font-family: 'Gotham Narrow', Arial, sans-serif; margin: 0;">
+          Final delivery
+        </label>
+      </div>
+
+      <!-- Warning -->
+      <div id="fd-warning" style="display: none; padding: 12px 14px; border-radius: 8px; background: #FCEBEB; border: 1px solid #F09595;">
+        <div style="display: flex; align-items: flex-start; gap: 8px;">
+          <span style="color: #A32D2D; font-size: 16px; margin-top: 1px; flex-shrink: 0;">&#9888;</span>
+          <div>
+            <p style="font-size: 13px; font-weight: 500; color: #791F1F; margin: 0 0 2px;">Warning — irreversible action</p>
+            <p style="font-size: 12px; color: #A32D2D; margin: 0;">Ticking this will finalize the delivery and cannot be reversed. No further GRN Entrys will be created once confirmed.</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <input type="hidden" id="sh_finaldelivery" value="{{ metadata.sh_finaldelivery }}" />
+    <!-- <input type="hidden" id="sh_partialdeliveryallowed" value="{{ metadata.sh_partialdeliveryallowed }}" /> -->
+
+  </fieldset>
+</div>
+
+<script>
+  function toggleWarning(cb) {
+    document.getElementById('fd-warning').style.display = cb.checked ? 'block' : 'none';
+    document.getElementById('sh_finaldelivery').value = cb.checked ? 'true' : 'false';
+    // document.getElementById('sh_partialdeliveryallowed').value = cb.checked ? 'false' : 'true';
+  }
+
+  // Restore checkbox state on page load if already saved
+  (function () {
+    const saved = document.getElementById('sh_finaldelivery').value;
+    if (saved === 'true') {
+      const cb = document.getElementById('final-delivery');
+      if (cb) {
+        cb.checked = true;
+        toggleWarning(cb);
+      }
+    }
+  })();
+</script>
+{% endif %}
+
+
+{% if user.roles contains "Starlinks Finance Team" and requestType == "Finance Account Creation" %}
+<div class="container border p-4 mt-3">
+  <fieldset class="p-4 mb-3">
+    <legend>Finance Section</legend>
+    <div class="row">
+
+      <!-- <div class="col-12 col-md-4 mb-3">
+      <label for="sh_paymentterms" class="form-label">Payment Terms *</label>
+      <input type="text" class="form-control" id="sh_paymentterms"
+          value="{{ metadata.sh_paymentterms }}"
+          {% if mode == 'view' %}readonly{% endif %} required>
+    </div>
+
+
+    <div class="col-12 col-md-4 mb-3">
+      <label for="sh_creditlimit" class="form-label">Credit Limit *</label>
+      <input type="text" class="form-control" id="sh_creditlimit"
+            value="{{ metadata.sh_creditlimit }}"
+            {% if mode == 'view' %}readonly{% endif %} required>
+    </div>
+  
+
+    <div class="col-12 col-md-4 mb-3">
+      <label for="sh_cod" class="form-label">COD *</label>
+      <input type="text" class="form-control" id="sh_cod"
+            value="{{ metadata.sh_cod }}"
+            {% if mode == 'view' %}readonly{% endif %} required>
+    </div> -->
+
+      <div class="col-12 col-md-4 mb-3">
+        <label for="sh_financeapprovalcomments" class="form-label">Finance Approval Comments *</label>
+        <input type="text" class="form-control" id="sh_financeapprovalcomments"
+          value="{{ metadata.sh_financeapprovalcomments }}" {% if mode=='view' %}readonly{% endif %} required>
+      </div>
+
+      {% if user.roles contains "Starlinks Technology Team" or user.roles contains "Starlinks CX Team" or user.roles contains "Starlinks Finance Team" %}
+      <div class="col-12 col-md-4 mb-3">
+        <label for="sh_d365id" class="form-label">D365 ID *</label>
+        <input type="text" class="form-control" id="sh_d365id" value="{{ metadata.sh_d365id }}" {% if mode=='view'%}readonly{% endif %} required>
+      </div>
+      {% endif %}
+
+    </div>
+  </fieldset>
+</div>
+{% endif %}
+
+{% if user.roles contains "Starlinks Technology Team" and requestType == "Tech Account Creation" %}
+<div class="container border p-4 mt-3">
+  <fieldset class="p-4 mb-3">
+    <legend>Technology Section</legend>
+
+    <div class="row">
+      <div class="col-12 col-md-4 mb-3">
+        <label for="sh_wmsid" class="form-label">WMS ID *</label>
+        <input type="text" class="form-control" id="sh_wmsid" value="{{ metadata.sh_wmsid }}" {% if mode== "view" %} readonly {% endif %} required>
+      </div>
+
+      <div class="col-12 col-md-4 mb-3">
+        <label for="sh_shipsyid" class="form-label">Shipsy ID *</label>
+        <input type="text" class="form-control" id="sh_shipsyid" value="{{ metadata.sh_shipsyid }}" {% if mode== "view" %} readonly {% endif %} required>
+      </div>
+
+      <div class="col-12 col-md-4 mb-3">
+        <label for="sh_mintsoftid" class="form-label">Mintsoft ID *</label>
+        <input type="text" class="form-control" id="sh_mintsoftid" value="{{ metadata.sh_mintsoftid }}" {% if mode== "view" %}readonly{% endif %} required>
+      </div>
+    </div>
+  </fieldset>
+  <fieldset class="p-4 mb-3">
+    <legend>Integration Info</legend>
+    {% if requestType == "Tech Account Creation" and metadata.sh_integrationinfojson %}
+      <input type="hidden" id="systemInfoJson" value='{{ metadata.sh_integrationinfojson }}'>
+    {% endif %}
+    
+    <div id="systemInfoFields"></div>
+     {% if mode != "view" %}
+    <button type="button" class="btn btn-primary" id="addSystemInfoBtn">Add System Info</button>
+    {% endif %}
+  </fieldset>
+</div>
+{% endif %}
+
+{% if requestType == "Account Manager Assignment" or requestType == "Fulfilment (Mintsoft) Account Creation" %}
+  {%if user.roles contains "Starlinks CX Team" %}
+  <div class="container border p-4 mt-3">
+    <fieldset class="p-4 mb-3">
+      <legend>Account Manager Assignment</legend>
+      <div class="row">
+          <!-- Account Manager Lookup -->
+      <div class="col-12 col-md-4 mb-3 position-relative">
+          <label for="userSearch" class="form-label">Account Manager *</label>
+
+      <input 
+      type="text"   
+      id="userSearch"
+      class="form-control"
+      placeholder="Search user by name or email..."
+      autocomplete="off"
+      value="{{ metadata.sh_accountmanager.name }}"
+      {% if mode == "view" %}readonly{% endif %}
+      required
+      >
+
+          <!-- Dropdown for search results -->
+          <ul 
+              id="userSearchResults"
+              class="list-group position-absolute w-100 mt-1 shadow-sm"
+              style="z-index: 2000; display:none; max-height: 220px; overflow-y: auto;"
+          ></ul>
+
+          <!-- Hidden field to store User ID (GUID) -->
+          <input type="hidden" id="userIdHidden" value="{{ ticket.sh_accountmanager.id }}" />
+      </div>
+
+      </div>
+    </fieldset>
+  
+  </div>
+  {% endif %}
+{% endif %}
+
+<!--  include "Ticketing System - Attachments" mode: "view"  -->
+
+{% if user.roles contains "Starlinks Technology Team" or user.roles contains "Starlinks HR Team" or user.roles contains "Starlinks CX Team" or user.roles contains "Starlinks Customer Service Team" or user.roles contains "Starlinks Procurement Team" or user.roles contains "Starlinks Operations Team" or user.roles contains "Department Manager" or (requestType == "GRN Entry" and user.emailaddress1 | downcase == ticket.sh_requestoremail | downcase) %}
+<div class="container border p-4 mt-3">
+  <fieldset class="p-4 mb-3">
+    <legend>Ticket Section</legend>
+    <div class="row">
+
+      <!-- Ticket Status -->
+      <div class="col-12 col-md-4 mb-3">
+        <label for="sh_ticketstatus" class="form-label">Ticket Status *</label>
+        <select class="form-select" id="sh_ticketstatus" {% if mode == "view" %}readonly{% endif %} required>
+          {% assign currentValue = ticket.sh_ticketstatus.Value | string %}
+          <!-- Options will be populated dynamically via JS based on ticketTransitions -->
+        </select>
+      </div>
+
+      <div class="col-12 col-md-4 mb-3">
+        <label for="sh_priority" class="form-label">Priority *</label>
+        <select class="form-select" id="sh_priority" {% if mode == "view" %}readonly{% endif %} required>
+          {% assign currentPriority = ticket.sh_priority.Value | string %}
+          <option value="126450000" {% if currentPriority == "126450000" %}selected{% endif %}>Low</option>
+          <option value="126450001" {% if currentPriority == "126450001" %}selected{% endif %}>Medium</option>
+          <option value="126450002" {% if currentPriority == "126450002" %}selected{% endif %}>High</option>
+        </select>
+      </div>
+
+      <div class="col-12 col-md-4 mb-3 position-relative">
+        <label for="assignedToSearch" class="form-label">Assigned to *</label>
+        <input type="text" id="assignedToSearch" class="form-control" placeholder="Search user by name or email..." autocomplete="off" value="{{ ticket.sh_assignedto.name }}" {% if mode == "view" %}readonly{% endif %} required>
+        <ul id="assignedToResults" class="list-group position-absolute w-100 mt-1 shadow-sm"
+          style="z-index:2000; display:none; max-height:220px; overflow-y:auto;"></ul>
+        <input type="hidden" id="assignedToHidden" value="{{ ticket.sh_assignedto.id }}">
+      </div>
+
+      
+      <!--  SLA date -->
+    <div class="col-12 col-md-4 mb-3">
+      <label for="sh_sla" class="form-label">SLA Date *</label>
+      <input type="date" class="form-control" id="sh_sla" value="{{ ticket.sh_sla | date: 'yyyy-MM-dd'}}" >
+    </div>
+
+
+    <!-- Reason for changing SLA -->
+     <div class="col-12 mb-3">
+      <label for="sh_reasonforchangingsla" class="form-label">Reason of change (required)*</label>
+      <textarea class="form-control" id="sh_reasonforchangingsla" rows="2"></textarea>
+    </div>
+
+    </div>
+
+    {% if currentValue != "126450002" and currentValue != "126450005" and currentValue != "126450006" %}
+    <button type="button" id="updateTicketBtn" class="btn btn-success mt-3">
+      Update
+    </button>
+    {% endif %}
+
+   <!-- Hidden field to pass comment text dynamically to the flow -->
+    <input type="hidden" id="sh_comment" value="" />
+
+  </fieldset>
+</div>
+
+<script>
+  const STATUS_MAP = {
+    "New":               126450000,
+    "Under Review":      126450008,
+    "Waiting":           126450009,
+    "In Progress":       126450001,
+    "Completed":         126450002,
+    "Blocked":           126450010,
+    "Resolved":          126450011,
+    "Reopen":            126450013,
+    "Cancelled":         126450012,
+    "Approval Pending":  126450005,
+    "Approved":          126450007,
+    "Approval Rejected": 126450006
+  };
+
+  // const ticketTransitions = {
+  //   "New":               ["Under Review"],
+  //   "Under Review":      ["Approval Pending", "Waiting", "In Progress"],
+  //   "Approval Pending":  ["Approved", "Approval Rejected"],
+  //   "Approved":          ["Waiting", "In Progress"],
+  //   "Waiting":           ["In Progress"],
+  //   "In Progress":       ["Blocked", "Resolved","Completed"],
+  //   "Blocked":           ["In Progress"],
+  //   "Resolved":          ["Completed"],
+  //   "Reopen":            ["In Progress"]
+  // };
+
+  const ticketTransitionsByType = {
+    "IT Request": {
+      "New":              ["Under Review"],
+      "Under Review":     ["Approval Pending", "Waiting", "In Progress"],
+      "Approval Pending": ["Approved", "Approval Rejected"],
+      "Approved":         ["Waiting", "In Progress"],
+      "Waiting":          ["In Progress"],
+      "In Progress":      ["Blocked", "Resolved"],
+      "Blocked":          ["In Progress"],
+      "Resolved":         ["Completed"],
+      "Reopen":           ["In Progress"]
+    },
+    "Consignee Support": {
+      "New":              ["Waiting", "In Progress"],
+      "Waiting":          ["In Progress"],
+      "In Progress":      [ "Resolved"],
+      "Resolved":         ["Reopen"],
+      "Reopen":           ["In Progress"]
+    },
+    "GRN Entry": {
+      "Waiting":          ["Completed", "Cancelled"]
+    },
+    "PO Creation": {
+      "In Progress":      ["Blocked", "Cancelled", "Completed", "Waiting"],
+      "Blocked":          ["In Progress"],
+      "Waiting":          ["Completed", "Cancelled"]
+    }
+  };
+
+  // Pick the right map based on current requestType
+  const currentRequestType = "{{ requestType }}";
+  const ticketTransitions = ticketTransitionsByType[currentRequestType] || {
+    // Default fallback if requestType doesn't match any above
+    "New":              ["In Progress","Under Review","Blocked","Cancelled"],
+    "Approved":         ["In Progress"],
+    "Under Review":     ["In Progress","Cancelled"],
+    "In Progress":      ["Blocked", "Cancelled", "Completed"],
+    "Blocked":      ["In Progress"]
+  };
+
+  const currentStatusLabel = "{{ ticket.sh_ticketstatus.Label }}";
+  const currentStatusValue = "{{ ticket.sh_ticketstatus.Value }}";
+  const statusSelect = document.getElementById("sh_ticketstatus");
+
+  // Always show current status as first option (selected, disabled)
+  const currentOption = document.createElement("option");
+  currentOption.value = currentStatusValue;
+  currentOption.textContent = currentStatusLabel;
+  currentOption.selected = true;
+  currentOption.disabled = true;
+  statusSelect.appendChild(currentOption);
+
+  // Only add the valid next statuses from ticketTransitions
+  const nextStatuses = ticketTransitions[currentStatusLabel] || [];
+  nextStatuses.forEach(label => {
+    const option = document.createElement("option");
+    option.value = STATUS_MAP[label];
+    option.textContent = label;
+    statusSelect.appendChild(option);
+  });
+</script>
+{% endif %}
+
+<!-- Call Flow to Update ticket details -->
+<!-- <script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const requestType = "{{ requestType }}";
+    const btn = document.getElementById("updateTicketBtn");
+    if (!btn) {
+      console.error("Update button not found.");
+      return;
+    }
+
+    // 🧾 Ticket ID from Liquid (Dataverse record)
+    const ticketIdFromLiquid = "{{ ticket.sh_ticketid }}"; // change if your PK differs
+
+    // If URL contains ?id=GUID, override Liquid ID
+    const params = new URLSearchParams(window.location.search);
+    const ticketIdFromUrl = params.get("id");
+
+    const ticketId = ticketIdFromUrl || ticketIdFromLiquid;
+
+    btn.addEventListener("click", async function () {
+
+      const payload = {
+        basicInfo: {
+          ticketId: ticketId,
+          ticketstatus: document.getElementById("sh_ticketstatus").value,
+          priority: document.getElementById("sh_priority").value,
+          assignedToID: document.getElementById("assignedToHidden").value
+        },
+        ticketMeta: {
+          nometadata: "nometadata"
+        },
+        operation: "update",
+        attachments: []
+      };
+
+      console.log("🚀 Sending update payload:", payload);
+
+      try {
+        showLoader("Updating your ticket...");
+
+        const res = await fetch(flowUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+
+        const result = await res.json();
+        hideLoader();
+
+        console.log("📥 Flow Response:", result);
+
+        if (res.ok) {
+          console.log("✅ Update successful!");
+          console.log("Updated TicketId:", result.ticketId || ticketId);
+        } else {
+          console.error("❌ Flow returned error:", result);
+        }
+
+      } catch (err) {
+        hideLoader();
+        console.error("🔥 Update Flow call failed:", err);
+      }
+    });
+  });
+</script> -->
+
+<!-- Assigned To Search Feature old one can be removed-->
+<!-- <script>
+// Global selected IDs stored here
+let selectedLookupValues = {};
+
+// Universal debounce
+function debounce(fn, delay = 300) {
+    let timer;
+    return (...args) => {
+        clearTimeout(timer);
+        timer = setTimeout(() => fn(...args), delay);
+    };
+}
+
+// Universal Dataverse Lookup Builder
+function createLookup(config) {
+    const {
+        inputId,
+        resultsBoxId,
+        entity,
+        selectFields,
+        idField,
+        labelField,
+        filterFields,
+        labelFormatter,
+        hiddenIdField
+    } = config;
+
+    const input = document.getElementById(inputId);
+    const resultsBox = document.getElementById(resultsBoxId);
+
+    async function fetchResults(query) {
+        if (!query || query.length < 2) {
+            resultsBox.style.display = "none";
+            return;
+        }
+
+        showLoader("Searching…");
+
+        const encoded = encodeURIComponent(query);
+
+        // Build dynamic $filter (OR conditions)
+        const filterQuery = filterFields
+            .map(f => `contains(${f},'${encoded}')`)
+            .join(" or ");
+
+        const url = `/_api/${entity}?$select=${selectFields}&$filter=${filterQuery}&$top=10&$orderby=${labelField} asc`;
+
+        try {
+            const res = await fetch(url);
+            const data = await res.json();
+
+            resultsBox.innerHTML = "";
+
+            if (data.value?.length) {
+                data.value.forEach(item => {
+                    const listItem = document.createElement("li");
+                    listItem.className = "list-group-item list-group-item-action";
+
+                    const text = labelFormatter
+                        ? labelFormatter(item)
+                        : item[labelField];
+
+                    listItem.textContent = text;
+                    listItem.dataset.id = item[idField];
+
+                    listItem.onclick = () => {
+                        input.value = text;
+                        selectedLookupValues[inputId] = item[idField];
+
+                        if (hiddenIdField) {
+                            document.getElementById(hiddenIdField).value = item[idField];
+                        }
+
+                        resultsBox.style.display = "none";
+                        console.log("Selected:", item);
+                    };
+
+                    resultsBox.appendChild(listItem);
+                });
+
+                resultsBox.style.display = "block";
+            } else {
+                resultsBox.innerHTML =
+                    `<li class="list-group-item text-muted">No results found</li>`;
+                resultsBox.style.display = "block";
+            }
+
+        } catch (err) {
+            console.error(`Lookup Error for ${inputId}:`, err);
+        }
+
+        hideLoader();
+    }
+
+    // Attach event listener
+    input.addEventListener("input", debounce(e => {
+        fetchResults(e.target.value);
+    }, 350));
+}
+
+// Initialize lookups on DOM load
+document.addEventListener("DOMContentLoaded", () => {
+    // Customer Lookup
+    createLookup({
+        inputId: "assignedToSearch",
+        resultsBoxId: "assignedToResults",
+        entity: "systemusers",
+        selectFields: "systemuserid,fullname,internalemailaddress",
+        idField: "systemuserid",
+        labelField: "fullname",
+        filterFields: ["fullname", "internalemailaddress"],
+        labelFormatter: (u) => `${u.fullname} (${u.internalemailaddress || "no-email"})`,
+        hiddenIdField: "assignedToHidden"
+    });
+});
+
+</script> -->
+
+<!-- Assigned To Search Feature -->
+<script>
+
+// ═══════════════════════════════════════════════════════════════════
+// 🔧 ROLE EMAIL CONFIG
+// Add emails per role — must match internalemailaddress in Dataverse
+// ═══════════════════════════════════════════════════════════════════
+const ROLE_EMAILS = {
+    "Starlinks Technology Team": [  
+        "Farzeen.Sheikh@starlinks-me.com",
+        "Muhammad.Usman1@starlinks-me.com",
+        "Amir.ali@starlinks-me.com",
+        "Hussain.Asif@starlinks-me.com",
+        "Muhammad.Mubashir@starlinks-me.com",
+        "Muhammad.Uzair@starlinks-me.com",
+        "Ammara.Mushtaq@starlinks-me.com",
+        "Rehan.Memon@starlinks-me.com",
+        "b.alharbi@starlinks-me.com",
+        "Aymen.Babour@starlinks-me.com",
+        "sidra.khan@starlinks-me.com",
+        "ix.zeeshan@starlinks-me.com",
+        "obaid.ullah@starlinks-me.com",
+        "Waleed.Khan@starlinks-me.com",
+        "Hanzla.Chishti@starlinks-me.com",
+        "Nouman.Shaikh@starlinks-me.com",
+        "Hisham.Talaat@starlinks-me.com"
+    ]
+    // ,
+    // "Starlinks HR Team": [
+    //     // "hr.user@starlinks-me.com"
+    // ],
+    // "Starlinks Procurement Team": [
+    //     // "proc.user@starlinks-me.com"
+    // ]
+};
+
+// ═══════════════════════════════════════════════════════════════════
+// 🔧 REQUEST TYPE → ROLE MAPPING
+// Must match the option text in #sh_request exactly
+// ═══════════════════════════════════════════════════════════════════
+const REQUEST_TYPE_TO_ROLE = {
+    "IT Request":          "Starlinks Technology Team"
+    // "HR Request":          "Starlinks HR Team",
+    // "Procurement Request": "Starlinks Procurement Team"
+};
+
+// ═══════════════════════════════════════════════════════════════════
+// Get allowed emails based on selected request type
+// Returns: string[] of lowercase emails | null (null = no restriction)
+// ═══════════════════════════════════════════════════════════════════
+function getAllowedEmails() {
+    const dropdown = document.getElementById("sh_request");
+    if (!dropdown) {
+        console.warn("⚠️ #sh_request not found — no email filter applied");
+        return null;
+    }
+
+    const selectedText  = dropdown.options[dropdown.selectedIndex]?.text?.trim();
+    const selectedValue = dropdown.value?.trim();
+    const roleName      = REQUEST_TYPE_TO_ROLE[selectedValue] || REQUEST_TYPE_TO_ROLE[selectedText];
+
+    if (!roleName) {
+        console.warn(`⚠️ No role mapped for "${selectedText}" — showing all users`);
+        return null;
+    }
+
+    const emails = (ROLE_EMAILS[roleName] || []).map(e => e.toLowerCase().trim());
+    console.log(`✅ "${selectedText}" → "${roleName}" → allowed emails:`, emails);
+    return emails;
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// GLOBAL STATE
+// ═══════════════════════════════════════════════════════════════════
+let selectedLookupValues = {};
+
+function debounce(fn, delay = 300) {
+    let timer;
+    return (...args) => {
+        clearTimeout(timer);
+        timer = setTimeout(() => fn(...args), delay);
+    };
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// UNIVERSAL LOOKUP — original fetch logic + client-side email filter
+// ═══════════════════════════════════════════════════════════════════
+function createLookup(config) {
+    const {
+        inputId,
+        resultsBoxId,
+        entity,
+        selectFields,
+        idField,
+        labelField,
+        filterFields,
+        labelFormatter,
+        hiddenIdField
+    } = config;
+
+    const input      = document.getElementById(inputId);
+    const resultsBox = document.getElementById(resultsBoxId);
+
+    if (!input || !resultsBox) {
+        console.warn(`⚠️ createLookup: elements not found for inputId="${inputId}"`);
+        return;
+    }
+
+    async function fetchResults(query) {
+        if (!query || query.length < 2) {
+            resultsBox.style.display = "none";
+            return;
+        }
+
+        showLoader("Searching…");
+
+        const encoded = encodeURIComponent(query);
+
+        // ── Original fetch — unchanged, search by name or email text ──
+        const filterQuery = filterFields
+            .map(f => `contains(${f},'${encoded}')`)
+            .join(" or ");
+
+        const url = `/_api/${entity}?$select=${selectFields}&$filter=${filterQuery}&$top=50&$orderby=${labelField} asc`;
+
+        console.log("🔍 Fetching from Dataverse →", url);
+
+        try {
+            const res = await fetch(url);
+
+            if (!res.ok) {
+                console.error(`❌ Fetch failed: ${res.status}`);
+                resultsBox.innerHTML = `<li class="list-group-item text-danger">Search failed. Please try again.</li>`;
+                resultsBox.style.display = "block";
+                hideLoader();
+                return;
+            }
+
+            const data = await res.json();
+            let results = data.value || [];
+
+            console.log(`📦 ${results.length} record(s) returned from Dataverse`);
+
+            // ── Client-side email filter applied AFTER fetch ───────────
+            const allowedEmails = getAllowedEmails();
+
+            if (allowedEmails === null) {
+                // No restriction — show all results as-is
+                console.log("ℹ️ No email filter — showing all results");
+
+            } else if (allowedEmails.length === 0) {
+                // Role is configured but has no emails — show nothing
+                console.warn("⚠️ Allowed emails list is empty — blocking all results");
+                results = [];
+
+            } else {
+                // Filter: only keep records whose email is in the allowed list
+                const before = results.length;
+                results = results.filter(u => {
+                    const userEmail = (u.internalemailaddress || "").toLowerCase().trim();
+                    return allowedEmails.some(allowed => allowed.toLowerCase() === userEmail.toLowerCase());
+                });
+                console.log(`🔒 Email filter: ${before} → ${results.length} record(s) after filtering`);
+            }
+
+            // ── Render results ─────────────────────────────────────────
+            resultsBox.innerHTML = "";
+
+            if (results.length > 0) {
+                results.forEach(item => {
+                    const listItem = document.createElement("li");
+                    listItem.className = "list-group-item list-group-item-action";
+
+                    const text = labelFormatter ? labelFormatter(item) : item[labelField];
+                    listItem.textContent = text;
+                    listItem.dataset.id  = item[idField];
+
+                    listItem.onclick = () => {
+                        input.value = text;
+                        selectedLookupValues[inputId] = item[idField];
+
+                        if (hiddenIdField) {
+                            document.getElementById(hiddenIdField).value = item[idField];
+                        }
+
+                        resultsBox.style.display = "none";
+                        console.log("✅ Selected:", item);
+                    };
+
+                    resultsBox.appendChild(listItem);
+                });
+
+                resultsBox.style.display = "block";
+
+            } else {
+                resultsBox.innerHTML = `<li class="list-group-item text-muted">No results found</li>`;
+                resultsBox.style.display = "block";
+            }
+
+        } catch (err) {
+            console.error("❌ Lookup error:", err);
+            resultsBox.innerHTML = `<li class="list-group-item text-danger">An error occurred. Please try again.</li>`;
+            resultsBox.style.display = "block";
+        }
+
+        hideLoader();
+    }
+
+    // Close dropdown on outside click
+    document.addEventListener("click", (e) => {
+        if (!input.contains(e.target) && !resultsBox.contains(e.target)) {
+            resultsBox.style.display = "none";
+        }
+    });
+
+    // Attach debounced input listener
+    input.addEventListener("input", debounce(e => fetchResults(e.target.value), 350));
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════════════
+document.addEventListener("DOMContentLoaded", () => {
+
+    createLookup({
+        inputId:        "assignedToSearch",
+        resultsBoxId:   "assignedToResults",
+        entity:         "systemusers",
+        selectFields:   "systemuserid,fullname,internalemailaddress",
+        idField:        "systemuserid",
+        labelField:     "fullname",
+        filterFields:   ["fullname", "internalemailaddress"],
+        labelFormatter: (u) => `${u.fullname} (${u.internalemailaddress || "no-email"})`,
+        hiddenIdField:  "assignedToHidden"
+    });
+
+    createLookup({
+      inputId: "vendorSearch",
+      resultsBoxId: "vendorSearchResults",
+      entity: "sh_vendorses",
+      selectFields: "sh_vendorsid,sh_vendorname,sh_vendornumber",
+      idField: "sh_vendorsid",
+      labelField: "sh_vendorname",
+      filterFields: ["sh_vendorname", "sh_vendornumber"],
+      labelFormatter: (v) => v.sh_vendornumber
+        ? `${v.sh_vendornumber} | ${v.sh_vendorname}`
+        : v.sh_vendorname,
+      hiddenIdField: "vendorIdHidden"
+    });
+
+});
+
+</script>
+
+<!-- Call Flow to Update ticket details -->
+<script>
+  function getSystemInfo() {
+    const rows = document.querySelectorAll("#systemInfoFields .row");
+    const result = [];
+
+    rows.forEach(row => {
+      const systemSelect = row.querySelector("select[id^='system_']");
+      const typeSelect = row.querySelector("select[id^='type_']");
+      const keyInput = row.querySelector("input[id^='key_']");
+      const valueInput = row.querySelector("input[id^='value_']");
+
+      const systemLabel =
+        systemSelect?.selectedIndex > 0
+          ? systemSelect.options[systemSelect.selectedIndex].text.trim()
+          : "";
+
+      const typeLabel =
+        typeSelect?.selectedIndex > 0
+          ? typeSelect.options[typeSelect.selectedIndex].text.trim()
+          : "";
+
+      const key = (keyInput?.value || "").trim();
+      const value = (valueInput?.value || "").trim();
+
+      // Only push meaningful rows (keeps your payload clean)
+      if (systemLabel || typeLabel || key || value) {
+        result.push({
+          system: systemLabel,
+          type: typeLabel,
+          key: key,
+          value: value
+        });
+      }
+    });
+
+    return JSON.stringify(result); // JSON string
+  }
+
+  document.addEventListener("DOMContentLoaded", function () {
+    const btn = document.getElementById("updateTicketBtn");
+    if (!btn) {
+      console.error("Update button not found.");
+      return;
+    }
+
+    // 🧾 Ticket ID from Liquid (Dataverse record)
+    const ticketIdFromLiquid = "{{ ticket.sh_ticketid }}"; // change if your PK differs
+
+    // If URL contains ?id=GUID, override Liquid ID
+    const params = new URLSearchParams(window.location.search);
+    const ticketIdFromUrl = params.get("id");
+
+    const ticketId = ticketIdFromUrl || ticketIdFromLiquid;
+
+    btn.addEventListener("click", async function () {
+
+      // ✅ Build ticketMeta FIRST so we can stop before calling the Flow
+      const ticketMeta = (() => {
+        if (requestType === 'Tech Account Creation') {
+          return {
+            parentTicketId: "{{parentTicketId}}",
+            wmsId: sh_wmsid.value,
+            mintsoftId: sh_mintsoftid.value,
+            shipsyId: sh_shipsyid.value,
+            systemInfo: getSystemInfo()
+          };
+        }
+
+        if (requestType === 'Finance Account Creation') {
+          return {
+            parentTicketId: "{{parentTicketId}}",
+            d365Id: sh_d365id.value,
+            financeApprovalComments: sh_financeapprovalcomments
+          };
+        }
+
+        if (requestType === 'GRN Entry') {
+          return {
+            metadataRecordID: "{{ metadata.sh_procurementmetadataid }}",
+            finaldelivery: document.getElementById("sh_finaldelivery").value === 'true'
+          };
+        }
+
+        if (requestType === 'PO Creation') {
+          const isCompleted = document.getElementById("sh_ticketstatus").value == STATUS_MAP["Completed"];
+          if (isCompleted && !validatePOCreation()) return null;
+          return {
+            metadataRecordID: "{{ metadata.sh_procurementmetadataid }}",
+            ponumber: sh_ponumber.value
+          };
+        }
+
+        if (requestType === 'Vendor Selection') {
+          if (!validateVendorSelection()) return null;
+          return {
+            metadataRecordID: "{{ metadata.sh_procurementmetadataid }}",
+            vendorID: document.getElementById("vendorIdHidden").value || null,
+            // vendorCode : document.getElementById("vendorNumberHidden").value,
+            prepaymentrequired: sh_prepaymentrequired.checked,
+            procurementsubcategory: document.getElementById("procurementSubCategoryBtn").textContent.trim() === "Select Procurement Sub Category" ? null : document.getElementById("procurementSubCategoryBtn").textContent.trim() ,
+            prepaymentamount: sh_prepaymentrequired.checked ? sh_prepaymentamount.value : null
+          };
+        }
+
+        if (requestType === 'Account Manager Assignment') {
+          const inputEl = document.getElementById("userSearch");
+          const input = (inputEl?.value || "").trim();
+          const id = document.getElementById("userIdHidden").value;
+
+          // preselected label coming from server
+          const preselected = (inputEl?.defaultValue || "").trim();
+
+          // ❌ stop if blank OR user changed/cleared prefill without selecting a new one
+          if (!id && (!input || input !== preselected)) {
+            showToast(
+              "Account Manager is required. Please search and select an Account Manager.",
+              "danger"
+            );
+            return null; // IMPORTANT: this will stop the flow call below
+          }
+
+          return {
+            parentTicketId: "{{parentTicketId}}",
+            accountmanagerID: id || null
+          };
+        }
+
+        return {
+          nometadata: "yes"
+        };
+      })();
+
+      // ✅ If validation failed, DO NOT call Flow
+      if (ticketMeta === null) return;
+
+      // ✅ Existing payload (unchanged except ticketMeta now uses the variable above)
+      const payload = {
+        basicInfo: {
+          ticketId: ticketId,
+          modifiedByUserEmail: modifiedByUserEmail,
+          modifiedByUserName: modifiedByUserName,
+          requestType: requestType,
+          ticketstatus: document.getElementById("sh_ticketstatus").value,
+          priority: document.getElementById("sh_priority").value,
+          assignedToID: document.getElementById("assignedToHidden").value,
+          slaDate: document.getElementById("sh_sla").value,
+          reasonToChangeSla: document.getElementById("sh_reasonforchangingsla").value
+        },
+        ticketMeta: ticketMeta,
+        Comment: document.getElementById("sh_comment").value,
+        operation: "update",
+        requestType: "{{requestType}}",
+        attachments: []
+      };
+
+      console.log("🚀 Sending update payload:", payload);
+
+      try {
+        showLoader("Updating your ticket...");
+
+        const res = await fetch(flowUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+
+        const result = await res.json();
+        hideLoader();
+
+        console.log("📥 Flow Response:", result);
+
+        if (res.ok) {
+          showToast("Ticket updated successfully!", "success");
+          setTimeout(() => location.reload(), 100);
+          console.log("✅ Update successful!");
+          console.log("Updated TicketId:", result.ticketId || ticketId);
+        } else {
+          console.error("❌ Flow returned error:", result);
+        }
+
+      } catch (err) {
+        hideLoader();
+        showToast("Failed to update ticket", "danger");
+        console.error("🔥 Update Flow call failed:", err);
+      }
+    });
+  });
+</script>
+
+<!-- Make Reason required when SLA date is changed -->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const slaWrapper = document.getElementById("sh_sla").closest(".col-12");
+  const slaInput = document.getElementById("sh_sla");
+  const reasonWrapper = document.getElementById("sh_reasonforchangingsla").closest(".col-12.mb-3");
+  const reasonInput = document.getElementById("sh_reasonforchangingsla");
+  const updateBtn = document.getElementById("updateTicketBtn");
+  const ticketTypeSelect = document.getElementById("sh_tickettype");
+  const requestSelect = document.getElementById("sh_request");
+
+  // Store the original SLA value loaded from metadata
+  const originalSlaValue = slaInput.value;
+
+  // --- SLA visibility condition ---
+  function shouldShowSLA() {
+    const ticketTypeVal = ticketTypeSelect.value.trim().toLowerCase();
+    const requestVal = requestSelect.value.trim().toLowerCase();
+    return ticketTypeVal === "request" && requestVal === "it request";
+  }
+
+  // --- Show/hide SLA field ---
+  function updateSLAVisibility() {
+    if (shouldShowSLA()) {
+      slaWrapper.style.display = "";
+    } else {
+      slaWrapper.style.display = "none";
+
+      // If SLA gets hidden, also collapse the reason field and reset validation
+      reasonWrapper.style.display = "none";
+      reasonInput.removeAttribute("required");
+      reasonInput.value = "";
+      validateForm();
+    }
+  }
+
+  // --- Initial visibility setup ---
+  reasonWrapper.style.display = "none";
+  reasonInput.removeAttribute("required");
+  updateSLAVisibility(); // evaluate on load based on pre-selected dropdown values
+
+  // --- Dropdown change handlers ---
+  ticketTypeSelect.addEventListener("change", function () {
+    updateSLAVisibility();
+  });
+
+  requestSelect.addEventListener("change", function () {
+    updateSLAVisibility();
+  });
+
+  // --- SLA change handler ---
+  slaInput.addEventListener("change", function () {
+    const slaChanged = slaInput.value !== originalSlaValue;
+
+    if (slaChanged) {
+      reasonWrapper.style.display = "";
+      reasonInput.setAttribute("required", "true");
+    } else {
+      reasonWrapper.style.display = "none";
+      reasonInput.removeAttribute("required");
+      reasonInput.value = "";
+    }
+
+    validateForm();
+  });
+
+  // --- Reason input handler ---
+  reasonInput.addEventListener("input", validateForm);
+
+  // --- Validation logic ---
+  function validateForm() {
+    const slaVisible = slaWrapper.style.display !== "none";
+    const slaChanged = slaInput.value !== originalSlaValue;
+    const reasonFilled = reasonInput.value.trim() !== "";
+
+    if (slaVisible && slaChanged && !reasonFilled) {
+      updateBtn.disabled = true;
+      updateBtn.title = "Please provide a reason for changing the SLA date.";
+    } else {
+      updateBtn.disabled = false;
+      updateBtn.title = "";
+    }
+  }
+
+  // Run once on load
+  validateForm();
+});
+</script>

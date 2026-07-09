@@ -1,0 +1,16 @@
+adx_accountrelationship: 
+adx_append: true
+adx_appendto: true
+adx_contactrelationship: sh_ticket_RequestorPerson_contact
+adx_create: true
+adx_delete: false
+adx_entitylogicalname: sh_ticket
+adx_entityname: Contact Level Tickets
+adx_entitypermission_webrole:
+- c5ed9554-79a1-4c31-bea9-a940211a85a0
+adx_entitypermissionid: c6b4de1a-a1eb-4db4-beb8-e97b1ff8ebf5
+adx_parententitypermission: 
+adx_parentrelationship: 
+adx_read: true
+adx_scope: 756150001
+adx_write: true

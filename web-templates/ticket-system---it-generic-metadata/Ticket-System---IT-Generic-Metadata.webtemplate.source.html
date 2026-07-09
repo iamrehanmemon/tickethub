@@ -1,0 +1,1317 @@
+
+
+<!-- ============================================================
+     IT CASCADE DATA — always rendered regardless of mode
+     (needed by Edit Mode Manager on view page)
+============================================================ -->
+<script>
+  const itVerticals = ["Automotive","CPG","Shared","Lifestyle","Q-Commerce","Solutions","Dubai"];
+
+  const itCategoriesByVertical = {
+    "Automotive": [
+      { label:  "D365 Dynamics", sub: "ERP Finance, Procurement" },
+      { label:  "Rydoo", sub: "Travel Expenses" },
+      { label: "YMS (Inform)",          sub: "Yard Management System"                    },
+      { label: "WMS (Oracle)",          sub: "Warehouse Management System"               },
+      { label: "TMS (Locus)",           sub: "Transport Management System"               },
+      { label: "Hardware",              sub: "Laptops, monitors, printers & other accessories"                 },
+      { label: "Network & Connectivity",  sub: "WiFi, VPN, CCTV & Other Network Related" },
+      { label: "Office 365",            sub: "Accounts, Distribution Lists & Microso0ft Related apps"             },
+      { label: "Cloud & Hosting",       sub: "Azure Resources, Domains, SSL certificates & App services"             },
+      { label: "Cybersecurity",         sub: "Report threats, public email exceptions, whitelisting & security reviews"       },
+      { label: "Software",              sub: "Software Installation and Standard Applications Related"         },
+      { label: "Data Protection",       sub: "Privacy, DPO matters & Data subject Related"   }
+    ],
+    "CPG": [
+      { label: "D365 Dynamics",         sub: "ERP Finance, Procurement" },
+      { label:  "Rydoo", sub: "Travel Expenses" },
+      { label: "WMS (Oracle)",          sub: "Warehouse Management System"               },
+      { label: "TMS (Locus)",           sub: "Transport Management System"               },
+      { label: "DSS (Go Ramp)",         sub: "Dock Scheduling System"                    },
+      { label: "Hardware",              sub: "Laptops, monitors, printers & other accessories"                 },
+      { label: "Network & Connectivity",  sub: "WiFi, VPN, CCTV & Other Network Related" },
+      { label: "Office 365",            sub: "Accounts, Distribution Lists & Microsoft Related apps"             },
+      { label: "Cloud & Hosting",       sub: "Azure Resources, Domains, SSL certificates & App services"             },
+      { label: "Cybersecurity",         sub: "Report threats, public email exceptions, whitelisting & security reviews"       },
+      { label: "Software",              sub: "Software Installation and Standard Applications Related"         },
+      { label: "Data Protection",       sub: "Privacy, DPO matters & Data subject Related"   }
+    ],
+    "Shared": [
+      { label: "D365 Dynamics",         sub: "ERP Finance, Procurement" },
+      { label: "Rydoo",                sub: "Travel Expenses" },
+      { label: "Hardware",              sub: "Laptops, monitors, printers & other accessories"                 },
+      { label: "Network & Connectivity",  sub: "WiFi, VPN, CCTV & Other Network Related" },
+      { label: "Office 365",            sub: "Accounts, Distribution Lists & Microsoft Related apps"             },
+      { label: "Cloud & Hosting",       sub: "Azure Resources, Domains, SSL certificates & App services"             },
+      { label: "Cybersecurity",         sub: "Report threats, public email exceptions, whitelisting & security reviews"       },
+      { label: "Software",              sub: "Software Installation and Standard Applications Related"         },
+      { label: "Data Protection",       sub: "Privacy, DPO matters & Data subject Related"   }
+    ],
+    "Lifestyle": [
+      { label: "D365 Dynamics",         sub: "ERP Finance, Procurement" },
+      { label: "Rydoo",                sub: "Travel Expenses" },
+      { label: "WMS (Mintsoft)",        sub: "Warehouse Management System"               },
+      { label: "OMS (SLK)",            sub: "Order Management System"                   },
+      { label: "TMS (Shipsy)",          sub: "Transport Management System"               },
+      { label: "Hardware",              sub: "Laptops, monitors, printers & other accessories"                 },
+      { label: "Network & Connectivity",  sub: "WiFi, VPN, CCTV & Other Network Related" },
+      { label: "Office 365",            sub: "Accounts, Distribution Lists & Microsoft Related apps"             },
+      { label: "Cloud & Hosting",       sub: "Azure Resources, Domains, SSL certificates & App services"             },
+      { label: "Cybersecurity",         sub: "Report threats, public email exceptions, whitelisting & security reviews"       },
+      { label: "Software",              sub: "Software Installation and Standard Applications Related"         },
+      { label: "Data Protection",       sub: "Privacy, DPO matters & Data subject Related"   }
+    ],
+    "Q-Commerce": [
+      { label: "D365 Dynamics",         sub: "ERP Finance, Procurement" },
+      { label: "Rydoo",                sub: "Travel Expenses" },
+      { label: "WMS (Oracle)",          sub: "Warehouse Management System"               },
+      { label: "TMS (Locus)",           sub: "Transport Management System"               },
+      { label: "DSS (Go Ramp)",         sub: "Dock Scheduling System"                    },
+      { label: "Hardware",              sub: "Laptops, monitors, printers & other accessories"                 },
+      { label: "Network & Connectivity",  sub: "WiFi, VPN, CCTV & Other Network Related" },
+      { label: "Office 365",            sub: "Accounts, Distribution Lists & Microsoft Related apps"             },
+      { label: "Cloud & Hosting",       sub: "Azure Resources, Domains, SSL certificates & App services"             },
+      { label: "Cybersecurity",         sub: "Report threats, public email exceptions, whitelisting & security reviews"       },
+      { label: "Software",              sub: "Software Installation and Standard Applications Related"         },
+      { label: "Data Protection",       sub: "Privacy, DPO matters & Data subject Related"   }
+    ],
+    "Solutions": [
+      { label: "D365 Dynamics",         sub: "ERP Finance, Procurement" },
+      { label: "Rydoo",                sub: "Travel Expenses" },
+      { label: "Hardware",              sub: "Laptops, monitors, printers & other accessories"                 },
+      { label: "Network & Connectivity",  sub: "WiFi, VPN, CCTV & Other Network Related" },
+      { label: "Office 365",            sub: "Accounts, Distribution Lists & Microsoft Related apps"             },
+      { label: "Cloud & Hosting",       sub: "Azure Resources, Domains, SSL certificates & App services"             },
+      { label: "Cybersecurity",         sub: "Report threats, public email exceptions, whitelisting & security reviews"       },
+      { label: "Software",              sub: "Software Installation and Standard Applications Related"         },
+      { label: "Data Protection",       sub: "Privacy, DPO matters & Data subject Related"   }
+    ],
+    "Dubai": [
+      { label: "D365 Dynamics",         sub: "ERP Finance, Procurement" },
+      { label: "Rydoo",                sub: "Travel Expenses" },
+      { label: "WMS (Mintsoft)",        sub: "Warehouse Management System"               },
+      { label: "Hardware",              sub: "Laptops, monitors, printers & other accessories"                 },
+      { label: "Network & Connectivity",  sub: "WiFi, VPN, CCTV & Other Network Related" },
+      { label: "Office 365",            sub: "Accounts, Distribution Lists & Microsoft Related apps"             },
+      { label: "Cloud & Hosting",       sub: "Azure Resources, Domains, SSL certificates & App services"             },
+      { label: "Cybersecurity",         sub: "Report threats, public email exceptions, whitelisting & security reviews"       },
+      { label: "Software",              sub: "Software Installation and Standard Applications Related"         },
+      { label: "Data Protection",       sub: "Privacy, DPO matters & Data subject Related"   }
+    ]
+  };
+
+  const itSubCategories = [
+    { label: "Incident", sub: "Report a system issue or bug"        },
+    { label: "Request",  sub: "Request a change or new feature"     }
+  ];
+
+  const itServicesData = {
+    "Automotive": {
+        "D365 Dynamics": {
+        "Incident": [
+          "Access Issues","Funtional Reporting Issues","Technical Reporting Issue",
+          "Integration Issues","Workflows Issues","Functional Issue - Fixed Asset",
+          "Functional Issue - Budgeting","Functional Issue - Project Management Accounting",
+          "Performance Issues","Functional Issue - GL","Functional Issue - Procurement and AP",
+          "Functional Issue - Sales and AR","Functional Issue - Customer Billing",
+          "ZATCA Integration and Invoice Processing"
+        ],
+        "Request": [
+          "New User Request","Modify Role","Functional Reports (New/Change)","New Workflows",
+          "Functional Change - Fixed Asset","Functional Change - Budgeting",
+          "Functional Change - Project Management Accounting","Functional Change - GL",
+          "Functional Change - Procurement and AP","Functional Change - Sales and AR",
+          "Functional Change - Customer Billing","Functional Change - Items Related (PIM)",
+          "ZATCA Integration Enhancements"  
+          // "Other / Miscellaneous"
+        ]
+      },
+      "Rydoo": {
+        "Incident": [
+          "Expense Reimbursement Delay",
+          "Others"
+          
+        ],
+        "Request": [
+          "New User Request"
+        ]
+      },
+      "YMS (Inform)": {
+        "Incident": ["Access Issues","Application Issues","Reporting & Analytics Issues","Integrations & External Systems Issues","Data Issues","Other Issues"],
+        "Request":  ["Access & User Management","Customer Onboarding Setup","Integrations & External Systems","System Setup & Configuration","Reporting & Analytics"]
+      },
+      "WMS (Oracle)": {
+        "Incident": ["Functional Issues","Integrations & External Systems Issues","Data issues","Reporting & Analytics Issues","Other Issues"],
+        "Request":  ["Access & User Management","System Setup & Configuration","Reporting & Analytics","Integrations & External Systems"]
+      },
+      "TMS (Locus)": {
+        "Incident": ["Application Issues","Reporting & Analytics Issues","Data Issues","Access Issues"],
+        "Request":  ["System Setup & Configuration","Integrations & External Systems","Access & User Management","Reporting & Analytics"]
+      },
+         "Hardware": {
+        "Incident": ["Laptop","Monitor","Other"],
+        "Request":  ["Laptop","Monitor","Additional External Monitor","Docking Station","Temporary Laptop Issuance","Webcams","HDMI Cables (1.8 Meter)","Laptop 65W Type C Chargers (Dell/Lenovo)",
+        "Keyboard & Mouse","New Printer (Canon)","Printer Toner Request","Other"]
+      },
+       "Office 365": {
+         "Incident": [],
+        "Request":  []
+       },
+       "Cloud & Hosting": {
+        "Incident": [],
+        "Request":  []
+       },
+       "Cybersecurity": {
+         "Incident": [],
+        "Request":  []
+      },
+       "Business Applications": {
+         "Incident": [],
+        "Request":  []
+      },
+       "Data Protection": {
+         "Incident": [],
+        "Request":  []
+      },
+       "Network & Connectivity": {
+         "Incident": [],
+        "Request":  []
+      },
+       "Software": {
+        "Incident": [],
+        "Request":  []
+      },
+       "Service Now": {
+        "Incident": [],
+        "Request":  []
+      },
+       "Telephony": {
+        "Incident": [],
+        "Request":  []
+      }
+    },
+    "CPG": {
+        "D365 Dynamics": {
+        "Incident": [
+          "Access Issues","Funtional Reporting Issues","Technical Reporting Issue",
+          "Integration Issues","Workflows Issues","Functional Issue - Fixed Asset",
+          "Functional Issue - Budgeting","Functional Issue - Project Management Accounting",
+          "Performance Issues","Functional Issue - GL","Functional Issue - Procurement and AP",
+          "Functional Issue - Sales and AR","Functional Issue - Customer Billing",
+          
+          "ZATCA Integration and Invoice Processing"
+        ],
+        "Request": [
+         "New User Request","Modify Role","Functional Reports (New/Change)","New Workflows",
+          "Functional Change - Fixed Asset","Functional Change - Budgeting",
+          "Functional Change - Project Management Accounting","Functional Change - GL",
+          "Functional Change - Procurement and AP","Functional Change - Sales and AR",
+          "Functional Change - Customer Billing","Functional Change - Items Related (PIM)","ZATCA Integration Enhancements"  
+          // "Other / Miscellaneous"
+        ]
+      },
+      "Rydoo": {
+        "Incident": [
+          "Expense Reimbursement Delay",
+          "Others"
+          
+        ],
+        "Request": [
+          "New User Request"
+        ]
+      },
+      "WMS (Oracle)": {
+        "Incident": ["Functional Issues","Integrations & External Systems Issues","Data issues","Reporting & Analytics Issues","Other Issues"],
+        "Request":  ["Access & User Management","System Setup & Configuration","Reporting & Analytics","Integrations & External Systems"]
+      },
+      "TMS (Locus)": {
+        "Incident": ["Application Issues","Reporting & Analytics Issues","Data Issues","Access Issues"],
+        "Request":  ["System Setup & Configuration","Integrations & External Systems","Access & User Management","Reporting & Analytics"]
+      },
+      "DSS (Go Ramp)": {
+        "Incident": ["Access Issues","Customer onboarding issue","Integration issues","Report / Dashboard issue"],
+        "Request":  ["Access request","Customer onboarding Setup","New integration request","New Report / Dashboard Request"]
+      },
+         "Hardware": {
+        "Incident": ["Laptop","Monitor","Other"],
+        "Request":  ["Laptop","Monitor","Additional External Monitor","Docking Station","Temporary Laptop Issuance","Webcams","HDMI Cables (1.8 Meter)","Laptop 65W Type C Chargers (Dell/Lenovo)",
+        "Keyboard & Mouse","New Printer (Canon)","Printer Toner Request","Other"]
+      },
+       "Office 365": {
+         "Incident": [],
+        "Request":  []
+       },
+       "Cloud & Hosting": {
+        "Incident": [],
+        "Request":  []
+       },
+       "Cybersecurity": {
+         "Incident": [],
+        "Request":  []
+      },
+       "Business Applications": {
+         "Incident": [],
+        "Request":  []
+      },
+       "Data Protection": {
+         "Incident": [],
+        "Request":  []
+      },
+       "Network & Connectivity": {
+         "Incident": [],
+        "Request":  []
+      },
+       "Software": {
+        "Incident": [],
+        "Request":  []
+      },
+       "Service Now": {
+        "Incident": [],
+        "Request":  []
+      },
+       "Telephony": {
+        "Incident": [],
+        "Request":  []
+      }
+    },
+    "Shared": {
+        "D365 Dynamics": {
+        "Incident": [
+          "Access Issues","Funtional Reporting Issues","Technical Reporting Issue",
+          "Integration Issues","Workflows Issues","Functional Issue - Fixed Asset",
+          "Functional Issue - Budgeting","Functional Issue - Project Management Accounting",
+          "Performance Issues","Functional Issue - GL","Functional Issue - Procurement and AP",
+          "Functional Issue - Sales and AR","Functional Issue - Customer Billing",
+          
+          "ZATCA Integration and Invoice Processing"
+        ],
+        "Request": [
+          "New User Request","Modify Role","Functional Reports (New/Change)","New Workflows",
+          "Functional Change - Fixed Asset","Functional Change - Budgeting",
+          "Functional Change - Project Management Accounting","Functional Change - GL",
+          "Functional Change - Procurement and AP","Functional Change - Sales and AR",
+          "Functional Change - Customer Billing","Functional Change - Items Related (PIM)","ZATCA Integration Enhancements"  
+          // "Other / Miscellaneous"
+        ]
+      },
+      "Rydoo": {
+        "Incident": [
+          "Expense Reimbursement Delay",
+          "Others"
+          
+        ],
+        "Request": [
+          "New User Request"
+        ]
+      },
+       "Hardware": {
+        "Incident": ["Laptop","Monitor","Other"],
+        "Request":  ["Laptop","Monitor","Additional External Monitor","Docking Station","Temporary Laptop Issuance","Webcams","HDMI Cables (1.8 Meter)","Laptop 65W Type C Chargers (Dell/Lenovo)",
+        "Keyboard & Mouse","New Printer (Canon)","Printer Toner Request","Other"]
+      },
+       "Office 365": {
+         "Incident": [],
+        "Request":  []
+       },
+       "Cloud & Hosting": {
+        "Incident": [],
+        "Request":  []
+       },
+       "Cybersecurity": {
+         "Incident": [],
+        "Request":  []
+      },
+       "Business Applications": {
+         "Incident": [],
+        "Request":  []
+      },
+       "Data Protection": {
+         "Incident": [],
+        "Request":  []
+      },
+       "Network & Connectivity": {
+         "Incident": [],
+        "Request":  []
+      },
+       "Software": {
+        "Incident": [],
+        "Request":  []
+      },
+       "Service Now": {
+        "Incident": [],
+        "Request":  []
+      },
+       "Telephony": {
+        "Incident": [],
+        "Request":  []
+      }
+    },
+    "Lifestyle": {
+        "D365 Dynamics": {
+        "Incident": [
+          "Access Issues","Funtional Reporting Issues","Technical Reporting Issue",
+          "Integration Issues","Workflows Issues","Functional Issue - Fixed Asset",
+          "Functional Issue - Budgeting","Functional Issue - Project Management Accounting",
+          "Performance Issues","Functional Issue - GL","Functional Issue - Procurement and AP",
+          "Functional Issue - Sales and AR","Functional Issue - Customer Billing",
+          
+          "ZATCA Integration and Invoice Processing"
+        ],
+        "Request": [
+          "New User Request","Modify Role","Functional Reports (New/Change)","New Workflows",
+          "Functional Change - Fixed Asset","Functional Change - Budgeting",
+          "Functional Change - Project Management Accounting","Functional Change - GL",
+          "Functional Change - Procurement and AP","Functional Change - Sales and AR",
+          "Functional Change - Customer Billing","Functional Change - Items Related (PIM)","ZATCA Integration Enhancements"  
+          // "Other / Miscellaneous"
+        ]
+      },
+      "Rydoo": {
+        "Incident": [
+          "Expense Reimbursement Delay",
+          "Others"
+          
+        ],
+        "Request": [
+          "New User Request"
+        ]
+      },
+      "WMS (Mintsoft)": {
+        "Incident": ["Integrations & External Systems Issues","Reporting & Analytics Issues","Operational Issues","Access Issues","Application Issues","Other Issues"],
+        "Request":  ["Access & User Management","Feature Requests & Enhancements","System Setup & Configuration","Reporting & Analytics","Other / Miscellaneous","Training & Support"]
+      },
+      "OMS (SLK)": {
+        "Incident": ["Access Issues","Payment Issues","Data Issues","Reporting & Analytics Issues","System Setup & Configuration Issues","Operational Issues","Application Issues","Integrations & External Systems Issues","Communication & Notification Issues","Other Issues"],
+        "Request":  ["Access & User Management","System Setup & Configuration","Feature Requests & Enhancements","Communication & Notification","Reporting & Analytics","Integrations & External Systems","Training & Support","Other / Miscellaneous","Labelling & Printing"]
+      },
+      "TMS (Shipsy)": {
+        "Incident": ["Reporting & Analytics Issues","Data Issues","Access Issues","Other Issues","Integrations & External Systems Issues","Functional Issues","Communication & Notification Issues","Application Issues"],
+        "Request":  ["Access & User Management","System Setup & Configuration","Feature Requests & Enhancements","Reporting & Analytics","Other / Miscellaneous"]
+      },
+         "Hardware": {
+        "Incident": ["Laptop","Monitor","Other"],
+        "Request":  ["Laptop","Monitor","Additional External Monitor","Docking Station","Temporary Laptop Issuance","Webcams","HDMI Cables (1.8 Meter)","Laptop 65W Type C Chargers (Dell/Lenovo)",
+        "Keyboard & Mouse","New Printer (Canon)","Printer Toner Request","Other"]
+      },
+       "Office 365": {
+         "Incident": [],
+        "Request":  []
+       },
+       "Cloud & Hosting": {
+        "Incident": [],
+        "Request":  []
+       },
+       "Cybersecurity": {
+         "Incident": [],
+        "Request":  []
+      },
+       "Business Applications": {
+         "Incident": [],
+        "Request":  []
+      },
+       "Data Protection": {
+         "Incident": [],
+        "Request":  []
+      },
+       "Network & Connectivity": {
+         "Incident": [],
+        "Request":  []
+      },
+       "Software": {
+        "Incident": [],
+        "Request":  []
+      },
+       "Service Now": {
+        "Incident": [],
+        "Request":  []
+      },
+       "Telephony": {
+        "Incident": [],
+        "Request":  []
+      }
+    },
+    "Q-Commerce": {
+      "D365 Dynamics": {
+        "Incident": [
+          "Access Issues","Funtional Reporting Issues","Technical Reporting Issue",
+          "Integration Issues","Workflows Issues","Functional Issue - Fixed Asset",
+          "Functional Issue - Budgeting","Functional Issue - Project Management Accounting",
+          "Performance Issues","Functional Issue - GL","Functional Issue - Procurement and AP",
+          "Functional Issue - Sales and AR","Functional Issue - Customer Billing",
+          
+          "ZATCA Integration and Invoice Processing"
+        ],
+        "Request": [
+          "New User Request","Modify Role","Functional Reports (New/Change)","New Workflows",
+          "Functional Change - Fixed Asset","Functional Change - Budgeting",
+          "Functional Change - Project Management Accounting","Functional Change - GL",
+          "Functional Change - Procurement and AP","Functional Change - Sales and AR",
+          "Functional Change - Customer Billing","Functional Change - Items Related (PIM)","ZATCA Integration Enhancements"  
+          // "Other / Miscellaneous"
+        ]
+      },
+      "Rydoo": {
+        "Incident": [
+          "Expense Reimbursement Delay",
+          "Others"
+          
+        ],
+        "Request": [
+          "New User Request"
+        ]
+      },
+      "WMS (Oracle)": {
+        "Incident": ["Functional Issues","Integrations & External Systems Issues","Data issues","Reporting & Analytics Issues","Other Issues"],
+        "Request":  ["Access & User Management","System Setup & Configuration","Reporting & Analytics","Integrations & External Systems"]
+      },
+      "TMS (Locus)": {
+        "Incident": ["Application Issues","Reporting & Analytics Issues","Data Issues","Access Issues"],
+        "Request":  ["System Setup & Configuration","Integrations & External Systems","Access & User Management","Reporting & Analytics"]
+      },
+      "DSS (Go Ramp)": {
+        "Incident": ["Access Issues","Customer onboarding issue","Integration issues","Report / Dashboard issue"],
+        "Request":  ["Access request","Customer onboarding Setup","New integration request","New Report / Dashboard Request"]
+      },
+         "Hardware": {
+        "Incident": ["Laptop","Monitor","Other"],
+        "Request":  ["Laptop","Monitor","Additional External Monitor","Docking Station","Temporary Laptop Issuance","Webcams","HDMI Cables (1.8 Meter)","Laptop 65W Type C Chargers (Dell/Lenovo)",
+        "Keyboard & Mouse","New Printer (Canon)","Printer Toner Request","Other"]
+      },
+       "Office 365": {
+         "Incident": [],
+        "Request":  []
+       },
+       "Cloud & Hosting": {
+        "Incident": [],
+        "Request":  []
+       },
+       "Cybersecurity": {
+         "Incident": [],
+        "Request":  []
+      },
+       "Business Applications": {
+         "Incident": [],
+        "Request":  []
+      },
+       "Data Protection": {
+         "Incident": [],
+        "Request":  []
+      },
+       "Network & Connectivity": {
+         "Incident": [],
+        "Request":  []
+      },
+       "Software": {
+        "Incident": [],
+        "Request":  []
+      },
+       "Service Now": {
+        "Incident": [],
+        "Request":  []
+      },
+       "Telephony": {
+        "Incident": [],
+        "Request":  []
+      }
+    },
+    "Solutions": {
+        "D365 Dynamics": {
+        "Incident": [
+          "Access Issues","Funtional Reporting Issues","Technical Reporting Issue",
+          "Integration Issues","Workflows Issues","Functional Issue - Fixed Asset",
+          "Functional Issue - Budgeting","Functional Issue - Project Management Accounting",
+          "Performance Issues","Functional Issue - GL","Functional Issue - Procurement and AP",
+          "Functional Issue - Sales and AR","Functional Issue - Customer Billing",
+          
+          "ZATCA Integration and Invoice Processing"
+        ],
+        "Request": [
+          "New User Request","Modify Role","Functional Reports (New/Change)","New Workflows",
+          "Functional Change - Fixed Asset","Functional Change - Budgeting",
+          "Functional Change - Project Management Accounting","Functional Change - GL",
+          "Functional Change - Procurement and AP","Functional Change - Sales and AR",
+          "Functional Change - Customer Billing","Functional Change - Items Related (PIM)","ZATCA Integration Enhancements"  
+          // "Other / Miscellaneous"
+        ]
+      },
+      "Rydoo": {
+        "Incident": [
+          "Expense Reimbursement Delay",
+          "Others"
+          
+        ],
+        "Request": [
+          "New User Request"
+        ]
+      },
+         "Hardware": {
+        "Incident": ["Laptop","Monitor","Other"],
+        "Request":  ["Laptop","Monitor","Additional External Monitor","Docking Station","Temporary Laptop Issuance","Webcams","HDMI Cables (1.8 Meter)","Laptop 65W Type C Chargers (Dell/Lenovo)",
+        "Keyboard & Mouse","New Printer (Canon)","Printer Toner Request","Other"]
+      },
+       "Office 365": {
+         "Incident": [],
+        "Request":  []
+       },
+       "Cloud & Hosting": {
+        "Incident": [],
+        "Request":  []
+       },
+       "Cybersecurity": {
+         "Incident": [],
+        "Request":  []
+      },
+       "Business Applications": {
+         "Incident": [],
+        "Request":  []
+      },
+       "Data Protection": {
+         "Incident": [],
+        "Request":  []
+      },
+       "Network & Connectivity": {
+         "Incident": [],
+        "Request":  []
+      },
+       "Software": {
+        "Incident": [],
+        "Request":  []
+      },
+       "Service Now": {
+        "Incident": [],
+        "Request":  []
+      },
+       "Telephony": {
+        "Incident": [],
+        "Request":  []
+      }
+    },
+    "Dubai": {
+      "D365 Dynamics": {
+        "Incident": [
+          "Access Issues","Funtional Reporting Issues","Technical Reporting Issue",
+          "Integration Issues","Workflows Issues","Functional Issue - Fixed Asset",
+          "Functional Issue - Budgeting","Functional Issue - Project Management Accounting",
+          "Performance Issues","Functional Issue - GL","Functional Issue - Procurement and AP",
+          "Functional Issue - Sales and AR","Functional Issue - Customer Billing",
+          "ZATCA Integration and Invoice Processing"
+        ],
+        "Request": [
+          "New User Request","Modify Role","Functional Reports (New/Change)","New Workflows",
+          "Functional Change - Fixed Asset","Functional Change - Budgeting",
+          "Functional Change - Project Management Accounting","Functional Change - GL",
+          "Functional Change - Procurement and AP","Functional Change - Sales and AR",
+          "Functional Change - Customer Billing","Functional Change - Items Related (PIM)","ZATCA Integration Enhancements"  
+          // "Other / Miscellaneous"
+        ]
+      },
+      "Rydoo": {
+        "Incident": [
+          "Expense Reimbursement Delay",
+          "Others"
+          
+        ],
+        "Request": [
+          "New User Request"
+        ]
+      },
+      "WMS (Mintsoft)": {
+        "Incident": ["Integrations & External Systems Issues","Reporting & Analytics Issues","Operational Issues","Access Issues","Application Issues","Other Issues"],
+        "Request":  ["Access & User Management","Feature Requests & Enhancements","System Setup & Configuration","Reporting & Analytics","Other / Miscellaneous","Training & Support"]
+      },
+         "Hardware": {
+        "Incident": ["Laptop","Monitor","Other"],
+        "Request":  ["Laptop","Monitor","Additional External Monitor","Docking Station","Temporary Laptop Issuance","Webcams","HDMI Cables (1.8 Meter)","Laptop 65W Type C Chargers (Dell/Lenovo)",
+        "Keyboard & Mouse","New Printer (Canon)","Printer Toner Request","Other"]
+      },
+       "Office 365": {
+         "Incident": [],
+        "Request":  []
+       },
+       "Cloud & Hosting": {
+        "Incident": [],
+        "Request":  []
+       },
+       "Cybersecurity": {
+         "Incident": [],
+        "Request":  []
+      },
+       "Business Applications": {
+         "Incident": [],
+        "Request":  []
+      },
+       "Data Protection": {
+         "Incident": [],
+        "Request":  []
+      },
+       "Network & Connectivity": {
+         "Incident": [],
+        "Request":  []
+      },
+       "Software": {
+        "Incident": [],
+        "Request":  []
+      },
+       "Service Now": {
+        "Incident": [],
+        "Request":  []
+      },
+       "Telephony": {
+        "Incident": [],
+        "Request":  []
+      }
+    }
+  };
+  const itExternalRedirects = {
+    /*
+      Structure:
+      Category Name: {
+        Incident: {
+          default: "fallback incident link",
+          services: {
+            "Service Name": "service-specific incident link"
+          }
+        },
+        Request: {
+          default: "fallback request link",
+          services: {
+            "Service Name": "service-specific request link"
+          }
+        }
+      }
+    */
+
+    "Hardware": {
+      "Incident": {
+        default: "https://support.alquraishi.com/esc?id=sc_cat_item&sys_id=465d98dc3b6d62101889a21864e45a2f",
+        services: {
+          "Laptop": "https://support.alquraishi.com/esc?id=sc_cat_item&sys_id=465d98dc3b6d62101889a21864e45a2f",
+          "Monitor": "https://support.alquraishi.com/esc?id=sc_cat_item&sys_id=465d98dc3b6d62101889a21864e45a2f",
+          "Other": "https://support.alquraishi.com/esc?id=sc_cat_item&sys_id=465d98dc3b6d62101889a21864e45a2f"
+        }
+      },
+      "Request": {
+        default: "https://support.alquraishi.com/esc?id=sc_cat_item&sys_id=866bca632bd8cf509882f51ef291bf48&sysparm_category=3e68865b2b8b72509882f51ef291bf35",
+        services: {
+          "Laptop": "https://support.alquraishi.com/esc?id=sc_cat_item&sys_id=b43bb3ea2b9562100556ff0fe291bfc0",
+          "Monitor": "https://support.alquraishi.com/esc?id=sc_cat_item&sys_id=b43bb3ea2b9562100556ff0fe291bfc0",
+          "Additional External Monitor": "https://support.alquraishi.com/esc?id=sc_cat_item&sys_id=866bca632bd8cf509882f51ef291bf48&sysparm_category=3e68865b2b8b72509882f51ef291bf35",
+          "Docking Station": "https://support.alquraishi.com/esc?id=sc_cat_item&sys_id=866bca632bd8cf509882f51ef291bf48&sysparm_category=3e68865b2b8b72509882f51ef291bf35",
+          "Temporary Laptop Issuance": "https://support.alquraishi.com/esc?id=sc_cat_item&sys_id=866bca632bd8cf509882f51ef291bf48&sysparm_category=3e68865b2b8b72509882f51ef291bf35p",
+          "Webcams": "https://support.alquraishi.com/esc?id=sc_cat_item&sys_id=ffc84ed72b8b72509882f51ef291bf7d&sysparm_category=3e68865b2b8b72509882f51ef291bf35",
+          "HDMI Cables (1.8 Meter)": "https://support.alquraishi.com/esc?id=sc_cat_item&sys_id=57bd1e5b3b47b250c5471764c3e45a7f&sysparm_category=cd0a14043be162101889a21864e45ac8&catalog_id=-1",
+          "Laptop 65W Type C Chargers (Dell/Lenovo)": "https://support.alquraishi.com/esc?id=sc_cat_item&sys_id=a69e1a9b3b47b250c5471764c3e45ac0&sysparm_category=cd0a14043be162101889a21864e45ac8&catalog_id=-1",
+          "Keyboard & Mouse": "https://support.alquraishi.com/esc?id=sc_cat_item&sys_id=7cde27c13b6c0350c5471764c3e45a95&sysparm_category=cd0a14043be162101889a21864e45ac8",
+          "New Printer (Canon)": "https://support.alquraishi.com/esc?id=sc_cat_item&sys_id=7cd0495d2b6d36509882f51ef291bf41&sysparm_category=d69f74073b1c8710c5471764c3e45a9a",
+          "Printer Toner Request": "https://support.alquraishi.com/esc?id=sc_cat_item&sys_id=28cf55573b500b10c5471764c3e45a10&sysparm_category=d69f74073b1c8710c5471764c3e45a9a",
+           "Other": "https://support.alquraishi.com/esc?id=sc_cat_item&sys_id=b43bb3ea2b9562100556ff0fe291bfc0"
+        }
+      }
+    },
+
+    "Office 365": {
+      "Incident": {
+        default: "https://support.alquraishi.com/esc?id=sc_cat_item&sys_id=465d98dc3b6d62101889a21864e45a2f"
+      },
+      "Request": {
+        default: "https://support.alquraishi.com/esc?id=sc_cat_item&sys_id=58ee74cb3b5166101889a21864e45a58&sysparm_category=cd0a14043be162101889a21864e45ac8"
+      }
+    },
+
+    "Cloud & Hosting": {
+      "Incident": {
+        default: "https://support.alquraishi.com/esc?id=sc_cat_item&sys_id=465d98dc3b6d62101889a21864e45a2f"
+      },
+      "Request": {
+        default: "https://support.alquraishi.com/esc?id=sc_cat_item&sys_id=cb1b14443be162101889a21864e45ace&sysparm_category=cd0a14043be162101889a21864e45ac8"
+      }
+    },
+
+    "Cybersecurity": {
+      "Incident": {
+        default: "https://support.alquraishi.com/esc?id=sc_cat_item&sys_id=465d98dc3b6d62101889a21864e45a2f"
+      },
+      "Request": {
+        default: "https://support.alquraishi.com/esc?id=sc_cat_item&sys_id=27ecb77c2b29e6100556ff0fe291bf4e&sysparm_category=cd0a14043be162101889a21864e45ac8"
+      }
+    },
+
+    "Business Applications": {
+      "Incident": {
+        default: "https://support.alquraishi.com/esc?id=sc_cat_item&sys_id=465d98dc3b6d62101889a21864e45a2f"
+      },
+      "Request": {
+        default: "https://support.alquraishi.com/esc?id=sc_cat_item&sys_id=465d98dc3b6d62101889a21864e45a2f"
+      }
+    },
+
+    "Data Protection": {
+      "Incident": {
+        default: "https://support.alquraishi.com/esc?id=sc_cat_item&sys_id=465d98dc3b6d62101889a21864e45a2f"
+      },
+      "Request": {
+        default: "https://support.alquraishi.com/esc?id=sc_cat_item&sys_id=a97137c53b2926101889a21864e45a72&sysparm_category=cd0a14043be162101889a21864e45ac8"
+      }
+    },
+
+    "Network & Connectivity": {
+      "Incident": {
+        default: "https://support.alquraishi.com/esc?id=sc_cat_item&sys_id=465d98dc3b6d62101889a21864e45a2f"
+      },
+      "Request": {
+        default: "https://support.alquraishi.com/esc?id=sc_cat_item&sys_id=7faa044f3b9d26101889a21864e45adc&sysparm_category=cd0a14043be162101889a21864e45ac8"
+      }
+    },
+
+    "Software": {
+      "Incident": {
+        default: "https://support.alquraishi.com/esc?id=sc_cat_item&sys_id=465d98dc3b6d62101889a21864e45a2f"
+      },
+      "Request": {
+        default: "https://support.alquraishi.com/esc?id=sc_cat_item&sys_id=d43e208f3b1166101889a21864e45ad8&sysparm_category=cd0a14043be162101889a21864e45ac8"
+      }
+    },
+
+    "Service Now": {
+      "Incident": {
+        default: "https://support.alquraishi.com/esc?id=sc_cat_item&sys_id=d43e208f3b1166101889a21864e45ad8&sysparm_category=cd0a14043be162101889a21864e45ac8"
+      },
+      "Request": {
+        default: "https://support.alquraishi.com/esc?id=sc_cat_item&sys_id=d43e208f3b1166101889a21864e45ad8&sysparm_category=cd0a14043be162101889a21864e45ac8"
+      }
+    },
+
+    "Telephony": {
+      "Incident": {
+        default: "https://support.alquraishi.com/esc?id=sc_cat_item&sys_id=d43e208f3b1166101889a21864e45ad8&sysparm_category=cd0a14043be162101889a21864e45ac8"
+      },
+      "Request": {
+        default: "https://support.alquraishi.com/esc?id=sc_cat_item&sys_id=d43e208f3b1166101889a21864e45ad8&sysparm_category=cd0a14043be162101889a21864e45ac8"
+      }
+    }
+  };
+
+</script>
+<!-- ============================================================
+     END IT CASCADE DATA
+============================================================ -->
+
+{% if mode != "view" %}
+<fieldset class="p-4 mb-3">
+  <legend>Request Details</legend>
+
+  <input type="hidden" id="itVertical"/>
+  <input type="hidden" id="itCategory"/>
+  <input type="hidden" id="itSubCategory"/>
+  <input type="hidden" id="itService"/>
+
+  <div id="step-verticals" class="mb-5">
+    <h4 class="fw-semibold mb-3 form-label">Select Vertical *</h4>
+    <div id="verticalTiles" class="row g-3"></div>
+  </div>
+
+  <div id="step-categories" class="mb-5" hidden>
+    <h4 class="fw-semibold mb-3 form-label">Category *</h4>
+    <div id="categoryTiles" class="row g-3"></div>
+  </div>
+
+  <div id="step-subcategories" class="mb-5" hidden>
+    <h4 class="fw-semibold mb-3 form-label">
+      Sub Category *
+      <span id="selectedCategoryLabel" class="badge bg-light text-dark ms-2"></span>
+    </h4>
+    <div id="subCategoryTiles" class="row g-3"></div>
+  </div>
+
+  <div id="step-services" class="mb-5" hidden>
+    <h4 class="fw-semibold mb-3 form-label">
+      Service *
+      <span id="selectedSubCategoryLabel" class="badge bg-light text-dark ms-2"></span>
+    </h4>
+    <div id="serviceTiles" class="row g-3"></div>
+  </div>
+
+  <div id="step-erp-template" class="mb-4" hidden>
+    <div class="row">
+      <div class="col-12 col-md-8 mb-3" id="div-url">
+        <label for="sh_url" class="form-label">URL</label>
+        <input type="text" class="form-control" id="sh_url" value="{{ metadata.sh_url}}">
+        <div id="hint-url" class="form-text starlinks-one-tile-sub">
+          Paste the related Dynamics URL here to help us quickly identify the affected record or page.
+        </div>
+      </div>
+      <div class="col-12 col-md-4 mb-3" id="div-legalentity">
+        <label for="sh_legalentity" class="form-label">Legal Entity *</label>
+        <select class="form-select" id="sh_legalentity">
+          {% assign currentLegalEntityValue = metadata.sh_legalentity.Value | string %}
+          <option value="" disabled selected>Select</option>
+          <option value="126450000" {% if currentLegalEntityValue == "126450000" %}selected{% endif %}>5030 | Starlinks Company</option>
+          <option value="126450001" {% if currentLegalEntityValue == "126450001" %}selected{% endif %}>5031 | Starlinks Global Ltd</option>
+          <option value="126450002" {% if currentLegalEntityValue == "126450002" %}selected{% endif %}>5032 | Starlinks Corporation Logistic Services L.L.C</option>
+          <option value="126450003" {% if currentLegalEntityValue == "126450003" %}selected{% endif %}>5033 | Starlinks Solutions</option>
+        </select>
+      </div>
+      <div class="col-12 col-md-4 mb-3" id="div-environment">
+        <label for="sh_environment" class="form-label">Environment *</label>
+        <select class="form-select" id="sh_environment">
+          {% assign currentEnvironmentValue = metadata.sh_environment.Value | string %}
+          <option value="" disabled selected>Select</option>
+          <option value="126450000" {% if currentEnvironmentValue == "126450000" %}selected{% endif %}>Live (Production)</option>
+          <option value="126450001" {% if currentEnvironmentValue == "126450001" %}selected{% endif %}>UAT Environment</option>
+          <option value="126450005" {% if currentEnvironmentValue == "126450005" %}selected{% endif %}>Test Environment</option>
+          <option value="126450002" {% if currentEnvironmentValue == "126450002" %}selected{% endif %}>Dev01 (Development 1)</option>
+          <option value="126450003" {% if currentEnvironmentValue == "126450003" %}selected{% endif %}>Dev02 (Development 2)</option>
+          <option value="126450004" {% if currentEnvironmentValue == "126450004" %}selected{% endif %}>Dev03 (Development 3)</option>
+        </select>
+      </div>
+    </div>
+    <div class="mb-3" id="div-description">
+      <label class="form-label">Description *</label>
+      <textarea class="form-control" id="sh_description" rows="5">{{ metadata.sh_description }}</textarea>
+      <div id="hint-description" class="form-text starlinks-one-tile-sub" style="display:none;">
+        Please provide the Module name, relevant Document Number (if any), and a clear description of the issue or request you are facing.
+      </div>
+    </div>
+  </div>
+
+  <div class="mb-3">
+    <label for="sh_additionalinformation" class="form-label">Additional Information *</label>
+    <textarea class="form-control" id="sh_additionalinformation" rows="8">{{ metadata.sh_additionalinformation }}</textarea>
+  </div>
+
+</fieldset>
+{% endif %}
+
+
+{% if mode == "view" %}
+<fieldset class="p-4 mb-3">
+  <legend>Request Details</legend>
+  <div class="row">
+
+    <!-- Vertical — plain select, one Liquid option by default, populated on edit -->
+    <div class="col-12 col-md-4 mb-3">
+      <label for="sh_vertical" class="form-label">Vertical *</label>
+      <select class="form-select" id="sh_vertical" disabled required>
+        {% if metadata.sh_vertical %}
+          <option value="{{ metadata.sh_vertical.name }}" selected>{{ metadata.sh_vertical }}</option>
+        {% endif %}
+      </select>
+    </div>
+
+    <!-- Category -->
+    <div class="col-12 col-md-4 mb-3">
+      <label for="sh_itcategory" class="form-label">Category *</label>
+      <select class="form-select" id="sh_itcategory" disabled required>
+        {% if metadata.sh_support %}
+          <option value="{{ metadata.sh_support }}" selected>{{ metadata.sh_support }}</option>
+        {% endif %}
+      </select>
+    </div>
+
+    <!-- Sub Category -->
+      <div class="col-12 col-md-4 mb-3">
+        <label for="sh_itscope" class="form-label">Sub Category *</label>
+        <select class="form-select" id="sh_itscope" disabled required>
+          {% if metadata.sh_scope %}
+            <option value="{{ metadata.sh_scope }}" selected>{{ metadata.sh_scope }}</option>
+          {% endif %}
+        </select>
+      </div>
+
+      <!-- Service -->
+      <div class="col-12 col-md-4 mb-3">
+        <label for="sh_itsubcategory" class="form-label">Service *</label>
+        <select class="form-select" id="sh_itsubcategory" disabled required>
+          {% if metadata.sh_category %}
+            <option value="{{ metadata.sh_category }}" selected>{{ metadata.sh_category }}</option>
+          {% endif %}
+        </select>
+      </div>
+
+    
+
+    <!-- ERP fields — shown only when category is D365 -->
+    {% if metadata.sh_support ==   "D365 Dynamics" %}
+    <div class="col-12 col-md-8 mb-3" id="div-url">
+      <label for="sh_url" class="form-label">URL</label>
+      <input type="text" class="form-control" id="sh_url" value="{{ metadata.sh_url }}" readonly>
+    </div>
+    <div class="col-12 col-md-4 mb-3" id="div-legalentity">
+      <label for="sh_legalentity" class="form-label">Legal Entity</label>
+      <select class="form-select" id="sh_legalentity" disabled>
+        {% assign lev = metadata.sh_legalentity.Value | string %}
+        <option value="" disabled>Select</option>
+        <option value="126450000" {% if lev == "126450000" %}selected{% endif %}>5030 | Starlinks Company</option>
+        <option value="126450001" {% if lev == "126450001" %}selected{% endif %}>5031 | Starlinks Global Ltd</option>
+        <option value="126450002" {% if lev == "126450002" %}selected{% endif %}>5032 | Starlinks Corporation Logistic Services L.L.C</option>
+        <option value="126450003" {% if lev == "126450003" %}selected{% endif %}>5033 | Starlinks Solutions</option>
+      </select>
+    </div>
+    <div class="col-12 col-md-4 mb-3" id="div-environment">
+      <label for="sh_environment" class="form-label">Environment</label>
+      <select class="form-select" id="sh_environment" disabled>
+        {% assign env = metadata.sh_environment.Value | string %}
+        <option value="" disabled>Select</option>
+        <option value="126450000" {% if env == "126450000" %}selected{% endif %}>Live (Production)</option>
+        <option value="126450001" {% if env == "126450001" %}selected{% endif %}>UAT Environment</option>
+        <option value="126450005" {% if env == "126450005" %}selected{% endif %}>Test Environment</option>
+        <option value="126450002" {% if env == "126450002" %}selected{% endif %}>Dev01 (Development 1)</option>
+        <option value="126450003" {% if env == "126450003" %}selected{% endif %}>Dev02 (Development 2)</option>
+        <option value="126450004" {% if env == "126450004" %}selected{% endif %}>Dev03 (Development 3)</option>
+      </select>
+    </div>
+    <div class="col-12 mb-3">
+      <label for="sh_description" class="form-label">Description</label>
+      <textarea class="form-control" id="sh_description" rows="5" readonly>{{ metadata.sh_description }}</textarea>
+    </div>
+    {% endif %}
+
+    <div class="col-12 mb-3">
+      <label for="sh_additionalinformation" class="form-label">Additional Information</label>
+      <textarea class="form-control" id="sh_additionalinformation" readonly>{{ metadata.sh_additionalinformation }}</textarea>
+    </div>
+
+  </div>
+</fieldset>
+{% endif %}
+
+
+{% if mode != "view" %}
+<script>
+/* ================================
+   SUBMIT MODE — Tile state + rendering
+   (data arrays are above, always rendered)
+================================ */
+let state = {
+  vertical:    null,
+  category:    null,
+  subCategory: null,
+  service:     null
+};
+
+
+function showToast(message, type = "danger") {
+  const existing = document.getElementById("it-toast");
+  if (existing) existing.remove();
+  const toast = document.createElement("div");
+  toast.id = "it-toast";
+  toast.className = `alert alert-${type} position-fixed bottom-0 end-0 m-3`;
+  toast.style.cssText = "z-index:9999;max-width:360px;";
+  toast.innerText = message;
+  document.body.appendChild(toast);
+  setTimeout(() => toast.remove(), 3500);
+}
+
+function validateRequest() {
+  if (!state.vertical)    { showToast("Please select a Vertical.", "danger"); return false; }
+  if (!state.category)    { showToast("Please select a Category.", "danger"); return false; }
+  if (!state.subCategory) { showToast("Please select a Sub Category.", "danger"); return false; }
+  if (!state.service)     { showToast("Please select a Service.", "danger"); return false; }
+  // console.log('Validation function called!');
+
+  const externalUrl = getExternalRedirectUrl(
+  state.category,
+  state.subCategory,
+  state.service
+    );
+
+    if (externalUrl) {
+      setSubmitButtonDisabled(true);
+      showToast("This item opens in ServiceNow. Please use the opened tab instead.", "warning");
+      return false;
+    }
+
+  // ERP-specific validation
+  if (state.category ===   "D365 Dynamics") {
+    const legalEntity = document.getElementById("sh_legalentity")?.value;
+    const environment = document.getElementById("sh_environment")?.value;
+    const description = document.getElementById("sh_description")?.value?.trim();
+    if (!legalEntity)   { showToast("Please select a Legal Entity.", "danger"); return false; }
+    if (!environment)   { showToast("Please select an Environment.", "danger"); return false; }
+    if (!description)   { showToast("Please provide a Description.", "danger"); return false; }
+  }
+
+  const additionalInfo = document.getElementById("sh_additionalinformation")?.value?.trim();
+  if (!additionalInfo) {
+    showToast("Please provide Additional Information.", "danger");
+    document.getElementById("sh_additionalinformation")?.focus();
+    return false;
+  }
+  return true;
+}
+
+function getExternalRedirectUrl(category, subCategory, service = null) {
+  const config = itExternalRedirects?.[category]?.[subCategory];
+
+  if (!config) return null;
+
+  // Allows simple string config if you ever want:
+  // "Office 365": { "Incident": "https://..." }
+  if (typeof config === "string") return config;
+
+  // Service-specific link takes priority.
+  if (service && config.services && config.services[service]) {
+    return config.services[service];
+  }
+
+  // Otherwise use default link for that category + Incident/Request.
+  return config.default || null;
+}
+
+function getSubmitButton() {
+  return document.querySelector(
+    'input[type="submit"], button[type="submit"], #InsertButton, #UpdateButton'
+  );
+}
+
+function setSubmitButtonDisabled(disabled) {
+  const submitButton = getSubmitButton();
+
+  if (!submitButton) return;
+
+  submitButton.disabled = disabled;
+
+  if (disabled) {
+    submitButton.classList.add("disabled");
+    submitButton.setAttribute("aria-disabled", "true");
+    submitButton.title = "This item opens in ServiceNow. Please use the opened tab instead.";
+  } else {
+    submitButton.classList.remove("disabled");
+    submitButton.removeAttribute("aria-disabled");
+    submitButton.removeAttribute("title");
+  }
+}
+
+function selectedItemHasExternalRedirect() {
+  return !!getExternalRedirectUrl(
+    state.category,
+    state.subCategory,
+    state.service
+  );
+}
+
+
+function openExternalRedirect(url) {
+  if (!url) return;
+
+  window.open(url, "_blank", "noopener,noreferrer");
+  setSubmitButtonDisabled(true);
+}
+
+function renderTiles(containerId, items, clickHandler) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  container.innerHTML = "";
+  items.forEach(item => {
+    const label = typeof item === "string" ? item : item.label;
+    const sub   = typeof item === "string" ? "" : (item.sub || "");
+    const col = document.createElement("div");
+    col.className = "col-md-4";
+    col.innerHTML = `
+      <div class="hr-tile">
+        <div class="hr-tile-title form-label">${label}</div>
+        ${sub ? `<div class="hr-tile-sub">${sub}</div>` : ""}
+      </div>`;
+    col.querySelector(".hr-tile").addEventListener("click", e => {
+      [...container.querySelectorAll(".hr-tile")].forEach(t => t.classList.remove("tile-selected"));
+      e.currentTarget.classList.add("tile-selected");
+      clickHandler(label);
+    });
+    container.appendChild(col);
+  });
+}
+
+function resetFrom(level) {
+  if (level <= 1) {
+    state.category = null;
+    document.getElementById("itCategory").value = "";
+    document.getElementById("step-categories").hidden = true;
+    document.getElementById("categoryTiles").innerHTML = "";
+  }
+  if (level <= 2) {
+    state.subCategory = null;
+    document.getElementById("itSubCategory").value = "";
+    document.getElementById("step-subcategories").hidden = true;
+    document.getElementById("subCategoryTiles").innerHTML = "";
+    document.getElementById("selectedCategoryLabel").innerText = "";
+  }
+  if (level <= 3) {
+    state.service = null;
+    document.getElementById("itService").value = "";
+    document.getElementById("step-services").hidden = true;
+    document.getElementById("serviceTiles").innerHTML = "";
+    document.getElementById("selectedSubCategoryLabel").innerText = "";
+    document.getElementById("step-erp-template").hidden = true;
+    const ttd = document.getElementById("sh_tickettype");
+    if (ttd) ttd.selectedIndex = 0;
+  }
+}
+
+function loadVerticalTiles() {
+  renderTiles("verticalTiles", itVerticals, label => {
+    state.vertical = label;
+    document.getElementById("itVertical").value = label;
+
+    // Any new vertical selection means user is starting a new path.
+    // Enable submit again until/unless they choose an external redirect item.
+    setSubmitButtonDisabled(false);
+
+    resetFrom(1);
+    loadCategoryTiles();
+    document.getElementById("step-categories").hidden = false;
+  });
+}
+
+function loadCategoryTiles() {
+  const items = itCategoriesByVertical[state.vertical] || [];
+
+  renderTiles("categoryTiles", items, label => {
+    state.category = label;
+    document.getElementById("itCategory").value = label;
+
+    // Enable submit when user changes category.
+    // It will be disabled again only if the selected path is an external redirect.
+    setSubmitButtonDisabled(false);
+
+    resetFrom(2);
+    document.getElementById("selectedCategoryLabel").innerText = label;
+    loadSubCategoryTiles();
+    document.getElementById("step-subcategories").hidden = false;
+  });
+}
+
+// function loadSubCategoryTiles() {
+//   renderTiles("subCategoryTiles", itSubCategories, label => {
+//     state.subCategory = label;
+//     document.getElementById("itSubCategory").value = label;
+//     resetFrom(3);
+//     document.getElementById("selectedSubCategoryLabel").innerText = label;
+//     const ttd = document.getElementById("sh_tickettype");
+//     if (ttd) {
+//       for (let opt of ttd.options) {
+//         if (opt.text.trim().toLowerCase() === label.trim().toLowerCase()) {
+//           ttd.value = opt.value;
+//           break;
+//         }
+//       }
+//     }
+//     loadServiceTiles();
+//     document.getElementById("step-services").hidden = false;
+//   });
+// }
+
+function loadSubCategoryTiles() {
+  renderTiles("subCategoryTiles", itSubCategories, label => {
+    state.subCategory = label;
+    document.getElementById("itSubCategory").value = label;
+
+    // Enable first. If this subcategory is external, we disable after opening link.
+    setSubmitButtonDisabled(false);
+
+    resetFrom(3);
+    document.getElementById("selectedSubCategoryLabel").innerText = label;
+
+    const ttd = document.getElementById("sh_tickettype");
+    if (ttd) {
+      for (let opt of ttd.options) {
+        if (opt.text.trim().toLowerCase() === label.trim().toLowerCase()) {
+          ttd.value = opt.value;
+          break;
+        }
+      }
+    }
+
+    const services = itServicesData?.[state.vertical]?.[state.category]?.[state.subCategory] || [];
+
+    // Categories like Office 365 / Cloud & Hosting / Software have no services.
+    // Open external link immediately and disable submit.
+    if (!services.length) {
+      const externalUrl = getExternalRedirectUrl(state.category, state.subCategory);
+
+      if (externalUrl) {
+        openExternalRedirect(externalUrl);
+        return;
+      }
+
+      document.getElementById("step-services").hidden = true;
+      return;
+    }
+
+    loadServiceTiles();
+    document.getElementById("step-services").hidden = false;
+  });
+}
+
+// function loadServiceTiles() {
+//   const services = itServicesData?.[state.vertical]?.[state.category]?.[state.subCategory] || [];
+//   if (!services.length) {
+//     document.getElementById("step-services").hidden = true;
+//     return;
+//   }
+//   renderTiles("serviceTiles", services, label => {
+//     state.service = label;
+//     document.getElementById("itService").value = label;
+//     document.getElementById("step-erp-template").hidden = (state.category !==   "D365 Dynamics");
+//   });
+//   document.getElementById("step-services").hidden = false;
+// }
+function loadServiceTiles() {
+  const services = itServicesData?.[state.vertical]?.[state.category]?.[state.subCategory] || [];
+
+  if (!services.length) {
+    document.getElementById("step-services").hidden = true;
+    return;
+  }
+
+  renderTiles("serviceTiles", services, label => {
+    state.service = label;
+    document.getElementById("itService").value = label;
+
+    // Enable first. If the selected service is external, disable after opening link.
+    setSubmitButtonDisabled(false);
+
+    const externalUrl = getExternalRedirectUrl(
+      state.category,
+      state.subCategory,
+      state.service
+    );
+
+    // Hardware and any future service-level external redirects.
+    if (externalUrl) {
+      openExternalRedirect(externalUrl);
+      return;
+    }
+
+    // Normal IT application flow remains unchanged.
+    document.getElementById("step-erp-template").hidden =
+      (state.category !==   "D365 Dynamics");
+  });
+
+  document.getElementById("step-services").hidden = false;
+}
+document.addEventListener("DOMContentLoaded", () => {
+  loadVerticalTiles();
+});
+</script>
+{% endif %}
+
+
+<style>
+.hr-tile {
+  border-radius: 1rem;
+  padding: 1.25rem;
+  background: #fff;
+  border: 1px solid rgba(0,0,0,.08);
+  transition: .2s;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(0,0,0,.04);
+}
+.hr-tile:hover  { transform: translateY(-3px); border-color: #ced4da; }
+.hr-tile-title  { font-weight: 600; }
+.hr-tile-sub    { font-size: .85rem; color: #6c757d; }
+.tile-selected  {
+  background: #f8f9fa !important;
+  border-color: #adb5bd !important;
+  box-shadow: 0 0 0 2px #dee2e6 inset;
+}
+</style>

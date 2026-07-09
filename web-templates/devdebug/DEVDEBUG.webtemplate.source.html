@@ -1,0 +1,814 @@
+{% if request.params['debug'] %}
+<div class="container mt-4">
+  <div class="card shadow border">
+    <div class="card-header bg-info fw-bold text-white">
+      DEBUG: Ticket Object (Values + Liquid Expressions)
+    </div>
+
+    {% assign fallback = "---" %}
+
+    <div class="card-body p-0">
+      <table class="table table-bordered m-0">
+        <thead class="table-light">
+          <tr>
+            <th style="width:25%">Field</th>
+            <th style="width:40%">Value</th>
+            <th style="width:35%">Liquid Expression</th>
+          </tr>
+        </thead>
+        <tbody>
+
+          <!-- Created On -->
+          <tr>
+            <td>Created On</td>
+            <td>{{ ticket.createdon | default: fallback }}</td>
+            <td>{% raw %}"{{ ticket.createdon }}"{% endraw %}</td>
+          </tr>
+
+          <!-- Modified On -->
+          <tr>
+            <td>Modified On</td>
+            <td>{{ ticket.modifiedon | default: fallback }}</td>
+            <td>{% raw %}"{{ ticket.modifiedon }}"{% endraw %}</td>
+          </tr>
+
+          <!-- Completed On -->
+          <tr>
+            <td>Completed On</td>
+            <td>{{ ticket.sh_completedon | default: fallback }}</td>
+            <td>{% raw %}"{{ ticket.sh_completedon }}"{% endraw %}</td>
+          </tr>
+
+          <!-- Assigned To -->
+          <tr>
+            <td>Assigned To</td>
+            <td>{{ ticket.sh_assignedto.name | default: ticket.sh_assignedtoname | default: fallback }}</td>
+            <td>{% raw %}"{{ ticket.sh_assignedto.name }}"{% endraw %}</td>
+          </tr>
+
+          <!-- Department -->
+          <tr>
+            <td>Department</td>
+            <td>{{ ticket.sh_department.name | default: ticket.sh_departmentname | default: fallback }}</td>
+            <td>{% raw %}"{{ ticket.sh_department.name }}"{% endraw %}</td>
+          </tr>
+
+          <!-- Description -->
+          <!-- <tr>
+            <td>Description</td>
+            <td>{{ ticket.sh_description | default: fallback }}</td>
+            <td>{% raw %}"{{ ticket.sh_description }}"{% endraw %}</td>
+          </tr> -->
+
+          <!-- L1 -->
+          <tr>
+            <td>L1 Owner</td>
+            <td>{{ ticket.sh_l1 | default: fallback }}</td>
+            <td>{% raw %}"{{ ticket.sh_l1 }}"{% endraw %}</td>
+          </tr>
+
+          <!-- Priority -->
+          <tr>
+            <td>Priority</td>
+            <td>{{ ticket.sh_priority.Label | default: fallback }}</td>
+            <td>{% raw %}"{{ ticket.sh_priority.Label }}"{% endraw %}</td>
+          </tr>
+
+          <!-- Request -->
+          <tr>
+            <td>Request Type</td>
+            <td>{{ ticket.sh_request.name | default: ticket.sh_requestname | default: fallback }}</td>
+            <td>{% raw %}"{{ ticket.sh_request.name }}"{% endraw %}</td>
+          </tr>
+
+          <!-- Requestor Email -->
+          <tr>
+            <td>Requestor Email</td>
+            <td>{{ ticket.sh_requestoremail | default: fallback }}</td>
+            <td>{% raw %}"{{ ticket.sh_requestoremail }}"{% endraw %}</td>
+          </tr>
+
+          <!-- Requestor Name -->
+          <tr>
+            <td>Requestor Name</td>
+            <td>{{ ticket.sh_requestorname | default: fallback }}</td>
+            <td>{% raw %}"{{ ticket.sh_requestorname }}"{% endraw %}</td>
+          </tr>
+
+          <!-- SLA -->
+          <tr>
+            <td>SLA</td>
+            <td>{{ ticket.sh_sla | default: fallback }}</td>
+            <td>{% raw %}"{{ ticket.sh_sla }}"{% endraw %}</td>
+          </tr>
+
+          <!-- SLA Breach -->
+          <tr>
+            <td>SLA Breach</td>
+            <td>{{ ticket.sh_slabreach | default: fallback }}</td>
+            <td>{% raw %}"{{ ticket.sh_slabreach }}"{% endraw %}</td>
+          </tr>
+
+          <!-- Ticket Number -->
+          <tr>
+            <td>Ticket Number</td>
+            <td>{{ ticket.sh_ticket | default: fallback }}</td>
+            <td>{% raw %}"{{ ticket.sh_ticket }}"{% endraw %}</td>
+          </tr>
+
+          <tr>
+            <td>Parent Ticket Number</td>
+            <td>{{ ticket.sh_parentticket.name | default: fallback }}</td>
+            <td>{% raw %}"{{ ticket.sh_parentticket.name }}"{% endraw %}</td>
+          </tr>
+
+          <tr>
+            <td>Parent Ticket ID</td>
+            <td>{{ ticket.sh_parentticket.id | default: fallback }}</td>
+            <td>{% raw %}"{{ ticket.sh_parentticket.id }}"{% endraw %}</td>
+          </tr>
+
+          <!-- Ticket ID -->
+          <tr>
+            <td>Ticket ID</td>
+            <td>{{ ticket.sh_ticketid | default: fallback }}</td>
+            <td>{% raw %}"{{ ticket.sh_ticketid }}"{% endraw %}</td>
+          </tr>
+
+          <!-- Ticket Status -->
+          <tr>
+            <td>Ticket Status</td>
+            <td>{{ ticket.sh_ticketstatus.Label }}</td>
+            <td>{% raw %}"{{ ticket.sh_ticketstatus.Label }}"{% endraw %}</td>
+          </tr>
+
+          <!-- Ticket Type -->
+          <tr>
+            <td>Ticket Type</td>
+            <td>{{ ticket.sh_tickettype.name | default: fallback }}</td>
+            <td>{% raw %}"{{ ticket.sh_tickettype.name }}"{% endraw %}</td>
+          </tr>
+
+          <!-- Time to Complete -->
+          <tr>
+            <td>Time to Complete</td>
+            <td>{{ ticket.sh_timetocomplete | default: fallback }}</td>
+            <td>{% raw %}"{{ ticket.sh_timetocomplete }}"{% endraw %}</td>
+          </tr>
+
+          <!-- Title -->
+          <tr>
+            <td>Title</td>
+            <td>{{ ticket.sh_title | default: fallback }}</td>
+            <td>{% raw %}"{{ ticket.sh_title }}"{% endraw %}</td>
+          </tr>
+
+        </tbody>
+      </table>
+
+    </div>
+  </div>
+</div>
+{% endif %}
+
+{% if request.params['debug'] %}
+<div class="container mt-4">
+  <div class="card shadow border">
+    <div class="card-header bg-warning fw-bold text-dark">
+      DEBUG: IT Metadata Object (Values + Liquid Expressions)
+    </div>
+
+    {% assign fallback = "---" %}
+
+    <div class="card-body p-0">
+      <table class="table table-bordered m-0">
+        <thead class="table-light">
+          <tr>
+            <th style="width:25%">Field</th>
+            <th style="width:40%">Value</th>
+            <th style="width:35%">Liquid Expression</th>
+          </tr>
+        </thead>
+        <tbody>
+
+          <!-- Metadata Exists -->
+          <tr>
+            <td>Metadata Exists</td>
+            <td>
+              {% if metadata %}YES{% else %}NO{% endif %}
+            </td>
+            <td>{% raw %}{% if metadata %}YES{% else %}NO{% endif %}{% endraw %}</td>
+          </tr>
+
+          <!-- IT Metadata ID -->
+          <tr>
+            <td>IT Metadata ID</td>
+            <td>{{ metadata.sh_itmetadataid | default: fallback }}</td>
+            <td>{% raw %}"{{ metadata.sh_itmetadataid }}"{% endraw %}</td>
+          </tr>
+
+          <!-- IT ID -->
+          <tr>
+            <td>IT ID</td>
+            <td>{{ metadata.sh_itid | default: fallback }}</td>
+            <td>{% raw %}"{{ metadata.sh_itid }}"{% endraw %}</td>
+          </tr>
+
+          <!-- Support -->
+          <tr>
+            <td>Support</td>
+            <td>{{ metadata.sh_support | default: fallback }}</td>
+            <td>{% raw %}"{{ metadata.sh_support }}"{% endraw %}</td>
+          </tr>
+
+          <!-- Scope -->
+          <tr>
+            <td>Scope</td>
+            <td>{{ metadata.sh_scope | default: fallback }}</td>
+            <td>{% raw %}"{{ metadata.sh_scope }}"{% endraw %}</td>
+          </tr>
+
+          <!-- Category -->
+          <tr>
+            <td>Category</td>
+            <td>{{ metadata.sh_category | default: fallback }}</td>
+            <td>{% raw %}"{{ metadata.sh_category }}"{% endraw %}</td>
+          </tr>
+
+          <!-- Additional Information -->
+          <tr>
+            <td>Additional Information</td>
+            <td>{{ metadata.sh_additionalinformation | default: fallback }}</td>
+            <td>{% raw %}"{{ metadata.sh_additionalinformation }}"{% endraw %}</td>
+          </tr>
+
+          <!-- Ticket Lookup (GUID) -->
+          <tr>
+            <td>Ticket Lookup (GUID)</td>
+            <td>{{ metadata.sh_ticketnumber.id | default: fallback }}</td>
+            <td>{% raw %}"{{ metadata.sh_ticketnumber.id }}"{% endraw %}</td>
+          </tr>
+
+          <!-- Ticket Lookup (Name) -->
+          <tr>
+            <td>Ticket Lookup (Name)</td>
+            <td>{{ metadata.sh_ticketnumber.name | default: fallback }}</td>
+            <td>{% raw %}"{{ metadata.sh_ticketnumber.name }}"{% endraw %}</td>
+          </tr>
+
+          <!-- Created On -->
+          <tr>
+            <td>Created On</td>
+            <td>{{ metadata.createdon | default: fallback }}</td>
+            <td>{% raw %}"{{ metadata.createdon }}"{% endraw %}</td>
+          </tr>
+
+          <!-- Modified On -->
+          <tr>
+            <td>Modified On</td>
+            <td>{{ metadata.modifiedon | default: fallback }}</td>
+            <td>{% raw %}"{{ metadata.modifiedon }}"{% endraw %}</td>
+          </tr>
+
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+
+{% if request.params['debug'] %}
+<div class="container mt-4">
+  <div class="card shadow border">
+    <div class="card-header bg-primary text-white fw-bold">
+      DEBUG: Metadata Object (Values + Liquid Expressions)
+    </div>
+
+    {% assign fallback = "---" %}
+
+    <div class="card-body p-0">
+      <table class="table table-bordered m-0">
+        <thead class="table-light">
+          <tr>
+            <th style="width: 25%">Field</th>
+            <th style="width: 40%">Value</th>
+            <th style="width: 35%">Liquid Expression</th>
+          </tr>
+        </thead>
+        <tbody>
+
+          <!-- SYSTEM FIELDS -->
+          <tr>
+            <td>Created On</td>
+            <td>{{ metadata.createdon }}</td>
+            <td>{% raw %}"{{ metadata.createdon }}"{% endraw %}</td>
+          </tr>
+          <tr>
+            <td>Modified On</td>
+            <td>{{ metadata.modifiedon }}</td>
+            <td>{% raw %}"{{ metadata.modifiedon }}"{% endraw %}</td>
+          </tr>
+
+          <!-- LOOKUPS & FIELDS -->
+
+          <tr>
+            <td>AWB</td>
+            <td>{{ metadata.sh_awb }}</td>
+            <td>{% raw %}"{{ metadata.sh_awb }}"{% endraw %}</td>
+          </tr>
+
+          <tr>
+            <td>Category</td>
+            <td>{{ metadata.sh_category.name }}</td>
+            <td>{% raw %}"{{ metadata.sh_category.name }}"{% endraw %}</td>
+          </tr>
+
+          <tr>
+            <td>Consignee Email</td>
+            <td>{{ metadata.sh_consigneeemail }}</td>
+            <td>{% raw %}"{{ metadata.sh_consigneeemail }}"{% endraw %}</td>
+          </tr>
+
+          <tr>
+            <td>Consignee Name</td>
+            <td>{{ metadata.sh_consigneename }}</td>
+            <td>{% raw %}"{{ metadata.sh_consigneename }}"{% endraw %}</td>
+          </tr>
+
+          <tr>
+            <td>Consignee Phone</td>
+            <td>{{ metadata.sh_consigneephone }}</td>
+            <td>{% raw %}"{{ metadata.sh_consigneephone }}"{% endraw %}</td>
+          </tr>
+
+          <tr>
+            <td>Customer Name</td>
+            <td>{{ metadata.sh_customername }}</td>
+            <td>{% raw %}"{{ metadata.sh_customername }}"{% endraw %}</td>
+          </tr>
+
+          <tr>
+            <td>Hub</td>
+            <td>{{ metadata.sh_hub.name }}</td>
+            <td>{% raw %}"{{ metadata.sh_hub.name }}"{% endraw %}</td>
+          </tr>
+
+          <!-- NEW ADDRESS -->
+          <tr>
+            <td>New Address Line 1</td>
+            <td>{{ metadata.sh_newaddressline1 }}</td>
+            <td>{% raw %}"{{ metadata.sh_newaddressline1 }}"{% endraw %}</td>
+          </tr>
+
+          <tr>
+            <td>New Address Line 2</td>
+            <td>{{ metadata.sh_newaddressline2 }}</td>
+            <td>{% raw %}"{{ metadata.sh_newaddressline2 }}"{% endraw %}</td>
+          </tr>
+
+          <tr>
+            <td>New City</td>
+            <td>{{ metadata.sh_newaddresscity }}</td>
+            <td>{% raw %}"{{ metadata.sh_newaddresscity }}"{% endraw %}</td>
+          </tr>
+
+          <tr>
+            <td>New State</td>
+            <td>{{ metadata.sh_newaddressstate }}</td>
+            <td>{% raw %}"{{ metadata.sh_newaddressstate }}"{% endraw %}</td>
+          </tr>
+
+          <tr>
+            <td>New Country</td>
+            <td>{{ metadata.sh_newaddresscountry }}</td>
+            <td>{% raw %}"{{ metadata.sh_newaddresscountry }}"{% endraw %}</td>
+          </tr>
+
+          <tr>
+            <td>New Pincode</td>
+            <td>{{ metadata.sh_newaddresspincode }}</td>
+            <td>{% raw %}"{{ metadata.sh_newaddresspincode }}"{% endraw %}</td>
+          </tr>
+
+          <tr>
+            <td>New Mobile Number</td>
+            <td>{{ metadata.sh_newmobilenumber }}</td>
+            <td>{% raw %}"{{ metadata.sh_newmobilenumber }}"{% endraw %}</td>
+          </tr>
+
+          <!-- ORDER / PARTNERS -->
+          <tr>
+            <td>Order Number</td>
+            <td>{{ metadata.sh_ordernumber }}</td>
+            <td>{% raw %}"{{ metadata.sh_ordernumber }}"{% endraw %}</td>
+          </tr>
+
+          <tr>
+            <td>3PL Partner</td>
+            <td>{{ metadata.sh_plpartner.name }}</td>
+            <td>{% raw %}"{{ metadata.sh_plpartner.name }}"{% endraw %}</td>
+          </tr>
+
+          <tr>
+            <td>Retailer</td>
+            <td>{{ metadata.sh_retailer.name }}</td>
+            <td>{% raw %}"{{ metadata.sh_retailer.name }}"{% endraw %}</td>
+          </tr>
+
+          <tr>
+            <td>Self or 3PL</td>
+            <td>{{ metadata.sh_selfor3pl.name }}</td>
+            <td>{% raw %}"{{ metadata.sh_selfor3pl.name }}"{% endraw %}</td>
+          </tr>
+
+          <tr>
+            <td>Shipment Type</td>
+            <td>{{ metadata.sh_shipmenttype.name }}</td>
+            <td>{% raw %}"{{ metadata.sh_shipmenttype.name }}"{% endraw %}</td>
+          </tr>
+
+          <tr>
+            <td>Source Channel</td>
+            <td>{{ metadata.sh_sourcechannel.name }}</td>
+            <td>{% raw %}"{{ metadata.sh_sourcechannel.name }}"{% endraw %}</td>
+          </tr>
+
+          <tr>
+            <td>Ticket Number</td>
+            <td>{{ metadata.sh_ticketnumber.name }}</td>
+            <td>{% raw %}"{{ metadata.sh_ticketnumber.name }}"{% endraw %}</td>
+          </tr>
+
+          <tr>
+            <td>Type</td>
+            <td>{{ metadata.sh_type.name }}</td>
+            <td>{% raw %}"{{ metadata.sh_type.name }}"{% endraw %}</td>
+          </tr>
+
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+{% if request.params['debug'] %}
+<div class="container mt-4">
+  <div class="card shadow border">
+    <div class="card-header bg-primary text-white fw-bold">
+      DEBUG: Metadata Object (Values + Liquid Expressions)
+    </div>
+
+    {% assign fallback = "---" %}
+
+    <div class="card-body p-0">
+      <table class="table table-bordered m-0">
+        <thead class="table-light">
+          <tr>
+            <th style="width: 25%">Field</th>
+            <th style="width: 40%">Value</th>
+            <th style="width: 35%">Liquid Expression</th>
+          </tr>
+        </thead>
+        <tbody>
+
+          <!-- SYSTEM FIELDS -->
+          <tr>
+            <td>Created On</td>
+            <td>{{ metadata.createdon }}</td>
+            <td>{% raw %}"{{ metadata.createdon }}"{% endraw %}</td>
+          </tr>
+          <tr>
+            <td>Modified On</td>
+            <td>{{ metadata.modifiedon }}</td>
+            <td>{% raw %}"{{ metadata.modifiedon }}"{% endraw %}</td>
+          </tr>
+
+          <!-- LOOKUPS & FIELDS -->
+
+          <tr>
+            <td>AWB</td>
+            <td>{{ metadata.sh_awb }}</td>
+            <td>{% raw %}"{{ metadata.sh_awb }}"{% endraw %}</td>
+          </tr>
+
+          <tr>
+            <td>Category</td>
+            <td>{{ metadata.sh_category.name }}</td>
+            <td>{% raw %}"{{ metadata.sh_category.name }}"{% endraw %}</td>
+          </tr>
+
+          <tr>
+            <td>Consignee Email</td>
+            <td>{{ metadata.sh_consigneeemail }}</td>
+            <td>{% raw %}"{{ metadata.sh_consigneeemail }}"{% endraw %}</td>
+          </tr>
+
+          <tr>
+            <td>Consignee Name</td>
+            <td>{{ metadata.sh_consigneename }}</td>
+            <td>{% raw %}"{{ metadata.sh_consigneename }}"{% endraw %}</td>
+          </tr>
+
+          <tr>
+            <td>Consignee Phone</td>
+            <td>{{ metadata.sh_consigneephone }}</td>
+            <td>{% raw %}"{{ metadata.sh_consigneephone }}"{% endraw %}</td>
+          </tr>
+
+          <tr>
+            <td>Customer Name</td>
+            <td>{{ metadata.sh_customername }}</td>
+            <td>{% raw %}"{{ metadata.sh_customername }}"{% endraw %}</td>
+          </tr>
+
+          <tr>
+            <td>Hub</td>
+            <td>{{ metadata.sh_hub.name }}</td>
+            <td>{% raw %}"{{ metadata.sh_hub.name }}"{% endraw %}</td>
+          </tr>
+
+          <!-- NEW ADDRESS -->
+          <tr>
+            <td>New Address Line 1</td>
+            <td>{{ metadata.sh_newaddressline1 }}</td>
+            <td>{% raw %}"{{ metadata.sh_newaddressline1 }}"{% endraw %}</td>
+          </tr>
+
+          <tr>
+            <td>New Address Line 2</td>
+            <td>{{ metadata.sh_newaddressline2 }}</td>
+            <td>{% raw %}"{{ metadata.sh_newaddressline2 }}"{% endraw %}</td>
+          </tr>
+
+          <tr>
+            <td>New City</td>
+            <td>{{ metadata.sh_newaddresscity }}</td>
+            <td>{% raw %}"{{ metadata.sh_newaddresscity }}"{% endraw %}</td>
+          </tr>
+
+          <tr>
+            <td>New State</td>
+            <td>{{ metadata.sh_newaddressstate }}</td>
+            <td>{% raw %}"{{ metadata.sh_newaddressstate }}"{% endraw %}</td>
+          </tr>
+
+          <tr>
+            <td>New Country</td>
+            <td>{{ metadata.sh_newaddresscountry }}</td>
+            <td>{% raw %}"{{ metadata.sh_newaddresscountry }}"{% endraw %}</td>
+          </tr>
+
+          <tr>
+            <td>New Pincode</td>
+            <td>{{ metadata.sh_newaddresspincode }}</td>
+            <td>{% raw %}"{{ metadata.sh_newaddresspincode }}"{% endraw %}</td>
+          </tr>
+
+          <tr>
+            <td>New Mobile Number</td>
+            <td>{{ metadata.sh_newmobilenumber }}</td>
+            <td>{% raw %}"{{ metadata.sh_newmobilenumber }}"{% endraw %}</td>
+          </tr>
+
+          <!-- ORDER / PARTNERS -->
+          <tr>
+            <td>Order Number</td>
+            <td>{{ metadata.sh_ordernumber }}</td>
+            <td>{% raw %}"{{ metadata.sh_ordernumber }}"{% endraw %}</td>
+          </tr>
+
+          <tr>
+            <td>3PL Partner</td>
+            <td>{{ metadata.sh_plpartner.name }}</td>
+            <td>{% raw %}"{{ metadata.sh_plpartner.name }}"{% endraw %}</td>
+          </tr>
+
+          <tr>
+            <td>Retailer</td>
+            <td>{{ metadata.sh_retailer.name }}</td>
+            <td>{% raw %}"{{ metadata.sh_retailer.name }}"{% endraw %}</td>
+          </tr>
+
+          <tr>
+            <td>Self or 3PL</td>
+            <td>{{ metadata.sh_selfor3pl.name }}</td>
+            <td>{% raw %}"{{ metadata.sh_selfor3pl.name }}"{% endraw %}</td>
+          </tr>
+
+          <tr>
+            <td>Shipment Type</td>
+            <td>{{ metadata.sh_shipmenttype.name }}</td>
+            <td>{% raw %}"{{ metadata.sh_shipmenttype.name }}"{% endraw %}</td>
+          </tr>
+
+          <tr>
+            <td>Source Channel</td>
+            <td>{{ metadata.sh_sourcechannel.name }}</td>
+            <td>{% raw %}"{{ metadata.sh_sourcechannel.name }}"{% endraw %}</td>
+          </tr>
+
+          <tr>
+            <td>Ticket Number</td>
+            <td>{{ metadata.sh_ticketnumber.name }}</td>
+            <td>{% raw %}"{{ metadata.sh_ticketnumber.name }}"{% endraw %}</td>
+          </tr>
+
+          <tr>
+            <td>Type</td>
+            <td>{{ metadata.sh_type.name }}</td>
+            <td>{% raw %}"{{ metadata.sh_type.name }}"{% endraw %}</td>
+          </tr>
+
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+{% if request.params['debug'] %}
+<div class="container mt-4">
+  <div class="card shadow border">
+    <div class="card-header bg-primary text-white fw-bold">
+      DEBUG: Metadata Object (Values + Liquid Expressions)
+    </div>
+
+    {% assign fallback = "---" %}
+
+    <div class="card-body p-0">
+      <table class="table table-bordered m-0">
+        <thead class="table-light">
+          <tr>
+            <th style="width: 25%">Field</th>
+            <th style="width: 40%">Value</th>
+            <th style="width: 35%">Liquid Expression</th>
+          </tr>
+        </thead>
+        <tbody>
+
+          <tr>
+            <td>Info System</td>
+            <td>{{ metadata.sh_integrationinfojson | default: fallback }}</td>
+            <td>{% raw %}"{{ metadata.sh_integrationinfojson }}"{% endraw %}</td>
+          </tr>
+
+          <!-- Product Types (RAW) -->
+          <tr>
+            <td>Product Types (raw)</td>
+            <td>{{ metadata.sh_producttypes | default: fallback }}</td>
+            <td>{% raw %}"{{ metadata.sh_producttypes }}"{% endraw %}</td>
+          </tr>
+
+          <!-- Product Types (Label) -->
+          <tr>
+            <td>Product Types (label)</td>
+            <td>
+              {% assign pt = metadata.sh_producttypes %}
+              {% if pt %}
+                {% if pt.label %}
+                  {{ pt.label }}
+                {% else %}
+                  {% for o in pt %}
+                    {{ o.label }}{% unless forloop.last %}; {% endunless %}
+                  {% endfor %}
+                {% endif %}
+              {% else %}
+                {{ fallback }}
+              {% endif %}
+            </td>
+            <td>{% raw %}"{{ metadata.sh_producttypes.label }}"{% endraw %}</td>
+          </tr>
+
+          <!-- Product Types (Value) -->
+          <tr>
+            <td>Product Types (value)</td>
+            <td>
+              {% assign pt = metadata.sh_producttypes %}
+              {% if pt %}
+                {% if pt.value %}
+                  {{ pt.value }}
+                {% else %}
+                  {% for o in pt %}
+                    {{ o.value }}{% unless forloop.last %},{% endunless %}
+                  {% endfor %}
+                {% endif %}
+              {% else %}
+                {{ fallback }}
+              {% endif %}
+            </td>
+            <td>{% raw %}"{{ metadata.sh_producttypes.value }}"{% endraw %}</td>
+          </tr>
+
+          <!-- Proof of Delivery (RAW) -->
+          <tr>
+            <td>Proof of Delivery (raw)</td>
+            <td>{{ metadata.sh_proofofdelivery | default: fallback }}</td>
+            <td>{% raw %}"{{ metadata.sh_proofofdelivery }}"{% endraw %}</td>
+          </tr>
+
+          <!-- Proof of Delivery (Label) -->
+          <tr>
+            <td>Proof of Delivery (label)</td>
+            <td>
+              {% assign pt = metadata.sh_proofofdelivery %}
+              {% if pt %}
+                {% if pt.label %}
+                  {{ pt.label }}
+                {% else %}
+                  {% for o in pt %}
+                    {{ o.label }}{% unless forloop.last %}; {% endunless %}
+                  {% endfor %}
+                {% endif %}
+              {% else %}
+                {{ fallback }}
+              {% endif %}
+            </td>
+            <td>{% raw %}"{{ metadata.sh_proofofdelivery.label }}"{% endraw %}</td>
+          </tr>
+
+          <!-- Proof of Delivery (Value) -->
+          <tr>
+            <td>Proof of Delivery (value)</td>
+            <td>
+              {% assign pt = metadata.sh_proofofdelivery %}
+              {% if pt %}
+                {% if pt.value %}
+                  {{ pt.value }}
+                {% else %}
+                  {% for o in pt %}
+                    {{ o.value }}{% unless forloop.last %},{% endunless %}
+                  {% endfor %}
+                {% endif %}
+              {% else %}
+                {{ fallback }}
+              {% endif %}
+            </td>
+            <td>{% raw %}"{{ metadata.sh_proofofdelivery.value }}"{% endraw %}</td>
+          </tr>
+
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+{% if request.params.debug %}
+<div class="alert alert-warning mt-3">
+  <strong>Vendor Name:</strong> {{ metadata.sh_vendor.sh_vendorname }} <br>
+  <strong>Vendor ID:</strong> {{ metadata.sh_vendor.id }} <br>
+  <strong>Vendor Logical Name:</strong> {{ metadata.sh_vendor.logicalname }}
+</div>
+{% endif %}
+
+{% if request.params.debug %}
+<div class="alert alert-warning mt-3">
+
+  <strong>Raw Entity Count:</strong> {{ metadata_result.results.entities.size }} <br>
+  <strong>Metadata ID:</strong> {{ metadata.sh_procurementmetadataid }} <br>
+
+  <hr>
+  <strong>-- Direct Fields --</strong><br>
+  <strong>Project Name:</strong> {{ metadata.sh_projectname }} <br>
+  <strong>Location:</strong> {{ metadata.sh_location }} <br>
+  <strong>PO Number:</strong> {{ metadata.sh_ponumber }} <br>
+  <strong>Projected Budget:</strong> {{ metadata.sh_projectedbudget }} <br>
+  <strong>Prepayment Required:</strong> {{ metadata.sh_prepaymentrequired }} <br>
+  <strong>Prepayment Amount:</strong> {{ metadata.sh_prepaymentamount }} <br>
+  <strong>Service Needed By:</strong> {{ metadata.sh_serviceneededby }} <br>
+  <strong>Project Details:</strong> {{ metadata.sh_projectdetails }} <br>
+  <strong>Partial Delivery Allowed:</strong> {{ metadata.sh_partialdeliveryallowed }} <br>
+
+  <hr>
+  <strong>-- Lookup Fields --</strong><br>
+  <strong>Vendor ID:</strong> {{ metadata.sh_vendor.id }} <br>
+  <strong>Vendor Name (primary):</strong> {{ metadata.sh_vendor.name }} <br>
+  <strong>Vendor Logical Name:</strong> {{ metadata.sh_vendor.logicalname }} <br>
+
+  <hr>
+  <strong>-- Linked Entity (sh_Vendor alias) --</strong><br>
+  <strong>sh_Vendor.sh_vendorname:</strong> {{ metadata.sh_Vendor.sh_vendorname }} <br>
+  <strong>sh_Vendor.sh_vendorsid:</strong> {{ metadata.sh_Vendor.sh_vendorsid }} <br>
+
+  <hr>
+  <strong>-- Dropdown Formatted Values --</strong><br>
+  <strong>Country:</strong> {{ metadata.sh_country.name }} <br>
+  <strong>Procurement Category:</strong> {{ metadata.sh_procurementcategory.name }} <br>
+  <strong>Region:</strong> {{ metadata.sh_findimregion.name }} <br>
+  <strong>Site:</strong> {{ metadata.sh_findimsite.name }} <br>
+  <strong>Department:</strong> {{ metadata.sh_findimdepartment.name }} <br>
+  <strong>Service:</strong> {{ metadata.sh_findimservice.name }} <br>
+  <strong>Sub Service:</strong> {{ metadata.sh_findimsubservice.name }} <br>
+  <strong>Vertical:</strong> {{ metadata.sh_findimvertical.name }} <br>
+  <strong>City:</strong> {{ metadata.sh_findimcity.name }} <br>
+  <strong>Cost Centre:</strong> {{ metadata.sh_findimcostcentre.name }} <br>
+  <strong>FindIM Country:</strong> {{ metadata.sh_findimcountry.name }} <br>
+
+  <hr>
+  <strong>-- Full Raw Dump --</strong><br>
+  <pre>{{ metadata | json }}</pre>
+
+</div>
+{% endif %}

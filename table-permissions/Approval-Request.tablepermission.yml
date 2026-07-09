@@ -1,0 +1,16 @@
+adx_accountrelationship: 
+adx_append: false
+adx_appendto: false
+adx_contactrelationship: 
+adx_create: false
+adx_delete: false
+adx_entitylogicalname: msdyn_flow_approvalrequest
+adx_entityname: Approval Request
+adx_entitypermission_webrole:
+- c5ed9554-79a1-4c31-bea9-a940211a85a0
+adx_entitypermissionid: b61b4a90-0e19-4398-bb7f-9b5b623fa74b
+adx_parententitypermission: 
+adx_parentrelationship: 
+adx_read: true
+adx_scope: 756150000
+adx_write: false

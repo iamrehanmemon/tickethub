@@ -1,0 +1,9 @@
+adx_editexistingrecordpermitted: true
+adx_multiplerecordsperuserpermitted: true
+adx_name: Ticket - Incident
+adx_progressindicatorenabled: true
+adx_progressindicatorposition: 756150000
+adx_progressindicatortype: 756150000
+adx_startnewsessiononload: true
+adx_startstep: ce682c26-1b8d-4abb-8576-a6e4e82857ee
+adx_webformid: effff800-d247-4fb3-9285-e3bf20542493

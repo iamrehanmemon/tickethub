@@ -1,0 +1,133 @@
+
+{% capture detail_config %}Vendor Selection|Vendor Name: <strong>{{ metadata.sh_vendor.name | default: 'Unavailable' }}</strong> &nbsp; Prepayment: <strong>{{ metadata.sh_prepaymentamount | default: 'Unavailable' }}</strong> &nbsp; Sub Category: <strong>{{ metadata.sh_subcategory | default: 'Unavailable' }}</strong>;;;PO Creation|PO Number: <strong>{{ metadata.sh_ponumber | default: 'Unavailable' }}</strong> &nbsp; PO Status: <strong>{{ metadata.sh_postatus | default: 'Unavailable' }}</strong> &nbsp; Approval Status: <strong>{{ metadata.sh_documentapprovalstatus | default: 'Unavailable' }}</strong>;;;Invoice Approval|Invoice details here;;;GRN Entry|Vendor Name: <strong>{{ metadata.sh_vendor.name | default: 'Unavailable' }}</strong> &nbsp; PO Number: <strong>{{ metadata.sh_ponumber | default: 'Unavailable' }}</strong>;;;GRN Posting|Vendor Name: <strong>{{ metadata.sh_vendor.name | default: 'Unavailable' }}</strong> &nbsp; PO Number: <strong>{{ metadata.sh_ponumber | default: 'Unavailable' }}</strong>{% endcapture %}
+{%- comment -%} Fetch sub-tickets for this parent ticket {%- endcomment -%}
+{%- fetchxml subtickets_result -%}
+<fetch>
+  <entity name="sh_ticket">
+    <attribute name="sh_ticketid" />
+    <attribute name="sh_ticket" />
+    <attribute name="sh_stepid" />
+    <attribute name="sh_request" />
+    <attribute name="sh_ticketstatus" />
+    <attribute name="sh_sla" />
+    <attribute name="sh_slabreach" />
+    <attribute name="sh_completedon" />
+    <attribute name="sh_assignedtoemail" />
+    <attribute name="createdon" />
+    <filter>
+      <condition attribute="sh_parentticket" operator="eq" value="{{ ticket.sh_ticketid }}" />
+      <condition attribute="createdon" operator="on-or-before" value='{{ "today" | date: "yyyy-MM-dd HH:mm:ss" }}' />
+    </filter>
+    <order attribute="createdon" descending="false" />
+  </entity>
+</fetch>
+{%- endfetchxml -%}
+
+{% assign subtickets = subtickets_result.results.entities %}
+
+
+{% if subtickets and subtickets.size > 0 %}
+
+<div class="container border p-4 mt-3">
+  <fieldset class="p-4 mb-3 col-12">
+    <legend class="d-flex justify-content-between align-items-center">
+      <span>Workflow Section</span>
+    </legend>
+
+    <div class="apv-card">
+
+      <div class="apv-header">
+        <div style="flex:1;min-width:0">
+          <h3 class="apv-title">Workflow Steps</h3>
+        </div>
+        <span class="apv-badge apv-badge-type">
+          {{ subtickets.size }} step{% if subtickets.size != 1 %}s{% endif %}
+        </span>
+      </div>
+
+      <div class="apv-list is-sequential">
+        {% for st in subtickets %}
+
+          {% assign request_key = st.sh_request.name | append: "|" %}
+          {% if detail_config contains request_key %}
+            {% assign after_key = detail_config | split: request_key | last %}
+            {% assign detail_line = after_key | split: ";;;" | first %}
+          {% else %}
+            {% assign detail_line = "" %}
+          {% endif %}
+
+
+          {% assign status_lower = st.sh_ticketstatus.label | downcase %}
+
+          {% if status_lower == "completed" or status_lower == "closed" %}
+            {% assign badge_class = "apv-badge-approved" %}
+            {% assign avatar_class = "apv-avatar-approved" %}
+            {% assign avatar_char = "✓" %}
+          {% elsif status_lower == "in progress" or status_lower == "active" %}
+            {% assign badge_class = "apv-badge-pending" %}
+            {% assign avatar_class = "apv-avatar-pending" %}
+            {% assign avatar_char = "▶" %}
+          {% else %}
+            {% assign badge_class = "apv-badge-type" %}
+            {% assign avatar_class = "apv-avatar-pending" %}
+            {% assign avatar_char = forloop.index %}
+          {% endif %}
+
+          {% if st.sh_slabreach == true and status_lower != "completed" and status_lower != "closed" %}
+            {% assign badge_class = "apv-badge-rejected" %}
+          {% endif %}
+
+          <div class="apv-row">
+            <div class="apv-avatar {{ avatar_class }}">{{ avatar_char }}</div>
+            <div class="apv-row-body">
+
+              <div class="apv-row-top">
+                <div>
+                  <span class="apv-name">{{ st.sh_request.name | default: st.sh_stepid }}</span>
+                  <span style="margin-left:8px;font-size:11px;color:#9ca3af">{{ st.sh_ticket }}</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:8px">
+                  <span class="apv-badge {{ badge_class }}">
+                    {% if st.sh_slabreach == true and status_lower != "completed" and status_lower != "closed" %}
+                      SLA Breached
+                    {% else %}
+                      {{ st.sh_ticketstatus.label }}
+                    {% endif %}
+                  </span>
+                  <a href="/View-Ticket/?id={{ st.sh_ticketid }}" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:5px;padding:4px 10px;font-size:12px;
+                    font-weight:500;border:1px solid #d1d5db;border-radius:6px;color:#374151;
+                    text-decoration:none;background:#ffffff;white-space:nowrap"
+                    onmouseover="this.style.background='#f9fafb';this.style.borderColor='#9ca3af'"
+                    onmouseout="this.style.background='#ffffff';this.style.borderColor='#d1d5db'">
+                    <svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8">
+                      <path d="M5 2H2a1 1 0 0 0-1 1v7a1 1 0 0 0 1 1h7a1 1 0 0 0 1-1V7" />
+                      <path d="M8 1h3m0 0v3m0-3L5 7" />
+                    </svg>
+                    View Ticket
+                  </a>
+                </div>
+              </div>
+
+              <div class="apv-date">
+                Assigned to: <strong>{{ st.sh_assignedtoemail | default: "Unassigned" }}</strong>
+                {% if st.sh_sla %}&nbsp;&nbsp; Due <strong>{{ st.sh_sla | date: "dd MMM yyyy" }}</strong>{% endif %}
+                {% if st.sh_completedon %}&nbsp;&nbsp; Completed <strong>{{ st.sh_completedon | date: "dd MMM yyyy HH:mm"}}</strong>{% endif %}
+                {% if detail_line != "" %}
+                <br />
+                {{ detail_line }}
+                {% endif %}
+              </div>
+
+            </div>
+          </div>
+
+        {% endfor %}
+
+      </div>
+
+    </div>
+
+  </fieldset>
+</div>
+
+{% endif %}

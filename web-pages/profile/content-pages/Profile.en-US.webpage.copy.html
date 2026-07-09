@@ -1,0 +1,19 @@
+<p>Please provide some information about yourself.</p>
+
+<p>The <strong>First Name</strong> and <strong>Last Name </strong>you provide will be displayed alongside any comments you make on the site.</p>
+
+<p>The <strong>Email Address</strong> will be used to submit any requests.</p>
+
+
+<script>
+    
+  document.addEventListener("DOMContentLoaded", function () {
+    // $("tr:has(#telephone1)").hide(); it hides the email as well that's why this is not  used
+    $("tr:has(#adx_organizationname)").hide();
+    $("tr:has(#jobtitle)").hide();
+    $("tr:has(#mspp_userpreferredlcid)").hide();
+    $("#telephone1").closest("td").hide();
+
+  })
+
+</script>

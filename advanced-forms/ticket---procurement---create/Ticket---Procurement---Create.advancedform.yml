@@ -1,0 +1,8 @@
+adx_editexistingrecordpermitted: true
+adx_multiplerecordsperuserpermitted: true
+adx_name: Ticket - Procurement - Create
+adx_progressindicatorenabled: true
+adx_progressindicatorposition: 756150000
+adx_progressindicatortype: 756150000
+adx_startstep: cb3c282d-ffbb-402a-a96f-f6b7e7ffbf8a
+adx_webformid: 98b26110-d4b9-4a60-afc0-b7ecea2b96a2

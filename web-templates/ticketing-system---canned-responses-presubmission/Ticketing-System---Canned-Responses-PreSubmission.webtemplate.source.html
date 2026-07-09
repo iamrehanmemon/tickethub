@@ -1,0 +1,659 @@
+<!-- <div class="modal fade" id="cannedResponsesModal" tabindex="-1" aria-labelledby="historyModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5 class="modal-title fw-bold" id="historyModalLabel">Select Email Template</h5> 
+      </div>
+
+      <div class="modal-body bg-white">
+        <div class="mb-3">
+          <label for="templateSelect" class="form-label fw-semibold">Choose Template</label>
+          <select class="form-select" id="templateSelect">
+            <option selected disabled>-- Select Template --</option>
+            <option value="followup">Follow-Up Email</option>
+            <option value="acknowledgement">Acknowledgement Email</option>
+            <option value="closure">Closure Confirmation</option>
+          </select>
+        </div>
+
+
+        <div class="mb-3">
+          <div class="d-flex justify-content-between align-items-center mb-1">
+            <label for="emailBody" class="form-label fw-semibold mb-0">Email Body</label>
+            <button type="button" id="copyButton" class="btn btn-sm btn-dark d-flex align-items-center gap-1"
+                    style="border-radius:6px;" disabled>
+              <i class="bi bi-copy"></i> Copy Canned Response
+            </button>
+            
+          </div>
+
+
+          <textarea id="emailBody" class="form-control" rows="8" readonly style="resize: none;"></textarea>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Dynamic email templates object
+  let templates = {};
+
+  function htmlToPlainText(html) {
+    if (!html) return "";
+    
+    const temp = document.createElement("div");
+    temp.innerHTML = html;
+
+    // Replace block-level elements with newlines
+    temp.querySelectorAll('p, div, h1, h2, h3, h4, h5, h6, li, tr').forEach(el => {
+      el.after(document.createTextNode('\n\n'));
+    });
+
+    // Replace <br> with newline
+    temp.querySelectorAll('br').forEach(br => {
+      br.replaceWith(document.createTextNode('\n'));
+    });
+
+    // Get text
+    let text = temp.textContent || temp.innerText || "";
+    
+    // Clean up
+    text = text.split('\n').map(line => line.trim()).join('\n');
+    text = text.replace(/\n{3,}/g, '\n\n');
+
+    return text.trim();
+  }
+  
+  document.addEventListener("DOMContentLoaded", function () {
+    const templateSelect = document.getElementById("templateSelect");
+    const emailBody = document.getElementById("emailBody");
+    const copyButton = document.getElementById("copyButton");
+    const copyIcon = copyButton.querySelector("i");
+
+
+    // 🔥 Load templates ONLY when Canned Responses modal is opened
+    const cannedModal = document.getElementById("cannedResponsesModal");
+    cannedModal.addEventListener("shown.bs.modal", function () {
+        loadEmailTemplates();
+    });
+
+    //🧩 Static email templates with Liquid placeholders
+//     let templates = {
+//       followup: `Hi {{ ticket.sh_requestor.fullname }},
+
+// Just following up on your request (Ticket #{{ ticket.sh_ticket }}) regarding {{ ticket.sh_request.name }}.
+
+// Airway Bill Number: {{ metadata.sh_awb | default: "Not Available" }}
+// PO Number: {{ metadata.sh_ponumber | default: "Not Available" }}
+// Invoice Number: {{ metadata.sh_invoicenumber | default: "Not Available" }}
+
+// Please let us know if you need any further assistance.
+
+// Best Regards,  
+// Support Team`,
+
+//       acknowledgement: `Dear {{ ticket.sh_requestor.fullname }},
+
+// We have received your request for {{ ticket.sh_request.name }} (Ticket #{{ ticket.sh_ticket }}).
+// Our team will review the details and update you shortly.
+
+// Request Date: {{ ticket.createdon | date: "%d-%b-%Y" }}
+// Request Type: {{ requestType | default: "General Request" }}
+
+// Kind regards,  
+// Customer Support`,
+
+//       closure: `Hello {{ ticket.sh_requestor.fullname }},
+
+// Your ticket ({{ ticket.sh_ticket }}) regarding {{ ticket.sh_request.name }} has been marked as resolved.
+
+// Airway Bill: {{ metadata.sh_awb | default: "Not Applicable" }}
+// Consignee: {{ metadata.sh_consignee | default: "N/A" }}
+
+// If you experience any further issues, please feel free to reopen the ticket.
+
+// Warm regards,  
+// Helpdesk Team`
+//     };
+
+    // 🧠 Update textarea when selecting a template
+    templateSelect.addEventListener("change", function () {
+      const selected = templateSelect.value;
+      const body = templates[selected] || "";
+      emailBody.value = body;
+      //emailBody.innerHTML = body;
+      copyButton.disabled = !body.trim();
+    });
+
+    // 📋 Copy logic (keeps modal open)
+    copyButton.addEventListener("click", async function () {
+      if (!emailBody.value.trim()) return;
+      try {
+        await navigator.clipboard.writeText(emailBody.value.trim());
+        copyIcon.classList.replace("bi-copy", "bi-check2");
+        copyButton.textContent = "Copied!";
+        copyButton.classList.replace("btn-dark", "btn-success");
+
+        // Reset after 2 seconds
+        setTimeout(() => {
+          copyIcon.classList.replace("bi-check2", "bi-copy");
+          copyButton.innerHTML = '<i class="bi bi-copy"></i> Copy Canned Response';
+          copyButton.classList.replace("btn-success", "btn-dark");
+        }, 2000);
+      } catch (err) {
+        alert("Failed to copy. Please try again.");
+      }
+    });
+  }
+);
+
+  async function loadEmailTemplates(message = "Loading email templates...") {
+    showLoader(message);
+
+    try {
+        const res = await fetch(
+            "/_api/new_emailtemplateses?$select=new_emailtemplatesid,new_emailbody,new_usedfor,new_templatetype" +
+            "&$filter=new_templatetype eq 'Canned Responses - TicketHub - Customer Service'"
+        );
+
+        const data = await res.json();
+
+        if (data.value && data.value.length) {
+
+            // Clear previous templates
+            templates = {};
+
+            // Clear dropdown
+            const templateSelect = document.getElementById("templateSelect");
+            templateSelect.innerHTML =
+                `<option selected disabled>-- Select Template --</option>`;
+
+            // Loop through returned templates
+            data.value.forEach(t => {
+                const key = t.new_usedfor;     // Dropdown text + template key
+                //const body = t.new_emailbody;  // Template body
+                const body = htmlToPlainText(t.new_emailbody);
+
+                // Store in template dictionary
+                templates[key] = body;
+
+                // Add dropdown option
+                const opt = document.createElement("option");
+                opt.value = key;
+                opt.textContent = key;
+                templateSelect.appendChild(opt);
+            });
+        }
+
+    } catch (e) {
+        console.error("Error loading email templates:", e);
+    } finally {
+        hideLoader();
+    }
+  }
+</script> -->
+
+<!-- <div class="modal fade" id="cannedResponsesModal" tabindex="-1" aria-labelledby="historyModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5 class="modal-title fw-bold" id="historyModalLabel">Select Email Template</h5>
+      </div>
+
+      <div class="modal-body bg-white">
+        <div class="mb-3">
+          <label for="templateSelect" class="form-label fw-semibold">Choose Template</label>
+          <select class="form-select" id="templateSelect">
+            <option selected disabled>-- Select Template --</option>
+            <option value="followup">Follow-Up Email</option>
+            <option value="acknowledgement">Acknowledgement Email</option>
+            <option value="closure">Closure Confirmation</option>
+          </select>
+        </div>
+
+        <div class="mb-3">
+          <div class="d-flex justify-content-between align-items-center mb-1">
+            <label for="emailBody" class="form-label fw-semibold mb-0">
+              Email Body
+            </label>
+
+            <div class="d-flex gap-2">
+              <button type="button" id="populateDescButton" class="btn btn-sm btn-dark d-flex align-items-center gap-1"
+                style="border-radius:6px;" disabled>
+                <i class="bi bi-arrow-down-square"></i> Populate Description
+              </button>
+
+              <button type="button" id="copyButton" class="btn btn-sm btn-dark d-flex align-items-center gap-1"
+                style="border-radius:6px;" disabled>
+                <i class="bi bi-copy"></i> Copy Canned Response
+              </button>
+            </div>
+          </div>
+
+          <textarea id="emailBody" class="form-control" rows="8" readonly style="resize: none;"></textarea>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Dynamic email templates object
+  let templates = {};
+
+  function htmlToPlainText(html) {
+    if (!html) return "";
+
+    const temp = document.createElement("div");
+    temp.innerHTML = html;
+
+    // Replace block-level elements with newlines
+    temp.querySelectorAll('p, div, h1, h2, h3, h4, h5, h6, li, tr').forEach(el => {
+      el.after(document.createTextNode('\n\n'));
+    });
+
+    // Replace <br> with newline
+    temp.querySelectorAll('br').forEach(br => {
+      br.replaceWith(document.createTextNode('\n'));
+    });
+
+    // Get text
+    let text = temp.textContent || temp.innerText || "";
+
+    // Clean up
+    text = text.split('\n').map(line => line.trim()).join('\n');
+    text = text.replace(/\n{3,}/g, '\n\n');
+
+    return text.trim();
+  }
+
+  // ✅ Read value by field id (supports input/textarea/select)
+  function getValueFromFieldId(fieldId) {
+    const el = document.getElementById(fieldId);
+    if (!el) return "";
+
+    if (el.tagName === "SELECT") {
+      // Prefer selected option text
+      const opt = el.options[el.selectedIndex];
+      return (opt && opt.text) ? opt.text.trim() : "";
+    }
+
+    return (el.value ?? "").trim();
+  }
+  
+  function renderTemplateWithFormFields(templateText) {
+    if (!templateText) return "";
+
+    return templateText.replace(
+      /\{\{\s*([^}|]+?)\s*(?:\|\s*default\s*:\s*["']([\s\S]*?)["'])?\s*\}\}/g,
+      (_, fieldIdRaw, defaultVal) => {
+        const fieldId = fieldIdRaw.trim();
+        const val = getValueFromFieldId(fieldId);
+
+        if (!val && defaultVal !== undefined) return defaultVal;
+        return val || "";
+      }
+    );
+  }
+
+  document.addEventListener("DOMContentLoaded", function () {
+    const templateSelect = document.getElementById("templateSelect");
+    const emailBody = document.getElementById("emailBody");
+    const copyButton = document.getElementById("copyButton");
+    const copyIcon = copyButton.querySelector("i");
+    const populateDescButton = document.getElementById("populateDescButton");
+
+
+    // 🔥 Load templates ONLY when Canned Responses modal is opened
+    const cannedModal = document.getElementById("cannedResponsesModal");
+    cannedModal.addEventListener("shown.bs.modal", function () {
+      loadEmailTemplates();
+    });
+
+    // ✅ Render selected template with current form values
+    function renderSelectedTemplate() {
+      const selected = templateSelect.value;
+      if (!selected || !templates[selected]) {
+        emailBody.value = "";
+        copyButton.disabled = true;
+        return;
+      }
+
+      const raw = templates[selected] || "";
+      const rendered = renderTemplateWithFormFields(raw);
+
+      emailBody.value = rendered;
+      populateDescButton.disabled = !rendered.trim();
+      copyButton.disabled = !rendered.trim();
+    }
+
+    // 🧠 Update textarea when selecting a template
+    templateSelect.addEventListener("change", renderSelectedTemplate);
+
+    // ✅ Auto-refresh canned response if user changes form values AFTER selecting template
+    document.addEventListener("input", function (e) {
+      if (e.target.matches("input, select, textarea")) {
+        // Only rerender if a template is already selected
+        if (templateSelect.value && templates[templateSelect.value]) {
+          renderSelectedTemplate();
+        }
+      }
+    });
+
+    // 📋 Copy logic (keeps modal open)
+    copyButton.addEventListener("click", async function () {
+      if (!emailBody.value.trim()) return;
+      try {
+        await navigator.clipboard.writeText(emailBody.value.trim());
+        copyIcon.classList.replace("bi-copy", "bi-check2");
+        copyButton.textContent = "Copied!";
+        copyButton.classList.replace("btn-dark", "btn-success");
+
+        // Reset after 2 seconds
+        setTimeout(() => {
+          copyIcon.classList.replace("bi-check2", "bi-copy");
+          copyButton.innerHTML = '<i class="bi bi-copy"></i> Copy Canned Response';
+          copyButton.classList.replace("btn-success", "btn-dark");
+        }, 2000);
+      } catch (err) {
+        alert("Failed to copy. Please try again.");
+      }
+    });
+  });
+  // 📋 Populate logic
+  populateDescButton.addEventListener("click", function () {
+  const text = emailBody.value.trim();
+  if (!text) return;
+
+  const desc = document.getElementById("sh_description");
+  if (!desc) { alert('Description field not found (id="sh_description")'); return; }
+
+  desc.value = text;
+  desc.dispatchEvent(new Event("input", { bubbles: true })); // optional but good
+});
+
+
+  async function loadEmailTemplates(message = "Loading email templates...") {
+    showLoader(message);
+
+    try {
+      const res = await fetch(
+        "/_api/new_emailtemplateses?$select=new_emailtemplatesid,new_emailbody,new_usedfor,new_templatetype" +
+        "&$filter=new_templatetype eq 'Canned Responses - TicketHub - Customer Service - PreSubmission'"
+      );
+
+      const data = await res.json();
+
+      if (data.value && data.value.length) {
+
+        // Clear previous templates
+        templates = {};
+
+        // Clear dropdown
+        const templateSelect = document.getElementById("templateSelect");
+        templateSelect.innerHTML = `<option selected disabled>-- Select Template --</option>`;
+
+        // Loop through returned templates
+        data.value.forEach(t => {
+          const key = t.new_usedfor;                 // Dropdown text + template key
+          const body = htmlToPlainText(t.new_emailbody); // Template body as plain text
+
+          // Store in template dictionary
+          templates[key] = body;
+
+          // Add dropdown option
+          const opt = document.createElement("option");
+          opt.value = key;
+          opt.textContent = key;
+          templateSelect.appendChild(opt);
+        });
+      }
+
+    } catch (e) {
+      console.error("Error loading email templates:", e);
+    } finally {
+      hideLoader();
+    }
+  }
+</script> -->
+
+<div class="modal fade" id="cannedResponsesModal" tabindex="-1" aria-labelledby="historyModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5 class="modal-title fw-bold" id="historyModalLabel">Select Email Template</h5>
+      </div>
+
+      <div class="modal-body bg-white">
+        <div class="mb-3">
+          <label for="templateSelect" class="form-label fw-semibold">Choose Template</label>
+          <select class="form-select" id="templateSelect">
+            <option selected disabled>-- Select Template --</option>
+            <option value="followup">Follow-Up Email</option>
+            <option value="acknowledgement">Acknowledgement Email</option>
+            <option value="closure">Closure Confirmation</option>
+          </select>
+        </div>
+
+        <div class="mb-3">
+          <div class="d-flex justify-content-between align-items-center mb-1">
+            <label for="emailBody" class="form-label fw-semibold mb-0">
+              Email Body
+            </label>
+
+            <div class="d-flex gap-2">
+              <button type="button" id="populateDescButton" class="btn btn-sm btn-dark d-flex align-items-center gap-1"
+                style="border-radius:6px;" disabled>
+                <i class="bi bi-arrow-down-square"></i> Populate Description
+              </button>
+
+              <button type="button" id="copyButton" class="btn btn-sm btn-dark d-flex align-items-center gap-1"
+                style="border-radius:6px;" disabled>
+                <i class="bi bi-copy"></i> Copy Canned Response
+              </button>
+            </div>
+          </div>
+
+          <textarea id="emailBody" class="form-control" rows="8" readonly style="resize: none;"></textarea>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  let templates = {};
+
+  function htmlToPlainText(html) {
+    if (!html) return "";
+
+    const temp = document.createElement("div");
+    temp.innerHTML = html;
+
+    temp.querySelectorAll('p, div, h1, h2, h3, h4, h5, h6, li, tr').forEach(el => {
+      el.after(document.createTextNode('\n\n'));
+    });
+
+    temp.querySelectorAll('br').forEach(br => {
+      br.replaceWith(document.createTextNode('\n'));
+    });
+
+    let text = temp.textContent || temp.innerText || "";
+    text = text.split('\n').map(line => line.trim()).join('\n');
+    text = text.replace(/\n{3,}/g, '\n\n');
+
+    return text.trim();
+  }
+
+  function getValueFromFieldId(fieldId) {
+    const el = document.getElementById(fieldId);
+    if (!el) return "";
+
+    if (el.tagName === "SELECT") {
+      const opt = el.options[el.selectedIndex];
+      return (opt && opt.text) ? opt.text.trim() : "";
+    }
+
+    return (el.value ?? "").trim();
+  }
+
+  // ✅ CHANGE 1: Added dot/space check to skip Liquid-style placeholders
+  // WHY: Placeholders like {{ticket.sh_requestor.fullname}} were being passed 
+  // to getValueFromFieldId() which returned "" causing "undefined" or blank text.
+  // Now if the placeholder contains a dot or space, we return it unchanged.
+  // Also changed empty value fallback from "" to `match` so unresolved 
+  // placeholders stay visible instead of becoming blank.
+  function renderTemplateWithFormFields(templateText) {
+    if (!templateText) return "";
+
+    return templateText.replace(
+      /\{\{\s*([^}|]+?)\s*(?:\|\s*default\s*:\s*["']([\s\S]*?)["'])?\s*\}\}/g,
+      (match, fieldIdRaw, defaultVal) => {
+        const fieldId = fieldIdRaw.trim();
+
+        // ✅ CHANGE 1a: Skip Liquid-style placeholders (ticket.x, metadata.x etc)
+        if (fieldId.includes('.') || fieldId.includes(' ')) return match;
+
+        const val = getValueFromFieldId(fieldId);
+
+        if (!val && defaultVal !== undefined) return defaultVal;
+
+        // ✅ CHANGE 1b: Return original placeholder instead of blank/undefined
+        if (!val) return match;
+
+        return val;
+      }
+    );
+  }
+
+  document.addEventListener("DOMContentLoaded", function () {
+    const templateSelect = document.getElementById("templateSelect");
+    const emailBody = document.getElementById("emailBody");
+    const copyButton = document.getElementById("copyButton");
+    const copyIcon = copyButton.querySelector("i");
+    const populateDescButton = document.getElementById("populateDescButton");
+
+    // ✅ CHANGE 2: Moved populateDescButton listener INSIDE DOMContentLoaded
+    // WHY: In the original code it was outside DOMContentLoaded, meaning 
+    // populateDescButton was not yet defined when the listener was attached,
+    // causing a ReferenceError and the button doing nothing on click.
+    populateDescButton.addEventListener("click", function () {
+      const text = emailBody.value.trim();
+      if (!text) return;
+
+      const desc = document.getElementById("sh_description");
+      if (!desc) { alert('Description field not found (id="sh_description")'); return; }
+
+      desc.value = text;
+      desc.dispatchEvent(new Event("input", { bubbles: true }));
+    });
+
+    const cannedModal = document.getElementById("cannedResponsesModal");
+    cannedModal.addEventListener("shown.bs.modal", function () {
+      loadEmailTemplates();
+    });
+
+    function renderSelectedTemplate() {
+      const selected = templateSelect.value;
+      if (!selected || !templates[selected]) {
+        emailBody.value = "";
+        copyButton.disabled = true;
+        return;
+      }
+
+      const raw = templates[selected] || "";
+      const rendered = renderTemplateWithFormFields(raw);
+
+      emailBody.value = rendered;
+      populateDescButton.disabled = !rendered.trim();
+      copyButton.disabled = !rendered.trim();
+    }
+
+    templateSelect.addEventListener("change", renderSelectedTemplate);
+
+    document.addEventListener("input", function (e) {
+      if (e.target.matches("input, select, textarea")) {
+        if (templateSelect.value && templates[templateSelect.value]) {
+          renderSelectedTemplate();
+        }
+      }
+    });
+
+    copyButton.addEventListener("click", async function () {
+      if (!emailBody.value.trim()) return;
+      try {
+        await navigator.clipboard.writeText(emailBody.value.trim());
+        copyIcon.classList.replace("bi-copy", "bi-check2");
+        copyButton.textContent = "Copied!";
+        copyButton.classList.replace("btn-dark", "btn-success");
+
+        setTimeout(() => {
+          copyIcon.classList.replace("bi-check2", "bi-copy");
+          copyButton.innerHTML = '<i class="bi bi-copy"></i> Copy Canned Response';
+          copyButton.classList.replace("btn-success", "btn-dark");
+        }, 2000);
+      } catch (err) {
+        alert("Failed to copy. Please try again.");
+      }
+    });
+  });
+
+  async function loadEmailTemplates(message = "Loading email templates...") {
+    showLoader(message);
+
+    try {
+      const res = await fetch(
+        "/_api/new_emailtemplateses?$select=new_emailtemplatesid,new_emailbody,new_usedfor,new_templatetype" +
+        "&$filter=new_templatetype eq 'Canned Responses - TicketHub - Customer Service - PreSubmission'"
+      );
+
+      const data = await res.json();
+
+      if (data.value && data.value.length) {
+        templates = {};
+
+        const templateSelect = document.getElementById("templateSelect");
+        templateSelect.innerHTML = `<option selected disabled>-- Select Template --</option>`;
+
+        data.value.forEach(t => {
+          const key = t.new_usedfor;
+          const body = htmlToPlainText(t.new_emailbody);
+
+          templates[key] = body;
+
+          const opt = document.createElement("option");
+          opt.value = key;
+          opt.textContent = key;
+          templateSelect.appendChild(opt);
+        });
+      }
+
+    } catch (e) {
+      console.error("Error loading email templates:", e);
+    } finally {
+      hideLoader();
+    }
+  }
+</script>

@@ -1,0 +1,36 @@
+adx_accept: 
+adx_allowmultiplefiles: true
+adx_attachfile: true
+adx_attachfilelabel: >-
+  [
+    {
+      "LCID": 1033,
+      "Value": "Upload Specification Sheets, Quotes, etc."
+    }
+  ]
+adx_attachfilemaxsize: 80000
+adx_attachfilerequired: true
+adx_attachfilerestrictaccept: false
+adx_attachfilestoragelocation: 756150000
+adx_containername: cx-portal
+adx_entitypermissionsenabled: true
+adx_formname: Procurement Metadata
+adx_hideformonsuccess: true
+adx_maximumnooffiles: 15
+adx_mode: 100000000
+adx_movepreviouspermitted: true
+adx_name: Procurement Metadata
+adx_nextstep: ''
+adx_referencequerystringisprimarykey: true
+adx_storageaccountname: starlinkspowerplatform
+adx_successmessage: >-
+  [
+    {
+      "LCID": 1033
+    }
+  ]
+adx_targetentitylogicalname: sh_procurementmetadata
+adx_type: 100000001
+adx_validationsummarylinksenabled: true
+adx_webform: 73951ff1-8d43-46f7-ab42-d6859d54bb75
+adx_webformstepid: 545d09c9-740e-4084-9f05-5494c4fd6a29

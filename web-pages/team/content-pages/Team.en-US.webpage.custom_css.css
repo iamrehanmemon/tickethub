@@ -1,0 +1,57 @@
+.btn-icons {
+    border-top-left-radius: 50%;
+    border-top-right-radius: 50%;
+    border-bottom-right-radius: 50%;
+    border-bottom-left-radius: 50%;
+    width: 40px;
+    height: 40px;
+}
+
+.card-group {
+    border-radius: 0.75rem;
+    border-width: 2.5px;
+    border-style: solid;
+    border-color: #006F4A;
+}
+
+.card {
+    border: none;
+}
+
+.custom-team-card {
+    margin-bottom: 24px;
+}
+
+#teamOrgChart {
+    min-height: 350px;
+    background: #fff;
+    border-radius: 1rem;
+    padding: 1.5rem 1rem;
+    margin-bottom: 2rem;
+    overflow-x: hidden;
+}
+
+.orgchart-node-content {
+    box-shadow: none;
+    padding: 0 !important;
+}
+
+/* #teamOrgChart {
+  width: 100%;
+  overflow-x: hidden;
+  min-height: 450px;
+  background: #fff;
+  border-radius: 1rem;
+  padding: 2rem 1rem;
+  margin-bottom: 2rem;
+  width: 100vw;
+  height: auto;         
+  overflow-y: auto;     
+} */
+.d3-org-chart-container > svg {
+  height: auto !important;
+  min-height: 100% !important;
+  overflow: visible;
+}
+
+

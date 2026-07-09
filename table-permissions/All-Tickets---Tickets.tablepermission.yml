@@ -1,0 +1,16 @@
+adx_accountrelationship: 
+adx_append: true
+adx_appendto: true
+adx_contactrelationship: 
+adx_create: true
+adx_delete: false
+adx_entitylogicalname: sh_ticket
+adx_entityname: All Tickets - Tickets
+adx_entitypermission_webrole:
+- a056d286-4322-41f8-82af-46802e0ea645
+adx_entitypermissionid: b6fecaf4-0ab3-4636-bcc3-6ea5aacc0ead
+adx_parententitypermission: 
+adx_parentrelationship: 
+adx_read: true
+adx_scope: 756150000
+adx_write: true

@@ -1,0 +1,16 @@
+adx_accountrelationship: 
+adx_append: true
+adx_appendto: true
+adx_contactrelationship: 
+adx_create: true
+adx_delete: false
+adx_entitylogicalname: sh_hrmetadata
+adx_entityname: HR Metadata
+adx_entitypermission_webrole:
+- c5ed9554-79a1-4c31-bea9-a940211a85a0
+adx_entitypermissionid: 325f3ddc-3c73-4fb4-9cc2-0c3223856132
+adx_parententitypermission: 
+adx_parentrelationship: 
+adx_read: true
+adx_scope: 756150000
+adx_write: true

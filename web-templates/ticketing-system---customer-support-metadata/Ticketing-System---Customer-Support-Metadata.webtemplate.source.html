@@ -1,0 +1,504 @@
+{% assign fetchAddressEndPoint = settings["fetchAddressUrl"] %}
+<script>
+  const fetchAddressUrl = "{{ fetchAddressEndPoint }}";
+</script>
+
+{% comment %}
+<fieldset class="p-4 mb-3 col-md">
+  <legend>Customer Support Metadata</legend>
+  <div class="mb-3">
+    <label for="sh_type" class="form-label">Type *</label>
+    <select class="form-select" id="sh_type" required>
+      {% if metadata.sh_type %}
+        <option selected>{{ metadata.sh_type.name }}</option>
+      {% endif %}
+    </select>
+  </div>
+
+  <div class="mb-3">
+    <label for="sh_category" class="form-label">Category *</label>
+    <select class="form-select" id="sh_category" required>
+      {% if metadata.sh_category %}
+        <option selected>{{ metadata.sh_category.name }}</option>
+      {% endif %}
+    </select>
+  </div>
+
+  <div class="mb-3">
+    <label for="sh_awb" class="form-label">Airway Bill *</label>
+    <input type="text" class="form-control" id="sh_awb" value="{{ metadata.sh_awb }}" {% if mode == "view" %}readonly{% endif %} required />
+  </div>
+
+  <div class="mb-3">
+    <label for="sh_selfor3pl" class="form-label">Self or 3PL ? *</label>
+    <select class="form-select" id="sh_selfor3pl" required>
+      {% if metadata.sh_selfor3pl %}
+        <option selected>{{ metadata.sh_selfor3pl.name }}</option>
+      {% endif %}
+    </select>
+  </div>
+
+  <div class="mb-3">
+    <label for="sh_hub" class="form-label">Hub *</label>
+    <select class="form-select" id="sh_hub" required>
+      {% if metadata.sh_hub %}
+        <option selected>{{ metadata.sh_hub.name }}</option>
+      {% endif %}
+    </select>
+  </div>
+
+  <div class="mb-3">
+    <label for="sh_plpartner" class="form-label">3PL Partner *</label>
+    <select class="form-select" id="sh_plpartner" required>
+      {% if metadata.sh_plpartner %}
+        <option selected>{{ metadata.sh_plpartner.name }}</option>
+      {% endif %}
+    </select>
+  </div>
+
+  <div class="mb-3">
+    <label for="sh_shipmenttype" class="form-label">Shipment Type *</label>
+    <select class="form-select" id="sh_shipmenttype" required>
+      {% if metadata.sh_shipmenttype %}
+        <option selected>{{ metadata.sh_shipmenttype.name }}</option>
+      {% endif %}
+    </select>
+  </div>
+
+  <div class="mb-3">
+    <label for="sh_ordernumber" class="form-label">Order Number *</label>
+    <input type="text" class="form-control" id="sh_ordernumber" value="{{ metadata.sh_ordernumber }}" {% if mode == "view" %}readonly{% endif %} required/>
+  </div>
+
+  <div class="mb-3">
+    <label for="sh_customername" class="form-label">Customer Name *</label>
+    <input type="text" class="form-control" id="sh_customername" value="{{ metadata.sh_customername }}" {% if mode == "view" %}readonly{% endif %} required/>
+  </div>
+
+  <div class="mb-3">
+    <label for="sh_sourcechannel" class="form-label">Source Channel *</label>
+    <select class="form-select" id="sh_sourcechannel" required>
+      {% if metadata.sh_sourcechannel %}
+        <option selected>{{ metadata.sh_sourcechannel.name }}</option>
+      {% endif %}
+    </select>
+  </div>
+
+  <legend>Consignee Details</legend>
+  <div class="mb-3">
+    <label for="sh_consigneename" class="form-label">Consignee Name</label>
+    <input type="text" class="form-control" id="sh_consigneename" value="{{ metadata.sh_consigneename }}" {% if mode == "view" %}readonly{% endif %} />
+  </div>
+
+  <div class="mb-3">
+    <label for="sh_consigneeemail" class="form-label">Consignee Email</label>
+    <input type="email" class="form-control" id="sh_consigneeemail" value="{{ metadata.sh_consigneeemail }}" {% if mode == "view" %}readonly{% endif %} />
+  </div>
+
+  <div class="mb-3">
+    <label for="sh_consigneephone" class="form-label">Consignee Phone *</label>
+    <input type="text" class="form-control" id="sh_consigneephone" value="{{ metadata.sh_consigneephone }}" {% if mode == "view" %}readonly{% endif %} required/>
+  </div>
+
+  <!-- 🔹 Add these new address fields after Consignee Phone -->
+  <div id="newAddressSection" class="d-none">
+    <legend>New Address Details</legend>
+
+    <div class="mb-3">
+      <label for="sh_newaddressline1" class="form-label">Address Line 1</label>
+      <input type="text" class="form-control" id="sh_newaddressline1" value="{{ metadata.sh_newaddressline1 }}" {% if mode == "view" %}readonly{% endif %} />
+    </div>
+
+    <div class="mb-3">
+      <label for="sh_newaddressline2" class="form-label">Address Line 2</label>
+      <input type="text" class="form-control" id="sh_newaddressline2" value="{{ metadata.sh_newaddressline2 }}" {% if mode == "view" %}readonly{% endif %} />
+    </div>
+
+    <div class="mb-3">
+      <label for="sh_newaddresscity" class="form-label">Destination City</label>
+      <input type="text" class="form-control" id="sh_newaddresscity" value="{{ metadata.sh_newaddresscity }}" {% if mode == "view" %}readonly{% endif %} />
+    </div>
+
+    <div class="mb-3">
+      <label for="sh_newaddressstate" class="form-label">Destination State</label>
+      <input type="text" class="form-control" id="sh_newaddressstate" value="{{ metadata.sh_newaddressstate }}" {% if mode == "view" %}readonly{% endif %} />
+    </div>
+
+    <div class="mb-3">
+      <label for="sh_newaddresscountry" class="form-label">Destination Country</label>
+      <input type="text" class="form-control" id="sh_newaddresscountry" value="{{ metadata.sh_newaddresscountry }}" {% if mode == "view" %}readonly{% endif %} />
+    </div>
+
+    <div class="mb-3">
+      <label for="sh_newaddresspincode" class="form-label">Destination Pincode</label>
+      <input type="text" class="form-control" id="sh_newaddresspincode" value="{{ metadata.sh_newaddresspincode }}" {% if mode == "view" %}readonly{% endif %} />
+    </div>
+  </div>
+
+  <div class="mb-3 d-none" id="newMobileNumberSection">
+    <label for="sh_newmobilenumber" class="form-label">New Mobile Number</label>
+    <input type="text" class="form-control" id="sh_newmobilenumber" value="{{ metadata.sh_newmobilenumber }}" {% if mode == "view" %}readonly{% endif %} />
+  </div>
+
+</fieldset>
+{% endcomment %}
+
+<fieldset class="p-4 mb-3 col-12">
+
+  <legend>Customer Support Metadata</legend>
+
+  <div class="row">
+
+    <!-- Type -->
+    <div class="col-12 col-md-4 mb-3">
+      <label for="sh_type" class="form-label">Type *</label>
+      <select class="form-select" id="sh_type" required>
+        {% if metadata.sh_type %}
+          <option selected>{{ metadata.sh_type.name }}</option>
+        {% endif %}
+      </select>
+    </div>
+
+    <!-- Category -->
+    <div class="col-12 col-md-4 mb-3">
+      <label for="sh_category" class="form-label">Category *</label>
+      <select class="form-select" id="sh_category" required>
+        {% if metadata.sh_category %}
+          <option selected>{{ metadata.sh_category.name }}</option>
+        {% endif %}
+      </select>
+    </div>
+
+    <!-- AWB -->
+    <div class="col-12 col-md-4 mb-3">
+      <label for="sh_awb" class="form-label">Airway Bill *</label>
+      <input type="text" class="form-control" id="sh_awb"
+             value="{{ metadata.sh_awb }}"
+             {% if mode == "view" %}readonly{% endif %}
+             required>
+    </div>
+
+    <!-- Self/3PL -->
+    <div class="col-12 col-md-4 mb-3">
+      <label for="sh_selfor3pl" class="form-label">Self or 3PL ? *</label>
+      <select class="form-select" id="sh_selfor3pl" required>
+        {% if metadata.sh_selfor3pl %}
+          <option selected>{{ metadata.sh_selfor3pl.name }}</option>
+        {% endif %}
+      </select>
+    </div>
+
+    <!-- Hub -->
+    <div class="col-12 col-md-4 mb-3">
+      <label for="sh_hub" class="form-label">Hub *</label>
+      <select class="form-select" id="sh_hub" required>
+        {% if metadata.sh_hub %}
+          <option selected>{{ metadata.sh_hub.name }}</option>
+        {% endif %}
+      </select>
+    </div>
+
+    <!-- 3PL Partner -->
+    <div class="col-12 col-md-4 mb-3">
+      <label for="sh_plpartner" class="form-label">3PL Partner *</label>
+      <select class="form-select" id="sh_plpartner" required>
+        {% if metadata.sh_plpartner %}
+          <option selected>{{ metadata.sh_plpartner.name }}</option>
+        {% endif %}
+      </select>
+    </div>
+
+    <!-- Shipment Type -->
+    <div class="col-12 col-md-4 mb-3">
+      <label for="sh_shipmenttype" class="form-label">Shipment Type *</label>
+      <select class="form-select" id="sh_shipmenttype" required>
+        {% if metadata.sh_shipmenttype %}
+          <option selected>{{ metadata.sh_shipmenttype.name }}</option>
+        {% endif %}
+      </select>
+    </div>
+
+    <!-- Order Number -->
+    <div class="col-12 col-md-4 mb-3">
+      <label for="sh_ordernumber" class="form-label">Order Number *</label>
+      <input type="text" class="form-control" id="sh_ordernumber"
+             value="{{ metadata.sh_ordernumber }}"
+             {% if mode == "view" %}readonly{% endif %}
+             required>
+    </div>
+
+    <!-- Customer Name -->
+    <div class="col-12 col-md-4 mb-3">
+      <label for="sh_customername" class="form-label">Customer Name *</label>
+      <input type="text" class="form-control" id="sh_customername"
+             value="{{ metadata.sh_customername }}"
+             {% if mode == "view" %}readonly{% endif %}
+             required>
+    </div>
+
+    <!-- Source Channel -->
+    <div class="col-12 col-md-4 mb-3">
+      <label for="sh_sourcechannel" class="form-label">Source Channel *</label>
+      <select class="form-select" id="sh_sourcechannel" required>
+        {% if metadata.sh_sourcechannel %}
+          <option selected>{{ metadata.sh_sourcechannel.name }}</option>
+        {% endif %}
+      </select>
+    </div>
+
+  </div> <!-- end row -->
+
+  <!-- Consignee Section -->
+  <legend class="mt-4">Consignee Details</legend>
+
+  <div class="row">
+
+    <!-- Consignee Name -->
+    <div class="col-12 col-md-4 mb-3">
+      <label for="sh_consigneename" class="form-label">Consignee Name</label>
+      <input type="text" class="form-control" id="sh_consigneename"
+             value="{{ metadata.sh_consigneename }}"
+             {% if mode == "view" %}readonly{% endif %}>
+    </div>
+
+    <!-- Consignee Email -->
+    <div class="col-12 col-md-4 mb-3">
+      <label for="sh_consigneeemail" class="form-label">Consignee Email</label>
+      <input type="email" class="form-control" id="sh_consigneeemail"
+             value="{{ metadata.sh_consigneeemail }}"
+             {% if mode == "view" %}readonly{% endif %}>
+    </div>
+
+    <!-- Consignee Phone -->
+    <div class="col-12 col-md-4 mb-3">
+      <label for="sh_consigneephone" class="form-label">Consignee Phone *</label>
+      <input type="text" class="form-control" id="sh_consigneephone"
+             value="{{ metadata.sh_consigneephone }}"
+             {% if mode == "view" %}readonly{% endif %}
+             required>
+    </div>
+
+  </div>
+
+  <!-- New Address Section (Conditional) -->
+  <div id="newAddressSection" class="d-none mt-3">
+    <legend>New Address Details</legend>
+
+    <div class="row">
+      <!-- Short Address Code -->
+      <div class="col-12 col-md-4 mb-3">
+        <label for="sh_shortaddresscode" class="form-label">Short Address Code</label>
+
+        <div class="d-flex align-items-center gap-2">
+          <input type="text"
+                class="form-control shortaddr-input"
+                id="sh_shortaddresscode"
+                placeholder="Enter short address code"
+                value="{{ metadata.sh_shortaddresscode }}"
+                {% if mode == "view" %}readonly{% endif %}>
+
+          <button type="button"
+                  id="fetchAddressBtn"
+                  class="btn shortaddr-search-btn"
+                  title="Fetch Address"
+                  {% if mode == "view" %}disabled{% endif %}>
+            <i class="bi bi-search"></i>
+          </button>
+        </div>
+      </div>
+
+      <div class="col-12 col-md-4 mb-3">
+        <label for="sh_newaddressline1" class="form-label">Address Line 1</label>
+        <input type="text" class="form-control" id="sh_newaddressline1"
+               value="{{ metadata.sh_newaddressline1 }}"
+               {% if mode == "view" %}readonly{% endif %}>
+      </div>
+
+      <div class="col-12 col-md-4 mb-3">
+        <label for="sh_newaddressline2" class="form-label">Address Line 2</label>
+        <input type="text" class="form-control" id="sh_newaddressline2"
+               value="{{ metadata.sh_newaddressline2 }}"
+               {% if mode == "view" %}readonly{% endif %}>
+      </div>
+
+      <div class="col-12 col-md-4 mb-3">
+        <label for="sh_newaddresscity" class="form-label">Destination City</label>
+        <input type="text" class="form-control" id="sh_newaddresscity"
+               value="{{ metadata.sh_newaddresscity }}"
+               {% if mode == "view" %}readonly{% endif %}>
+      </div>
+
+      <div class="col-12 col-md-4 mb-3">
+        <label for="sh_newaddressstate" class="form-label">Destination State</label>
+        <input type="text" class="form-control" id="sh_newaddressstate"
+               value="{{ metadata.sh_newaddressstate }}"
+               {% if mode == "view" %}readonly{% endif %}>
+      </div>
+
+      <div class="col-12 col-md-4 mb-3">
+        <label for="sh_newaddresscountry" class="form-label">Destination Country</label>
+        <input type="text" class="form-control" id="sh_newaddresscountry"
+               value="{{ metadata.sh_newaddresscountry }}"
+               {% if mode == "view" %}readonly{% endif %}>
+      </div>
+
+      <div class="col-12 col-md-4 mb-3">
+        <label for="sh_newaddresspincode" class="form-label">Destination Pincode</label>
+        <input type="text" class="form-control" id="sh_newaddresspincode"
+               value="{{ metadata.sh_newaddresspincode }}"
+               {% if mode == "view" %}readonly{% endif %}>
+      </div>
+      
+      <div class="col-12 col-md-4 mb-3">
+        <label for="sh_addressadditionalnumber" class="form-label">Destination Additional Number</label>
+        <input type="text" class="form-control" id="sh_addressadditionalnumber"
+               value="{{ metadata.sh_addressadditionalnumber }}"
+               {% if mode == "view" %}readonly{% endif %}>
+      </div>
+    </div>
+  </div>
+
+  <!-- New Mobile Number Section -->
+  <div class="mb-3 mt-3 d-none" id="newMobileNumberSection">
+    <label for="sh_newmobilenumber" class="form-label">New Mobile Number</label>
+    <input type="number" class="form-control" id="sh_newmobilenumber"
+           value="{{ metadata.sh_newmobilenumber }}"
+           {% if mode == "view" %}readonly{% endif %}>
+  </div>
+
+  <div class="mb-3">
+    <div class="d-flex justify-content-between align-items-center mb-1">
+      <label class="form-label mb-0">Description *</label>
+
+      {% if form_selector == 'consignee-support' %}
+        <button type="button"
+                class="btn btn-sm btn-outline-secondary fw-semibold"
+                data-bs-toggle="modal"
+                data-bs-target="#cannedResponsesModal">
+          <i class="bi bi-send me-1"></i> Canned Responses
+        </button>
+      {% endif %}
+    </div>
+    <textarea class="form-control" rows="10" id="sh_description" {% if mode == "view" %}readonly{% endif %}>{{ metadata.sh_description }}</textarea>
+</fieldset>
+
+<script>
+  const ticketTypeMap = {
+    "Request": [
+      "Address & Phone number updated تحديث العنوان ورقم التواصل",
+      "Address Updated تم تحديث العنوان",
+      "Consignee Ready Now العميل جاهز للإستلام",
+      "Mobile Updated تم تحديث الجوال",
+      "Delivery Reschedule تأجيل التوصيل",
+      "RTO Request إلغاء التوصيل",
+      "Bayan Request طلب بيان جمركي",
+      "Courier Behavior سلوك المندوب",
+      "Delivered (Wrong Scan) لم يتم التوصيل فعلياً",
+      "Refund Request تسوية مالي"
+    ],
+    "Incident": [
+      "Delay تأخير",
+      "Out of Zone خارج نطاق المندوب",
+      "Wrong NDR سبب غير صحيح"
+    ]
+  };
+
+  document.addEventListener("DOMContentLoaded", function () {
+    const fetchAddressBtn = document.getElementById("fetchAddressBtn");
+    const shortCodeInput = document.getElementById("sh_shortaddresscode");
+
+    if (!fetchAddressBtn || !shortCodeInput) return;
+
+    fetchAddressBtn.addEventListener("click", async function () {
+      const code = shortCodeInput.value.trim();
+
+      if (!code) {
+        alert("Please enter Short Address Code first.");
+        return;
+      }
+
+      try {
+        showLoader("Fetching address details...");
+
+        // ✅ Replace this URL with your Power Automate / API endpoint
+        // Example: const fetchAddressUrl = "https://prod-xx.westeurope.logic.azure.com:443/workflows/....";
+        const response = await fetch(fetchAddressUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ shortAddressCode: code })
+        });
+
+        const result = await response.json();
+        hideLoader();
+
+        if (!response.ok) {
+          console.error("Address API error:", result);
+          alert("Failed to fetch address. Please check the code and try again.");
+          return;
+        }
+
+        // ✅ Normalize response (supports either {address:{...}} or direct object)
+        const address = result.address || result || {};
+
+        // ✅ Ensure address section is visible before populating
+        const addressSection = document.getElementById("newAddressSection");
+        if (addressSection) addressSection.classList.remove("d-none");
+
+        // ✅ Populate fields (map your API keys here)
+        setFieldValue("sh_newaddressline1", address.addressLine1 || address.line1 || "");
+        setFieldValue("sh_newaddressline2", address.addressLine2 || address.line2 || "");
+        setFieldValue("sh_newaddresscity", address.city || "");
+        setFieldValue("sh_newaddressstate", address.state || address.region || "");
+        setFieldValue("sh_newaddresscountry", address.country || "");
+        setFieldValue("sh_newaddresspincode", address.postcode || "");
+        setFieldValue("sh_addressadditionalnumber", address.additionalnumber || "");
+
+        // Optional: if API returns phone/email/name etc, you can map those too.
+        // setFieldValue("sh_consigneename", address.consigneeName || "");
+        // setFieldValue("sh_consigneephone", address.mobile || "");
+
+      } catch (err) {
+        hideLoader();
+        console.error("❌ Error fetching short address:", err);
+        alert("An error occurred while fetching address. Please try again.");
+      }
+    });
+
+    // ✅ helper to set input value safely
+    function setFieldValue(id, value) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.value = value ?? "";
+
+      // Trigger input event so your canned-response renderer updates (if you added that)
+      el.dispatchEvent(new Event("input", { bubbles: true }));
+    }
+
+    //Function to auto load the ticket type in dropdown
+    const categoryDropdown = document.getElementById("sh_category");
+    const ticketTypeDropdown = document.getElementById("sh_tickettype");
+
+    if (categoryDropdown && ticketTypeDropdown) {
+      categoryDropdown.addEventListener("change", function () {
+        const selectedText = this.options[this.selectedIndex]?.text?.trim();
+
+        // Find which ticket type (Request/Incident) the selected category belongs to
+        const ticketType = Object.keys(ticketTypeMap).find(type =>
+          ticketTypeMap[type].some(label =>
+            label.trim().toLowerCase() === selectedText.toLowerCase()
+          )
+        );
+
+        if (!ticketType || ticketTypeDropdown.options.length <= 1) return;
+
+        // Find the matching option by text and set its GUID as the value
+        for (let opt of ticketTypeDropdown.options) {
+          if (opt.text.trim().toLowerCase() === ticketType.toLowerCase()) {
+            ticketTypeDropdown.value = opt.value;
+            break;
+          }
+        }
+      });
+    }
+  });
+</script>

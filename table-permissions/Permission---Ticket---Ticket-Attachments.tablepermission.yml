@@ -1,0 +1,16 @@
+adx_accountrelationship: 
+adx_append: true
+adx_appendto: true
+adx_contactrelationship: 
+adx_create: true
+adx_delete: false
+adx_entitylogicalname: sh_ticketattachment
+adx_entityname: Permission - Ticket - Ticket Attachments
+adx_entitypermission_webrole:
+- c5ed9554-79a1-4c31-bea9-a940211a85a0
+adx_entitypermissionid: 24dbe94d-37dc-4bff-ad4e-c236ff6d1205
+adx_parententitypermission: 2dfeab65-b3d6-4295-8c37-ee6a71d51293
+adx_parentrelationship: sh_ticketattachment_TicketNumber_sh_ticket
+adx_read: true
+adx_scope: 756150003
+adx_write: true

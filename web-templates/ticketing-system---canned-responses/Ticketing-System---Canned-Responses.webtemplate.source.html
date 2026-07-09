@@ -1,0 +1,217 @@
+{% assign templateType = "" %}
+
+{% if requestType == "Consignee Support" %}
+  {% assign templateType = "Canned Responses - TicketHub - Customer Service" %}
+{% elsif requestType == "HR Request" %}
+  {% assign templateType = "Canned Responses - TicketHub - HR" %}
+{% elsif requestType == "Procurement Request" %}
+  {% assign templateType = "Canned Responses - TicketHub - Procurement" %}
+{% elsif requestType == "IT Request" or requestType == "Tech Account Creation" %}
+  {% assign templateType = "Canned Responses - TicketHub - Technology" %}
+{% elsif requestType == "Legal Request" %}
+  {% assign templateType = "Canned Responses - TicketHub - Legal" %}
+{% endif %}
+
+
+<!-- ============================= -->
+<!--     FETCHXML – LOAD TEMPLATES -->
+<!-- ============================= -->
+{%- fetchxml emailTemplates -%}
+<fetch>
+  <entity name="new_emailtemplates">
+    <attribute name="new_emailtemplatesid" />
+    <attribute name="new_emailbody" />
+    <attribute name="new_usedfor" />
+    <attribute name="new_templatetype" />
+    <attribute name="createdon" />
+    <filter type="and">
+      <condition attribute="new_templatetype" operator="eq" value="{{ templateType }}" />
+        <condition attribute="createdon" operator="on-or-before" value='{{ "today" | date: "yyyy-MM-dd HH:mm:ss" }}' />
+    </filter>
+  </entity>
+</fetch>
+{%- endfetchxml -%}
+
+<!-- ====================================== -->
+<!--  STORE EACH TEMPLATE AS HIDDEN HTML DIV -->
+<!-- ====================================== -->
+{% for t in emailTemplates.results.entities %}
+  <div class="d-none email-template-body"
+       id="tpl-{{ t.new_emailtemplatesid }}">
+    {{ t.new_emailbody | liquid }}
+  </div>
+{% endfor %}
+
+<!-- ============================= -->
+<!--         CANNED RESPONSE MODAL -->
+<!-- ============================= -->
+<div class="modal fade" id="cannedResponsesModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+ 
+      <!-- HEADER -->
+      <div class="modal-header">
+        <h5 class="modal-title fw-bold" id="historyModalLabel">Select Email Template</h5>
+      </div>  
+ 
+      <!-- BODY -->
+      <div class="modal-body bg-white">
+ 
+        <!-- DROPDOWN -->
+        <div class="mb-3">
+          <label for="templateDropdown" class="form-label fw-semibold">Choose Template</label>
+          <select id="templateDropdown" class="form-select">
+            <option value="">Select Template</option>
+            {% for t in emailTemplates.results.entities %}
+              <option value="tpl-{{ t.new_emailtemplatesid }}">
+                {{ t.new_usedfor }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+        <!-- Email Body Box -->
+        <div class="mb-3">
+          <!-- Label and Copy Button in one line -->
+          <div class="d-flex justify-content-between align-items-center mb-1">
+            <label for="emailBody" class="form-label fw-semibold mb-0">Email Body</label>
+            <button type="button" id="copyButton" class="btn btn-sm btn-dark d-flex align-items-center gap-1"
+                    style="border-radius:6px;" disabled>
+              <i class="bi bi-copy"></i> Copy Canned Response
+            </button>
+           
+          </div>
+ 
+          <!-- Email Body Textarea below -->
+          <textarea id="emailBody" class="form-control" rows="16" readonly style="resize: none;"></textarea>
+        </div>
+ 
+        <!-- EMAIL BODY TEXTAREA
+        <label class="form-label fw-semibold">Email Body</label>
+        <textarea id="emailBody"
+                  class="form-control"
+                  rows="8"
+                  readonly
+                  style="resize:none;"></textarea>
+        <button id="copyEmailBtn"
+                class="btn btn-dark btn-sm mt-2"
+                disabled>
+          <i class="bi bi-copy"></i> Copy Canned Response
+        </button> -->
+ 
+      </div>
+ 
+      <!-- Footer -->
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">
+          Close
+        </button>
+      </div>
+ 
+    </div>
+  </div>
+</div>
+
+<!-- ============================= -->
+<!--            SCRIPT LOGIC       -->
+<!-- ============================= -->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+  const dropdown  = document.getElementById("templateDropdown");
+  const emailBody = document.getElementById("emailBody");
+  const copyBtn   = document.getElementById("copyButton");
+
+  dropdown.addEventListener("change", function () {
+      const divId = this.value;
+
+      if (!divId) {
+        emailBody.value = "";
+        copyBtn.disabled = true;
+        return;
+      }
+
+      const sourceDiv = document.getElementById(divId);
+
+      if (!sourceDiv) {
+        emailBody.value = "";
+        copyBtn.disabled = true;
+        return;
+      }
+
+      // -------- Convert HTML → plain text with line breaks ----------
+      const html = sourceDiv.innerHTML;
+      const temp = document.createElement("div");
+      temp.innerHTML = html;
+
+      // Replace <br> with newlines
+      temp.querySelectorAll("br").forEach(br => br.replaceWith("\n"));
+
+      // Add newlines after block elements
+      temp.querySelectorAll("p,div,h1,h2,h3,h4,h5,h6,li").forEach(el => {
+        el.after("\n\n");
+      });
+
+      //emailBody.value = temp.innerText.trim();
+      emailBody.value = htmlToCleanText(sourceDiv.innerHTML);
+
+      copyBtn.disabled = false;
+  });
+
+
+  // =============== COPY TO CLIPBOARD ==================
+  copyBtn.addEventListener("click", async function () {
+      const text = emailBody.value.trim();
+      if (!text) return;
+
+      try {
+        await navigator.clipboard.writeText(text);
+
+        copyBtn.innerHTML = '<i class="bi bi-check2"></i> Copied!';
+        copyBtn.classList.remove("btn-dark");
+        copyBtn.classList.add("btn-success");
+
+        setTimeout(() => {
+          copyBtn.innerHTML = '<i class="bi bi-copy"></i> Copy Canned Response';
+          copyBtn.classList.remove("btn-success");
+          copyBtn.classList.add("btn-dark");
+        }, 1500);
+
+      } catch (err) {
+        alert("Failed to copy.");
+      }
+  });
+
+});
+
+
+function htmlToCleanText(html) {
+    if (!html) return "";
+
+    const temp = document.createElement("div");
+    temp.innerHTML = html;
+
+    // Replace <br> with newline
+    temp.querySelectorAll("br").forEach(br => br.replaceWith("\n"));
+
+    // Convert block elements to a newline
+    temp.querySelectorAll("p, div, li, h1, h2, h3, h4, h5, h6").forEach(el => {
+        el.after("\n");
+    });
+
+    // Get text
+    let text = temp.textContent || temp.innerText || "";
+
+    // Normalize spacing:
+    text = text
+        .replace(/\u00A0/g, " ")       // remove non-breaking spaces (source of ghost lines)
+        .replace(/\n{3,}/g, "\n\n")    // collapse 3+ blank lines into ONE
+        .replace(/[ ]{2,}/g, " ")      // collapse multiple spaces
+        .trim();
+
+    return text;
+}
+
+</script>
+
+
+

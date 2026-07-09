@@ -1,0 +1,534 @@
+{% assign requirements_tab = request.params['req'] | default: 'assigned' %}
+      
+{% if requirements_tab == 'ComplianceRisk' %}
+<style>
+  :root{
+    --green:#006F4A;
+    --green-dark:#00583a;
+    --green-tint:#e8f3ee;
+    --gray:#58595B;
+    --cool-gray:#94A0A9;
+    --line:#d7dadc;
+    --amber:#FAA633;
+    --amber-tint:#fff4e2;
+    --white:#fff;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;font-family:Arial,'Helvetica Neue',sans-serif;color:var(--gray);
+    background:#f4f5f5;font-size:14px;
+  }
+
+  header{
+    background:var(--green);color:#fff;padding:14px 20px;
+    display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;
+  }
+  header h1{margin:0;font-size:16px;font-weight:700;}
+  header p{margin:2px 0 0;font-size:12px;opacity:.85;}
+
+  .toolbar{
+    background:#fff;border-bottom:1px solid var(--line);padding:10px 20px;
+    display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+  }
+  .toolbar label{font-size:12px;font-weight:700;color:var(--cool-gray);margin-right:4px;}
+  .toolbar input[type=text]{padding:6px 9px;border:1px solid var(--line);border-radius:6px;font-size:13px;width:220px;}
+  .spacer{flex:1;}
+  button.btn{
+    font-family:inherit;border:none;cursor:pointer;border-radius:6px;
+    padding:7px 13px;font-size:12.5px;font-weight:700;
+  }
+  .btn-primary{background:var(--green);color:#fff;}
+  .btn-primary:hover{background:var(--green-dark);}
+  .btn-outline{background:#fff;color:var(--gray);border:1px solid var(--line);}
+  .btn-outline:hover{border-color:var(--cool-gray);}
+  .btn-sm{padding:4px 9px;font-size:11.5px;}
+
+  .banner{
+    margin:14px 20px 0;background:var(--amber-tint);border:1px solid #f3d8a8;border-radius:8px;
+    padding:10px 14px;font-size:12.5px;color:#7a5410;
+  }
+  .banner b{color:#5c3f0c;}
+
+  .layout{display:flex;gap:14px;padding:14px 20px;align-items:flex-start;}
+  @media(max-width:980px){.layout{flex-direction:column;}}
+
+  /* ---- LEFT: spreadsheet ---- */
+  .left-pane{flex:1;min-width:0;background:#fff;border:1px solid var(--line);border-radius:8px;overflow:auto;}
+  table{border-collapse:collapse;width:100%;min-width:980px;}
+  thead th{
+    position:sticky;top:0;background:var(--green);color:#fff;
+    font-size:11px;text-transform:uppercase;letter-spacing:.3px;font-weight:700;
+    padding:9px 8px;text-align:left;border-right:1px solid rgba(255,255,255,.15);white-space:nowrap;
+  }
+  tbody td{border:1px solid var(--line);padding:0;background:#fff;}
+  tbody tr.editing td{background:var(--green-tint);}
+  tbody tr:hover td{background:#f7fbf9;}
+  tbody tr.editing:hover td{background:var(--green-tint);}
+  td .cell-input{
+    width:100%;border:none;background:transparent;padding:8px 8px;font-size:13px;
+    font-family:inherit;color:var(--gray);
+  }
+  td .cell-input:focus{outline:2px solid var(--green);outline-offset:-2px;background:#fff;}
+  td.num-cell .cell-input{width:70px;}
+  td.rownum{
+    text-align:center;color:var(--cool-gray);font-size:11.5px;background:#fafbfb;width:34px;
+  }
+  td.status-cell{text-align:center;width:30px;}
+  .dot{width:9px;height:9px;border-radius:50%;display:inline-block;}
+  .dot.ok{background:var(--green);}
+  .dot.pending{background:var(--amber);}
+  td.del-cell{width:34px;text-align:center;}
+  .del-btn{border:none;background:none;color:var(--cool-gray);cursor:pointer;font-size:14px;padding:6px;}
+  .del-btn:hover{color:#c0392b;}
+  .add-row-btn-wrap{padding:8px;}
+
+  /* ---- RIGHT: preview ---- */
+  .right-pane{width:340px;flex-shrink:0;}
+  @media(max-width:980px){.right-pane{width:100%;}}
+  .preview-card{
+    background:#fff;border:1px solid var(--line);border-radius:8px;padding:16px;
+    position:sticky;top:14px;
+  }
+  .preview-card h3{margin:0 0 2px;font-size:13px;color:var(--gray);}
+  .preview-card .sub{margin:0 0 12px;font-size:11.5px;color:var(--cool-gray);}
+
+  .breadcrumb{font-size:11.5px;color:var(--cool-gray);margin-bottom:10px;min-height:14px;}
+  .breadcrumb b{color:var(--green-dark);}
+
+  .step-block{margin-bottom:14px;}
+  .step-block .step-label{font-size:10px;text-transform:uppercase;letter-spacing:.3px;color:var(--cool-gray);font-weight:700;margin-bottom:6px;}
+  .ptile-list{display:flex;flex-direction:column;gap:6px;}
+  .ptile{
+    border:1px solid var(--line);border-radius:7px;padding:8px 10px;cursor:pointer;
+    background:#fafbfb;font-size:13px;font-weight:600;color:var(--gray);transition:.12s;
+  }
+  .ptile:hover{border-color:var(--green);}
+  .ptile.chosen{background:var(--green);color:#fff;border-color:var(--green);}
+  .ptile-empty{font-size:12px;color:var(--cool-gray);font-style:italic;padding:6px 2px;}
+
+  .resolved{border-top:2px solid var(--line);margin-top:6px;padding-top:12px;}
+  .resolved dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:7px 10px;font-size:12.5px;}
+  .resolved dt{color:var(--cool-gray);font-weight:700;white-space:nowrap;}
+  .resolved dd{margin:0;color:var(--gray);font-weight:600;word-break:break-word;}
+  .resolved dd.missing{color:var(--amber);font-style:italic;font-weight:400;}
+
+  .reset-row{margin-top:12px;text-align:right;}
+  .reset-row button{background:#fff;border:1px solid var(--line);border-radius:6px;cursor:pointer;padding:5px 10px;font-size:12px;color:var(--cool-gray);}
+  .reset-row button:hover{color:var(--gray);border-color:var(--cool-gray);}
+
+  .summary-card{
+    background:#fff;border:1px solid var(--line);border-radius:8px;padding:12px 16px;margin-top:12px;font-size:12px;color:var(--cool-gray);
+  }
+  .summary-card b{color:var(--gray);}
+
+  footer{padding:6px 20px 30px;font-size:11.5px;color:var(--cool-gray);text-align:center;}
+
+  #toast-host{position:fixed;bottom:16px;right:16px;display:flex;flex-direction:column;gap:8px;z-index:999;}
+  .toast{background:var(--gray);color:#fff;padding:10px 15px;border-radius:7px;font-size:12.5px;box-shadow:0 4px 14px rgba(0,0,0,.18);}
+  .toast.success{background:var(--green-dark);}
+  .toast.warn{background:#9a6310;}
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>Starlinks One — Standard Requirement Form</h1>
+    <p>Define what gets logged, who it's assigned to, and the SLA — then test it like an end user would</p>
+  </div>
+</header>
+
+<div class="toolbar">
+  <label>Workspace</label>
+  <input type="text" id="workspaceName" value="Compliance and Risk">
+  <div class="spacer"></div>
+  <button class="btn btn-outline" id="downloadCsvBtn">Download CSV</button>
+</div>
+
+<div class="banner">
+  The below is just an example — please update it based on what's currently being requested by users via email or other channels.
+  <br><br>
+  This also assumes every vertical uses the <b>same set of categories</b> below. If that's not the case for your team, let Rehan know.
+</div>
+
+<div class="layout">
+  <div class="left-pane">
+    <table>
+      <thead>
+        <tr>
+          <th></th>
+          <th>Category</th>
+          <th>Sub Category</th>
+          <th>Service</th>
+          <th>Assigned To</th>
+          <th>SLA (Days)</th>
+          <th>L1 Escalation</th>
+          <th>Comments</th>
+          <th></th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="grid"></tbody>
+    </table>
+    <div class="add-row-btn-wrap">
+      <button class="btn btn-primary btn-sm" id="addRowBtn">+ Add row</button>
+    </div>
+  </div>
+
+  <div class="right-pane">
+    <div class="preview-card">
+      <h3>Test the form</h3>
+      <p class="sub">Click through it the way someone raising a ticket would</p>
+
+      <div class="breadcrumb" id="breadcrumb">Choose a category to start</div>
+
+      <div class="step-block" id="stepCategoryBlock">
+        <div class="step-label">Category</div>
+        <div class="ptile-list" id="stepCategoryList"></div>
+      </div>
+
+      <div class="step-block" id="stepSubBlock" style="display:none;">
+        <div class="step-label">Sub Category</div>
+        <div class="ptile-list" id="stepSubList"></div>
+      </div>
+
+      <div class="step-block" id="stepServiceBlock" style="display:none;">
+        <div class="step-label">Service</div>
+        <div class="ptile-list" id="stepServiceList"></div>
+      </div>
+
+      <div class="resolved" id="resolvedBlock" style="display:none;">
+        <dl>
+          <dt>Assigned To</dt><dd id="rv_assigned">—</dd>
+          <dt>SLA</dt><dd id="rv_sla">—</dd>
+          <dt>L1 Escalation</dt><dd id="rv_l1">—</dd>
+          <dt>Comments</dt><dd id="rv_comments">—</dd>
+        </dl>
+      </div>
+
+      <div class="reset-row"><button id="resetPreviewBtn">↺ Reset selection</button></div>
+    </div>
+
+    <div class="summary-card">
+      <b id="sumTotal">0</b> rows total · <b id="sumPending">0</b> still need Assigned To, SLA, or Escalation filled in
+    </div>
+  </div>
+</div>
+
+<footer>Nothing here is saved anywhere — this is just to help visualize how it would work once enabled on Starlinks One. Download a CSV when you're ready to send it to Rehan.</footer>
+
+<div id="toast-host"></div>
+
+<script>
+/* ---------- state ---------- */
+function uid(){ return Math.random().toString(36).slice(2,10) + Date.now().toString(36).slice(-4); }
+
+function starterEntries(){
+  const rows = [
+    // Compliance — Advisory
+    ["Compliance","Advisory","Policy Interpretation Query","hashem.qaw@starlinks-me.com",3,"j.radhakrishnan@starlinks-me.com",""],
+    ["Compliance","Advisory","Contract Compliance Review","hashem.qaw@starlinks-me.com",5,"j.radhakrishnan@starlinks-me.com",""],
+    ["Compliance","Advisory","Third-Party / Vendor Due Diligence","hashem.qaw@starlinks-me.com",5,"j.radhakrishnan@starlinks-me.com",""],
+    // Compliance — Request
+    ["Compliance","Request","Policy Document Request","hashem.qaw@starlinks-me.com",2,"j.radhakrishnan@starlinks-me.com",""],
+    ["Compliance","Request","New Policy Sign-Off","hashem.qaw@starlinks-me.com",3,"j.radhakrishnan@starlinks-me.com",""],
+    ["Compliance","Request","Compliance Certificate Request","hashem.qaw@starlinks-me.com",2,"j.radhakrishnan@starlinks-me.com",""],
+    // Compliance — Incident
+    ["Compliance","Incident","Regulatory Breach Report","hashem.qaw@starlinks-me.com",1,"j.radhakrishnan@starlinks-me.com",""],
+    ["Compliance","Incident","Suspected Fraud Report","hashem.qaw@starlinks-me.com",1,"j.radhakrishnan@starlinks-me.com",""],
+    ["Compliance","Incident","Whistleblower / Ethics Concern","hashem.qaw@starlinks-me.com",1,"j.radhakrishnan@starlinks-me.com",""],
+    // Compliance — Training
+    ["Compliance","Training","Compliance Training Request","hashem.qaw@starlinks-me.com",5,"j.radhakrishnan@starlinks-me.com",""],
+    ["Compliance","Training","Anti-Bribery & Corruption Training","hashem.qaw@starlinks-me.com",5,"j.radhakrishnan@starlinks-me.com",""],
+    // Compliance — Regulatory
+    ["Compliance","Regulatory","ZATCA / VAT Compliance Query","hashem.qaw@starlinks-me.com",3,"j.radhakrishnan@starlinks-me.com",""],
+    ["Compliance","Regulatory","Customs Regulation Query","hashem.qaw@starlinks-me.com",3,"j.radhakrishnan@starlinks-me.com",""],
+    ["Compliance","Regulatory","Saudization (Nitaqat) Compliance Query","hashem.qaw@starlinks-me.com",3,"j.radhakrishnan@starlinks-me.com",""],
+    // Compliance — Data Protection
+    ["Compliance","Data Protection","PDPL / Data Privacy Query","hashem.qaw@starlinks-me.com",3,"j.radhakrishnan@starlinks-me.com",""],
+    ["Compliance","Data Protection","Data Breach Notification","hashem.qaw@starlinks-me.com",1,"j.radhakrishnan@starlinks-me.com",""],
+    // Risk — Advisory
+    ["Risk","Advisory","Risk Assessment Request","j.radhakrishnan@starlinks-me.com",5,"hashem.qaw@starlinks-me.com",""],
+    ["Risk","Advisory","New Project Risk Review","j.radhakrishnan@starlinks-me.com",5,"hashem.qaw@starlinks-me.com",""],
+    // Risk — Incident
+    ["Risk","Incident","Operational Risk Incident","j.radhakrishnan@starlinks-me.com",1,"hashem.qaw@starlinks-me.com",""],
+    ["Risk","Incident","Health & Safety Incident","j.radhakrishnan@starlinks-me.com",1,"hashem.qaw@starlinks-me.com",""],
+    ["Risk","Incident","Fleet / Warehouse Safety Incident","j.radhakrishnan@starlinks-me.com",1,"hashem.qaw@starlinks-me.com",""],
+    // Risk — Request
+    ["Risk","Request","Risk Register Update","j.radhakrishnan@starlinks-me.com",3,"hashem.qaw@starlinks-me.com",""],
+    ["Risk","Request","Insurance Claim Support","j.radhakrishnan@starlinks-me.com",3,"hashem.qaw@starlinks-me.com",""],
+    // Risk — Audit
+    ["Risk","Audit","Internal Audit Support","j.radhakrishnan@starlinks-me.com",5,"hashem.qaw@starlinks-me.com",""],
+    ["Risk","Audit","External Audit Coordination","j.radhakrishnan@starlinks-me.com",5,"hashem.qaw@starlinks-me.com",""],
+    // Risk — Third-Party Risk
+    ["Risk","Third-Party Risk","Vendor Risk Assessment","j.radhakrishnan@starlinks-me.com",5,"hashem.qaw@starlinks-me.com",""],
+    ["Risk","Third-Party Risk","Supplier Onboarding Risk Check","j.radhakrishnan@starlinks-me.com",3,"hashem.qaw@starlinks-me.com",""]
+  ];
+  return rows.map(r=>({id:uid(), category:r[0], subCategory:r[1], service:r[2], assignedTo:r[3], slaDays:r[4], l1Escalation:r[5], comments:r[6]}));
+}
+
+let state = { workspace:'Compliance and Risk', entries: starterEntries() };
+let editingId = null;
+let previewPath = { category:null, subCategory:null, service:null };
+
+const $ = id => document.getElementById(id);
+
+function isComplete(e){
+  return !!(e.assignedTo && e.assignedTo.trim() && e.slaDays!=null && e.slaDays!=='' && e.l1Escalation && e.l1Escalation.trim());
+}
+
+function escapeHtml(s){
+  return String(s==null?'':s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function toast(msg, type){
+  const host = $('toast-host');
+  const t = document.createElement('div');
+  t.className = 'toast' + (type ? ' '+type : '');
+  t.textContent = msg;
+  host.appendChild(t);
+  setTimeout(()=>t.remove(), 3500);
+}
+
+/* ---------- grid rendering ---------- */
+function fieldCell(entry, field, type, extraClass){
+  const val = entry[field]==null ? '' : entry[field];
+  const inputType = (type==='number') ? 'number' : (type==='email' ? 'email' : 'text');
+  return `<td class="${extraClass||''}"><input class="cell-input" type="${inputType}" data-id="${entry.id}" data-field="${field}" value="${escapeHtml(val)}"></td>`;
+}
+
+function renderGrid(){
+  const tbody = $('grid');
+  tbody.innerHTML = state.entries.map((e,i)=>`
+    <tr data-row="${e.id}" class="${e.id===editingId?'editing':''}">
+      <td class="rownum">${i+1}</td>
+      ${fieldCell(e,'category')}
+      ${fieldCell(e,'subCategory')}
+      ${fieldCell(e,'service')}
+      ${fieldCell(e,'assignedTo','email')}
+      ${fieldCell(e,'slaDays','number','num-cell')}
+      ${fieldCell(e,'l1Escalation','email')}
+      ${fieldCell(e,'comments')}
+      <td class="status-cell"><span class="dot ${isComplete(e)?'ok':'pending'}" title="${isComplete(e)?'Complete':'Needs Assigned To / SLA / Escalation'}"></span></td>
+      <td class="del-cell"><button class="del-btn" data-del="${e.id}" title="Delete row">✕</button></td>
+    </tr>`).join('');
+
+  tbody.querySelectorAll('.cell-input').forEach(inp=>{
+    inp.addEventListener('input', onCellInput);
+    inp.addEventListener('focus', ()=> setEditingRow(inp.dataset.id));
+  });
+  tbody.querySelectorAll('[data-del]').forEach(btn=>{
+    btn.addEventListener('click', ()=> deleteRow(btn.dataset.del));
+  });
+
+  updateSummary();
+}
+
+function setEditingRow(id){
+  editingId = id;
+  document.querySelectorAll('tbody tr').forEach(tr=>{
+    tr.classList.toggle('editing', tr.dataset.row===id);
+  });
+}
+
+function onCellInput(e){
+  const id = e.target.dataset.id;
+  const field = e.target.dataset.field;
+  const entry = state.entries.find(x=>x.id===id);
+  if(!entry) return;
+  entry[field] = field==='slaDays' ? (e.target.value===''? null : Number(e.target.value)) : e.target.value;
+
+  const row = document.querySelector(`tr[data-row="${id}"]`);
+  if(row){
+    const dot = row.querySelector('.dot');
+    const ok = isComplete(entry);
+    dot.className = 'dot ' + (ok?'ok':'pending');
+    dot.title = ok ? 'Complete' : 'Needs Assigned To / SLA / Escalation';
+  }
+  updateSummary();
+  renderPreview(); // keep the tile picker in sync with whatever was typed
+}
+
+function deleteRow(id){
+  if(!confirm('Delete this row?')) return;
+  state.entries = state.entries.filter(e=>e.id!==id);
+  if(!state.entries.length){
+    state.entries.push({id:uid(), category:'', subCategory:'', service:'', assignedTo:'', slaDays:null, l1Escalation:'', comments:''});
+  }
+  renderGrid();
+  renderPreview();
+}
+
+$('addRowBtn').addEventListener('click', ()=>{
+  const e = {id:uid(), category:'', subCategory:'', service:'', assignedTo:'', slaDays:null, l1Escalation:'', comments:''};
+  state.entries.push(e);
+  renderGrid();
+  renderPreview();
+  const inp = document.querySelector(`tr[data-row="${e.id}"] input`);
+  if(inp) inp.focus();
+});
+
+/* ---------- preview: interactive cascading picker ---------- */
+function uniqueValues(field, filter){
+  const seen = new Map(); // lowercase -> original-case display value
+  state.entries.forEach(e=>{
+    if(filter.category!=null && e.category.trim().toLowerCase()!==filter.category.toLowerCase()) return;
+    if(filter.subCategory!=null && e.subCategory.trim().toLowerCase()!==filter.subCategory.toLowerCase()) return;
+    const v = (e[field]||'').trim();
+    if(v) seen.set(v.toLowerCase(), v);
+  });
+  return [...seen.values()].sort((a,b)=>a.localeCompare(b));
+}
+
+function renderTileList(containerId, values, chosenValue, onPick){
+  const c = $(containerId);
+  if(!values.length){
+    c.innerHTML = `<div class="ptile-empty">Nothing here yet — fill it in on the left.</div>`;
+    return;
+  }
+  c.innerHTML = values.map(v=>`<div class="ptile ${v===chosenValue?'chosen':''}" data-val="${escapeHtml(v)}">${escapeHtml(v)}</div>`).join('');
+  c.querySelectorAll('.ptile').forEach(t=>t.addEventListener('click', ()=> onPick(t.dataset.val)));
+}
+
+function updateBreadcrumb(){
+  const parts = [];
+  if(previewPath.category) parts.push(previewPath.category);
+  if(previewPath.subCategory) parts.push(previewPath.subCategory);
+  if(previewPath.service) parts.push(previewPath.service);
+  $('breadcrumb').innerHTML = parts.length ? '<b>' + parts.map(escapeHtml).join('</b> &rsaquo; <b>') + '</b>' : 'Choose a category to start';
+}
+
+function renderPreview(){
+  const cats = uniqueValues('category', {});
+  if(previewPath.category && !cats.some(c=>c.toLowerCase()===previewPath.category.toLowerCase())){
+    previewPath = {category:null, subCategory:null, service:null};
+  }
+  renderTileList('stepCategoryList', cats, previewPath.category, val=>{
+    previewPath = {category:val, subCategory:null, service:null};
+    renderPreview();
+  });
+
+  $('stepSubBlock').style.display = previewPath.category ? '' : 'none';
+  $('stepServiceBlock').style.display = 'none';
+  $('resolvedBlock').style.display = 'none';
+
+  if(!previewPath.category){ updateBreadcrumb(); return; }
+
+  const subs = uniqueValues('subCategory', {category:previewPath.category});
+  if(previewPath.subCategory && !subs.some(s=>s.toLowerCase()===previewPath.subCategory.toLowerCase())){
+    previewPath.subCategory = null; previewPath.service = null;
+  }
+  renderTileList('stepSubList', subs, previewPath.subCategory, val=>{
+    previewPath.subCategory = val; previewPath.service = null;
+    renderPreview();
+  });
+
+  if(!previewPath.subCategory){ updateBreadcrumb(); return; }
+  $('stepServiceBlock').style.display = '';
+
+  const services = uniqueValues('service', {category:previewPath.category, subCategory:previewPath.subCategory});
+  if(previewPath.service && !services.some(s=>s.toLowerCase()===previewPath.service.toLowerCase())){
+    previewPath.service = null;
+  }
+  renderTileList('stepServiceList', services, previewPath.service, val=>{
+    previewPath.service = val;
+    renderPreview();
+  });
+
+  updateBreadcrumb();
+
+  if(!previewPath.service) return;
+
+  const entry = state.entries.find(e=>
+    e.category.trim().toLowerCase()===previewPath.category.toLowerCase() &&
+    e.subCategory.trim().toLowerCase()===previewPath.subCategory.toLowerCase() &&
+    e.service.trim().toLowerCase()===previewPath.service.toLowerCase()
+  );
+  $('resolvedBlock').style.display = '';
+  renderResolved(entry);
+}
+
+function setResolvedField(elId, value){
+  const el = $(elId);
+  if(value!=null && String(value).trim()){
+    el.textContent = value;
+    el.classList.remove('missing');
+  } else {
+    el.textContent = 'Not set yet';
+    el.classList.add('missing');
+  }
+}
+
+function renderResolved(entry){
+  if(!entry){
+    setResolvedField('rv_assigned', null);
+    setResolvedField('rv_sla', null);
+    setResolvedField('rv_l1', null);
+    $('rv_comments').textContent = '—';
+    return;
+  }
+  setResolvedField('rv_assigned', entry.assignedTo);
+  setResolvedField('rv_sla', entry.slaDays!=null && entry.slaDays!=='' ? entry.slaDays+' day(s)' : null);
+  setResolvedField('rv_l1', entry.l1Escalation);
+  $('rv_comments').textContent = entry.comments && entry.comments.trim() ? entry.comments : '—';
+  $('rv_comments').classList.remove('missing');
+}
+
+$('resetPreviewBtn').addEventListener('click', ()=>{
+  previewPath = {category:null, subCategory:null, service:null};
+  renderPreview();
+});
+
+function updateSummary(){
+  $('sumTotal').textContent = state.entries.length;
+  $('sumPending').textContent = state.entries.filter(e=>!isComplete(e)).length;
+}
+
+/* ---------- export ---------- */
+function downloadFile(filename, content, mime){
+  const blob = new Blob([content], {type:mime||'text/plain'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click();
+  setTimeout(()=>{ document.body.removeChild(a); URL.revokeObjectURL(url); }, 200);
+}
+function csvEscape(v){
+  v = String(v==null?'':v);
+  if(/[",\n]/.test(v)) return '"'+v.replace(/"/g,'""')+'"';
+  return v;
+}
+$('downloadCsvBtn').addEventListener('click', ()=>{
+  const header = ['Category','Sub Category','Service','Assigned To','SLA (in Days)','L1 Escalation','Comments / Remarks'];
+  const rows = state.entries.map(e=>[e.category,e.subCategory,e.service,e.assignedTo,e.slaDays==null?'':e.slaDays,e.l1Escalation,e.comments]);
+  const csv = [header,...rows].map(r=>r.map(csvEscape).join(',')).join('\n');
+  downloadFile((state.workspace||'ticket-categories').replace(/\s+/g,'-')+'.csv', csv, 'text/csv');
+  toast('CSV downloaded.', 'success');
+});
+
+$('workspaceName').addEventListener('change', ()=>{ state.workspace = $('workspaceName').value.trim(); });
+
+/* ---------- init ---------- */
+(function init(){
+  const params = new URLSearchParams(window.location.search);
+  const fromUrl = params.get('team') || params.get('workspace');
+  if(fromUrl && fromUrl.trim()){
+    state.workspace = fromUrl.trim();
+    $('workspaceName').value = state.workspace;
+  }
+  renderGrid();
+  renderPreview();
+})();
+</script>
+</body>
+{% endif %} 
+
+
+
+<div class="row sectionBlockLayout text-start" style="display: flex; flex-wrap: wrap; margin: 0px; min-height: auto; padding: 8px;">
+  <div class="container" style="padding: 0px; display: flex; flex-wrap: wrap;">
+    <div class="col-lg-12 columnBlockLayout" style="flex-grow: 1; display: flex; flex-direction: column; min-width: 250px;">
+      <p>Nothing on this Page</p>
+    </div>
+  </div>
+</div>

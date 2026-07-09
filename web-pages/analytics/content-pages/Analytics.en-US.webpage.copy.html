@@ -1,0 +1,4657 @@
+{% include "Ticketing System - Loader" %}
+
+{%- assign userEmail = user.emailaddress1 | downcase -%}
+
+{%- assign isAllowedAllAccess = false -%}
+{%- assign defaultDept = "" -%}
+{%- assign hasIT  = false -%}
+{%- assign hasPROC  = false -%}
+{%- assign hasHR  = false -%}
+{%- assign hasLEGAL  = false -%}
+{%- assign hasCS  = false -%}
+{%- assign hasP2P = false -%}
+
+{%- if userEmail == "g.blythe@starlinks-me.com" or userEmail == "quentin.naylor@starlinks-me.com" or userEmail == "maxim.sychevskiy@starlinks-me.com" or userEmail == "rehan.memon@starlinks-me.com" -%}
+  {%- assign isAllowedAllAccess = true -%}
+  {%- assign defaultDept = "HR" -%}
+{%- endif -%}
+
+{%- if userEmail == "tamer.alamad@starlinks-me.com" -%}
+  {%- assign isAllowedAllAccess = true -%}
+  {%- assign defaultDept = "IT" -%}
+{%- endif -%}
+
+{%- if user.roles contains "Starlinks Procurement Team" -%}
+  {%- assign hasPROC = true -%}
+  {%- assign defaultDept = "PROC" -%}
+{%- endif -%}
+
+{%- if user.roles contains "Starlinks P2P Team" -%}
+  {%- assign hasP2P = true -%}
+  {%- assign defaultDept = "P2P" -%}
+{%- endif -%}
+
+
+{%- if user.roles contains "Starlinks HR Team" -%}
+  {%- assign hasHR = true -%}
+  {%- assign defaultDept = "HR" -%}
+{%- endif -%}
+
+{%- if user.roles contains "Starlinks Technology Team" -%}
+  {%- assign hasIT = true -%}
+  {%- assign defaultDept = "IT" -%}
+{%- endif -%}
+
+{%- if user.roles contains "Starlinks Legal Team" -%}
+  {%- assign hasLEGAL = true -%}
+  {%- assign defaultDept = "LEGAL" -%}
+{%- endif -%}
+
+{%- if user.roles contains "Starlinks Customer Service Team" -%}
+  {%- assign hasCS = true -%}
+  {%- assign defaultDept = "CS" -%}
+{%- endif -%}
+
+{%- if defaultDept == "" -%}
+  {% include "Starlinks - Access Not Enabled" title: "Dashboard access not enabled" subtitle: "You don't currently have access to any department dashboards. Please contact the Administrator if this is unexpected." primaryUrl: "/" primaryText: "Back to home" secondaryUrl: "mailto:rehan.memon@starlinks-me.com?subject=Dashboard%20Access%20Request&body=Hi%20Team,%0A%0AI%20do%20not%20have%20access%20to%20the%20Analytics%20Dashboard.%0A%0AThanks" secondaryText: "Contact Administrator" %}
+{%- else -%}
+
+{%- if user.roles contains "ABC" -%}
+<!-- Analytics Header -->
+<div class="topbar">
+  <div class="topbar-left">
+    <div class="topbar-title">Starlinks One Dashboard</div>
+    <div class="topbar-sub">Insights on workload, SLA health, trends, and bottlenecks.</div>
+    <div class="topbar-meta">
+      <span class="chip"><span class="dot"></span><span id="debugMsg">Ready</span></span>
+      <span class="chip"><span class="dot"></span>Executive View</span>
+    </div>
+  </div>
+
+  <!-- RIGHT: Controls -->
+  <div class="topbar-right" style="align-items: flex-end;">
+    <div class="control">
+      <label class="form-label">Department</label>
+      <select id="a_module" class="form-select form-select-sm">
+        <!-- <option value="ALL">All Departments</option> -->
+        {%- if hasPROC or isAllowedAllAccess -%}
+          <option value="PROC" {% if defaultDept == "PROC" %}selected{% endif %}>Procurement</option>
+        {%- endif -%}
+
+        {%- if isAllowedAllAccess -%}
+        <option value="P2P" {% if defaultDept=="P2P" %}selected{% endif %}>
+          Finance (P2P)
+        </option>
+        {%- endif -%}
+        {%- if isAllowedAllAccess or user.roles contains "Starlinks Finance Team" -%}
+          <option value="P2P" {% if defaultDept == "P2P" %}selected{% endif %}>Finance (P2P)</option>
+        {%- endif -%}
+
+        {%- if hasHR or isAllowedAllAccess -%}
+          <option value="HR" {% if defaultDept == "HR" %}selected{% endif %}>
+            HR
+          </option>
+        {%- endif -%}
+        {%- if hasLEGAL or isAllowedAllAccess -%}
+          <option value="LEGAL" {% if defaultDept == "LEGAL" %}selected{% endif %}>
+            Legal
+          </option>
+        {%- endif -%}
+
+        {%- if hasIT or isAllowedAllAccess -%}
+          <option value="IT" {% if defaultDept == "IT" %}selected{% endif %}>
+            IT
+          </option>
+        {%- endif -%}
+
+        {%- if hasCS or isAllowedAllAccess -%}
+          <option value="CS" {% if defaultDept == "CS" %}selected{% endif %}>
+            Customer Service
+          </option>
+        {%- endif -%}
+      </select>
+    </div>
+    <div class="control" style="min-width:240px;">
+      <label class="form-label">Date Range</label>
+      <select id="a_dateRange" class="form-select form-select-sm">
+        <option value="today">Today</option>
+        <option value="yesterday">Yesterday</option>
+        <option value="last7">Last 7 Days</option>
+        <option value="thisMonth">This Month</option>
+        <option value="lastMonth">Last Month</option>
+        <option value="lastQuarter">Last Quarter</option>
+        <option value="thisYear">This Year</option>
+        <option value="last90" selected>Last 90 Days (recommended)</option>
+        <option value="last365">Last 365 Days</option>
+        <option value="custom">Custom Range</option>
+      </select>
+    </div>
+    <!-- Date Range Filter -->
+    <div id="a_customRange" class="d-none d-flex gap-3">
+      <div class="control" style="min-width:240px;">
+        <label class="form-label">Start Date</label>
+        <input type="date" id="a_startDate" class="form-control form-control-sm">
+      </div>
+
+      <div class="control" style="min-width:240px;">
+        <label class="form-label">End Date</label>
+        <input type="date" id="a_endDate" class="form-control form-control-sm">
+      </div>
+    </div>
+
+    </div>
+
+    <!-- Dynamic filter 1
+    <div class="control" id="dyn_filter1_wrap" style="display:none; min-width:180px; max-width:220px;">
+      <label class="form-label mb-0" id="dyn_filter1_label">Filter 1</label>
+      <select id="dyn_filter1" class="form-select form-select-sm">
+        <option value="">All</option>
+      </select>
+    </div>
+
+    <!-- Dynamic filter 2 
+    <div class="control" id="dyn_filter2_wrap" style="display:none; min-width:180px; max-width:220px;">
+      <label class="form-label mb-0" id="dyn_filter2_label">Filter 2</label>
+      <select id="dyn_filter2" class="form-select form-select-sm">
+        <option value="">All</option>
+      </select>
+    </div>
+
+    <button id="a_apply" class="btn btn-primary" style="height:38px;">Apply</button>-->
+    <!-- <button id="a_apply" class="btn btn-primary" style="height:38px;">Apply</button> -->
+
+    <!-- Dynamic filters mount point -->
+    <div id="dyn_filters_container" style="display:contents;"></div>
+
+    <button id="a_apply" class="btn btn-primary" style="height:38px; align-self:flex-end;">Apply</button>
+    <span id="dyn_results_badge" style="display:none;" class="chip">
+      <span class="dot"></span>
+      <span id="dyn_results_count">—</span> records
+    </span>
+  </div>
+</div>
+
+
+<div class="topbar">
+  <div class="topbar-left">
+    <div class="topbar-title">Starlinks One Dashboard</div>
+    <div class="topbar-sub">Insights on workload, SLA health, trends, and bottlenecks.</div>
+    <div class="topbar-meta">
+      <span class="chip"><span class="dot"></span><span id="debugMsg">Ready</span></span>
+      <span class="chip"><span class="dot"></span>Executive View</span>
+      <!-- <span id="dyn_results_badge" style="display:none; align-self:flex-end;"> -->
+        <span class="chip" id="dyn_results_badge"><span class="dot"></span><span id="dyn_results_count">—</span> records</span>
+      <!-- </span> -->
+    </div>
+  </div>
+
+  <div class="topbar-right" style="display:flex; flex-wrap:wrap; align-items:flex-end; gap:12px;">
+
+    <div style="display:flex; flex-direction:column; gap:4px;">
+      <label class="form-label" style="margin-bottom:0;">Department</label>
+      <select id="a_module" class="form-select form-select-sm" style="min-width:160px;">
+        {%- if hasPROC or isAllowedAllAccess -%}
+          <option value="PROC" {% if defaultDept == "PROC" %}selected{% endif %}>Procurement</option>
+        {%- endif -%}
+        {%- if isAllowedAllAccess -%}
+          <option value="P2P" {% if defaultDept == "P2P" %}selected{% endif %}>Finance (P2P)</option>
+        {%- endif -%}
+        {%- if hasHR or isAllowedAllAccess -%}
+          <option value="HR" {% if defaultDept == "HR" %}selected{% endif %}>HR</option>
+        {%- endif -%}
+        {%- if hasLEGAL or isAllowedAllAccess -%}
+          <option value="LEGAL" {% if defaultDept == "LEGAL" %}selected{% endif %}>Legal</option>
+        {%- endif -%}
+        {%- if hasIT or isAllowedAllAccess -%}
+          <option value="IT" {% if defaultDept == "IT" %}selected{% endif %}>IT</option>
+        {%- endif -%}
+        {%- if hasCS or isAllowedAllAccess -%}
+          <option value="CS" {% if defaultDept == "CS" %}selected{% endif %}>Customer Service</option>
+        {%- endif -%}
+      </select>
+    </div>
+
+    <div style="display:flex; flex-direction:column; gap:4px;">
+      <label class="form-label" style="margin-bottom:0;">Date Range</label>
+      <select id="a_dateRange" class="form-select form-select-sm" style="min-width:220px;">
+        <option value="today">Today</option>
+        <option value="yesterday">Yesterday</option>
+        <option value="last7">Last 7 Days</option>
+        <option value="thisMonth">This Month</option>
+        <option value="lastMonth">Last Month</option>
+        <option value="lastQuarter">Last Quarter</option>
+        <option value="thisYear">This Year</option>
+        <option value="last90" selected>Last 90 Days (recommended)</option>
+        <option value="last365">Last 365 Days</option>
+        <option value="custom">Custom Range</option>
+      </select>
+    </div>
+
+    <!-- Custom date range inputs -->
+    <div id="a_customRange" class="d-none" style="display:none; gap:12px;">
+      <div style="display:flex; flex-direction:column; gap:4px;">
+        <label class="form-label" style="margin-bottom:0;">Start Date</label>
+        <input type="date" id="a_startDate" class="form-control form-control-sm" style="min-width:160px;">
+      </div>
+      <div style="display:flex; flex-direction:column; gap:4px;">
+        <label class="form-label" style="margin-bottom:0;">End Date</label>
+        <input type="date" id="a_endDate" class="form-control form-control-sm" style="min-width:160px;">
+      </div>
+    </div>
+
+    <!-- Dynamic filter 1 -->
+    <!-- <div style="display:none; flex-direction:column; gap:4px;" id="dyn_filter1_wrap">
+      <label class="form-label" style="margin-bottom:0;" id="dyn_filter1_label">Filter 1</label>
+      <select id="dyn_filter1" class="form-select form-select-sm" style="min-width:160px;">
+        <option value="">All</option>
+      </select>
+    </div> -->
+
+    <!-- Dynamic filter 2 -->
+    <!-- <div style="display:none; flex-direction:column; gap:4px;" id="dyn_filter2_wrap">
+      <label class="form-label" style="margin-bottom:0;" id="dyn_filter2_label">Filter 2</label>
+      <select id="dyn_filter2" class="form-select form-select-sm" style="min-width:160px;">
+        <option value="">All</option>
+      </select>
+    </div> -->
+
+    <div id="dyn_filters_container" style="display:contents;"></div>
+
+    <!-- <button id="a_apply" class="btn btn-primary" style="height:38px; align-self:flex-end;">Apply</button> -->
+    <button id="a_apply" class="btn btn-primary" style="height:38px; align-self:flex-end;">Apply</button>
+    
+  </div>
+</div>
+
+<div id="dyn_active_filters" style="display:none; flex-wrap:wrap; gap:8px; margin-top:8px; padding:10px 20px; align-items:center; justify-content:flex-end;">
+</div>
+{%- endif -%}
+
+<!-- Topbar — title and meta only -->
+<div class="topbar">
+  <div class="topbar-left">
+    <div class="topbar-title">Starlinks One Dashboard</div>
+    <div class="topbar-sub">Insights on workload, SLA health, trends, and bottlenecks.</div>
+    <div class="topbar-meta">
+      <span class="chip"><span class="dot"></span><span id="debugMsg">Ready</span></span>
+      <span class="chip"><span class="dot"></span>Executive View</span>
+    </div>
+  </div>
+</div>
+
+<!-- Filter Bar — all controls live here -->
+<div class="sectionbar" style="margin-top:8px;">
+  <div style="display:flex; flex-wrap:wrap; gap:12px; align-items:flex-end;">
+
+    <div style="display:flex; flex-direction:column; gap:4px;">
+      <label class="form-label" style="margin-bottom:0;">Department</label>
+      <select id="a_module" class="form-select form-select-sm" style="min-width:140px;">
+        {%- if hasPROC or isAllowedAllAccess -%}
+          <option value="PROC" {% if defaultDept == "PROC" %}selected{% endif %}>Procurement</option>
+        {%- endif -%}
+        {%- if isAllowedAllAccess -%}
+          <option value="P2P" {% if defaultDept == "P2P" %}selected{% endif %}>Finance (P2P)</option>
+        {%- endif -%}
+        {%- if hasHR or isAllowedAllAccess -%}
+          <option value="HR" {% if defaultDept == "HR" %}selected{% endif %}>HR</option>
+        {%- endif -%}
+        {%- if hasLEGAL or isAllowedAllAccess -%}
+          <option value="LEGAL" {% if defaultDept == "LEGAL" %}selected{% endif %}>Legal</option>
+        {%- endif -%}
+        {%- if hasIT or isAllowedAllAccess -%}
+          <option value="IT" {% if defaultDept == "IT" %}selected{% endif %}>IT</option>
+        {%- endif -%}
+        {%- if hasCS or isAllowedAllAccess -%}
+          <option value="CS" {% if defaultDept == "CS" %}selected{% endif %}>Customer Service</option>
+        {%- endif -%}
+      </select>
+    </div>
+
+    <div style="display:flex; flex-direction:column; gap:4px;">
+      <label class="form-label" style="margin-bottom:0;">Date Range</label>
+      <select id="a_dateRange" class="form-select form-select-sm" style="min-width:200px;">
+        <option value="today">Today</option>
+        <option value="yesterday">Yesterday</option>
+        <option value="last7">Last 7 Days</option>
+        <option value="thisMonth">This Month</option>
+        <option value="lastMonth">Last Month</option>
+        <option value="lastQuarter">Last Quarter</option>
+        <option value="thisYear">This Year</option>
+        <option value="last90" selected>Last 90 Days (recommended)</option>
+        <option value="last365">Last 365 Days</option>
+        <option value="custom">Custom Range</option>
+      </select>
+    </div>
+
+    <!-- Custom date inputs -->
+    <div id="a_customRange" style="display:none; gap:12px;">
+      <div style="display:flex; flex-direction:column; gap:4px;">
+        <label class="form-label" style="margin-bottom:0;">Start Date</label>
+        <input type="date" id="a_startDate" class="form-control form-control-sm" style="min-width:150px;">
+      </div>
+      <div style="display:flex; flex-direction:column; gap:4px;">
+        <label class="form-label" style="margin-bottom:0;">End Date</label>
+        <input type="date" id="a_endDate" class="form-control form-control-sm" style="min-width:150px;">
+      </div>
+    </div>
+
+    <!-- Dynamic filters mount point -->
+    <div id="dyn_filters_container" style="display:flex; flex-wrap:wrap; gap:12px; align-items:flex-end;">
+    </div>
+
+    <!-- Divider -->
+    <!-- <div style="width:1px; background:#e0e0e0; align-self:stretch; margin:0 4px;"></div> -->
+
+    <button id="a_apply" class="btn btn-primary" style="height:38px; align-self:flex-end;">Apply</button>
+
+    <!-- <span id="dyn_results_badge" style="display:none; align-self:flex-end;">
+      <span class="chip"><span class="dot"></span><span id="dyn_results_count">—</span> records</span>
+    </span> -->
+
+  </div>
+
+  <!-- Active filter chips -->
+  <div id="dyn_active_filters" style="display:none; flex-wrap:wrap; gap:8px; margin-top:10px; padding-top:10px; border-top:0.5px solid #e0e0e0; align-items:center;">
+  </div>
+
+</div>
+
+<!-- Section A -->
+<div class="sectionbar">
+  <div class="section-head">
+    <div>
+      <div class="section-kicker">
+        <span class="badge-soft">Section A</span>
+        <div class="section-title">Demand &amp; Volume (What’s coming in)</div>
+      </div>
+      <div class="section-purpose">Purpose: Understand workload drivers and volatility</div>
+      <!-- keep a_debug id -->
+      <div class="section-debug" id="a_debug" style="display: none;"></div>
+    </div>
+  </div>
+  <!-- KPI Cards -->
+  <div class="row g-3 mb-3">
+    <div class="col-lg-3 col-md-6 col-sm-12">
+      <div class="c p-3">
+        <div class="kpi-l" id="a_kpiTicketsLabel">Tickets</div>
+        <div class="d-flex align-items-end justify-content-between">
+          <div id="a_kpiTickets" class="kpi">—</div>
+          <span class="chip">#</span>
+        </div>
+        <div class="hint mt-1" id="a_kpiTicketsDetail">—</div>
+      </div>
+    </div>
+
+    <div class="col-lg-3 col-md-6 col-sm-12">
+      <div class="c p-3">
+        <div class="kpi-l" id="a_kpiTtcLabel">Avg Time to Complete (Selected)</div>
+        <div class="d-flex align-items-end justify-content-between">
+          <div id="a_kpiAvgTtc" class="kpi">—</div>
+        </div>
+        <div class="hint mt-1" id="a_kpiAvgTtcDetail"></div>
+      </div>
+    </div>
+
+    <div class="col-lg-3 col-md-6 col-sm-12">
+      <div class="c p-3">
+        <div class="kpi-l" id="a_kpiUnassignedLabel">Unassigned (Selected)</div>
+        <div class="d-flex align-items-end justify-content-between">
+          <div id="a_kpiUnassigned" class="kpi">—</div>
+        </div>
+        <div class="hint mt-1" id="a_kpiUnassignedDetail"></div>
+      </div>
+    </div>
+
+    <div class="col-lg-3 col-md-6 col-sm-12">
+      <div class="c p-3">
+        <div class="kpi-l" id="a_kpiInflowLabel">Inflow Trend (WoW / MoM)</div>
+        <div class="d-flex align-items-end justify-content-between">
+          <div id="a_kpiInflowDelta" class="kpi">—</div>
+          <span class="chip" id="a_inflowModeChip">—</span>
+        </div>
+        <div class="hint mt-1" id="a_kpiInflowDetail"></div>
+      </div>
+    </div>
+  </div>
+  <!-- Charts -->
+  <div class="row g-3">
+    <!-- Left: Created vs Completed line -->
+    <div class="col-lg-6">
+      <div class="c chart-card h-100">
+        <div class="chart-header">
+          <div>
+            <div class="chart-title">Total requests over time</div>
+            <div class="chart-sub">Created vs Completed trend for the selected range</div>
+          </div>
+
+          <div class="chip-row">
+            <!-- Keep same IDs -->
+            <span class="chip" id="a_lineTotals"><span class="dot"></span> Created: — • Completed: —</span>
+            <span class="chip" id="a_rangeChip"><span class="dot"></span> Range: —</span>
+          </div>
+        </div>
+
+        <div class="divider-soft"></div>
+
+        <canvas id="a_createdCompletedChart" height="130"></canvas>
+      </div>
+    </div>
+
+    <!-- Right: Pareto -->
+    <div class="col-lg-6">
+      <div class="c chart-card h-100">
+        <div class="chart-header">
+          <div>
+            <div class="chart-title">Top request categories</div>
+            <div class="chart-sub">Where demand is coming from</div>
+          </div>
+
+          <!-- Keep same ID -->
+          <span class="chip" id="a_paretoHint"><span class="dot"></span> —</span>
+        </div>
+
+        <div class="divider-soft"></div>
+
+        <!-- <canvas id="a_paretoChart" height="130"></canvas> -->
+        <div id="a_paretoChartWrapper" style="position:relative;">
+          <canvas id="a_paretoChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Section B -->
+<div class="sectionbar">
+  <div class="section-head">
+    <div>
+      <div class="section-kicker">
+        <span class="badge-soft">Section B</span>
+        <div class="section-title">Throughput &amp; Flow Efficiency (How work moves)</div>
+      </div>
+      <div class="section-purpose">Purpose: See if the system is flowing or clogging</div>
+      <div class="section-debug" id="b_debug" style="display: none;"></div>
+    </div>
+  </div>
+
+  <!-- KPI Cards (4 in a row on large screens) -->
+  <div class="row g-3 mb-3">
+    <div class="col-lg-3 col-md-6 col-sm-12">
+      <div class="c p-3">
+        <div class="kpi-l">Completed</div>
+        <div class="d-flex align-items-end justify-content-between">
+          <div id="b_kpiCompleted" class="kpi">—</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-3 col-md-6 col-sm-12">
+      <div class="c p-3">
+        <div class="kpi-l">Avg Cycle Time (Completion - Created)</div>
+        <div class="d-flex align-items-end justify-content-between">
+          <div id="b_kpiAvgCycle" class="kpi">—</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-3 col-md-6 col-sm-12">
+      <div class="c p-3">
+        <div class="kpi-l">Median Cycle Time</div>
+        <div class="d-flex align-items-end justify-content-between">
+          <div id="b_kpiMedianCycle" class="kpi">—</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-3 col-md-6 col-sm-12">
+      <div class="c p-3">
+        <div class="kpi-l">Throughput vs Inflow <span id="b_kpiThroughputHint">—</span></div>
+        <div class="d-flex align-items-end justify-content-between">
+          <div id="b_kpiThroughput" class="kpi">—</div>
+          <span class="chip">%</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Charts (MATCHES Section A chart cards) -->
+  <div class="row g-3">
+    <!-- Left: Cycle time trend -->
+    <div class="col-lg-6">
+      <div class="c chart-card h-100">
+        <div class="chart-header">
+          <div>
+            <div class="chart-title">Avg &amp; Median Cycle Time (trend)</div>
+            <div class="chart-sub">Flow health indicator over the selected range</div>
+          </div>
+
+          <div class="chip-row">
+            <!-- keep IDs -->
+            <span class="chip" id="b_rangeChip"><span class="dot"></span> Range: —</span>
+            <span class="chip" id="b_countsChip"><span class="dot"></span> Created: — • Completed: —</span>
+          </div>
+        </div>
+
+        <div class="divider-soft"></div>
+        <canvas id="b_cycleTrendChart" height="130"></canvas>
+      </div>
+    </div>
+
+    <!-- Right: Ageing buckets -->
+    <div class="col-lg-6">
+      <div class="c chart-card h-100">
+        <div class="chart-header">
+          <div>
+            <div class="chart-title">Open Requests Ageing (bucket)</div>
+            <div class="chart-sub">Backlog risk distribution</div>
+          </div>
+
+          <span class="chip"><span class="dot"></span> 0-3 • 4-7 • 8-14 • 15+</span>
+        </div>
+
+        <div class="divider-soft"></div>
+
+        <canvas id="b_openAgingChart" height="130"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Section C -->
+<div class="sectionbar">
+  <div class="section-head">
+    <div>
+      <div class="section-kicker">
+        <span class="badge-soft">Section C</span>
+        <div class="section-title">SLA Performance (Are we meeting commitments?)</div>
+      </div>
+      <div class="section-purpose">Purpose: Control service reliability</div>
+      <div class="section-debug" id="c_debug" style="display: none;"></div>
+    </div>
+  </div>
+
+  <!-- KPI Cards (4 in a row on large screens) -->
+  <div class="row g-3 mb-3">
+    <!-- % SLA Met -->
+    <div class="col-lg-3 col-md-6 col-sm-12">
+      <div class="c p-3">
+        <div class="kpi-l" id="c_kpiSLAMetLabel">SLA Met % (Selected)</div>
+        <div class="d-flex align-items-end justify-content-between">
+          <div id="c_kpiSlaMetPct" class="kpi">—</div>
+          <span class="chip">%</span>
+        </div>
+        <div class="hint mt-1" id="c_kpiSlaMetDetail">—</div>
+      </div>
+    </div>
+
+    <!-- SLA Breach % (optional but very useful alongside SLA Met) -->
+    <div class="col-lg-3 col-md-6 col-sm-12">
+      <div class="c p-3">
+        <div class="kpi-l" id="c_kpiSLABreachLabel">SLA Breach % (Selected)</div>
+        <div class="d-flex align-items-end justify-content-between">
+          <div id="c_kpiSlaBreachPct" class="kpi">—</div>
+          <span class="chip">%</span>
+        </div>
+        <div class="hint mt-1" id="c_kpiSlaBreachDetail">—</div>
+      </div>
+    </div>
+
+    <!-- Avg Delay for Breached -->
+    <div class="col-lg-3 col-md-6 col-sm-12">
+      <div class="c p-3">
+        <div class="kpi-l">Avg Delay (Breached)</div>
+        <div class="d-flex align-items-end justify-content-between">
+          <div id="c_kpiAvgDelay" class="kpi">—</div>
+        </div>
+        <div class="hint mt-1" id="c_kpiAvgDelayDetail">Delay = Actual completion - Target completion</div>
+      </div>
+    </div>
+
+    <!-- SLA Trend (delta) -->
+    <div class="col-lg-3 col-md-6 col-sm-12">
+      <div class="c p-3">
+        <div class="kpi-l">SLA Compliance Trend</div>
+        <div class="d-flex align-items-end justify-content-between">
+          <div id="c_kpiTrendDelta" class="kpi">—</div>
+          <span class="chip" id="c_trendModeChip">—</span>
+        </div>
+        <div class="hint mt-1" id="c_kpiTrendDetail">—</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Visuals row: Trend + Breach (equal width) -->
+  <div class="row g-3">
+    <!-- Line: SLA % trend -->
+    <div class="col-lg-6">
+      <div class="c chart-card h-100">
+        <div class="chart-header">
+          <div>
+            <div class="chart-title">SLA % trend</div>
+            <div class="chart-sub">Measured at completion (not creation)</div>
+          </div>
+          <div class="chip-row">
+            <span class="chip" id="c_rangeChip"><span class="dot"></span> Range: —</span>
+            <span class="chip" id="c_slaCountsChip"><span class="dot"></span> Met: — • Breached: —</span>
+          </div>
+        </div>
+        <div class="divider-soft"></div>
+        <canvas id="c_slaTrendChart" height="150"></canvas>
+      </div>
+    </div>
+
+    <!-- Bar: Top SLA breach categories -->
+    <div class="col-lg-6">
+      <div class="c chart-card h-100">
+        <div class="chart-header">
+          <div>
+            <div class="chart-title">Top SLA breach categories</div>
+            <div class="chart-sub">Where to act first</div>
+          </div>
+          <span class="chip" id="c_breachCatsHint"><span class="dot"></span> Top 10</span>
+        </div>
+        <div class="divider-soft"></div>
+        <canvas id="c_breachCategoryChart" height="150"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Heatmap full-width below -->
+  <div class="row g-3 mt-1">
+    <div class="col-12">
+      <div class="c chart-card">
+        <div class="chart-header">
+          <div>
+            <div class="chart-title">SLA % by Function x Month</div>
+            <div class="chart-sub">Spot systematic weak areas</div>
+          </div>
+          <span class="chip" id="c_heatmapHint"><span class="dot"></span> % SLA Met</span>
+        </div>
+        <div class="divider-soft"></div>
+
+        <div class="table-responsive" style="max-height:340px; overflow:auto;">
+          <table class="table table-sm mb-0" id="c_heatmapTable">
+            <thead class="table-light">
+              <tr id="c_heatmapHeadRow">
+                <th style="position:sticky; left:0; background:#f8fafc; z-index:2;">Function</th>
+                <!-- months injected here -->
+              </tr>
+            </thead>
+            <tbody id="c_heatmapBody">
+              <!-- rows injected here -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Visuals row (3 charts after KPI cards) -->
+  <!-- <div class="row g-3">
+
+    <div class="col-lg-4">
+      <div class="c chart-card h-100">
+        <div class="chart-header">
+          <div>
+            <div class="chart-title">SLA % trend</div>
+            <div class="chart-sub">Measured at completion (not creation)</div>
+          </div>
+          <div class="chip-row">
+            <span class="chip" id="c_rangeChip"><span class="dot"></span> Range: —</span>
+            <span class="chip" id="c_slaCountsChip"><span class="dot"></span> Met: — • Breached: —</span>
+          </div>
+        </div>
+        <div class="divider-soft"></div>
+        <canvas id="c_slaTrendChart" height="150"></canvas>
+      </div>
+    </div>
+    <div class="col-lg-4">
+      <div class="c chart-card h-100">
+        <div class="chart-header">
+          <div>
+            <div class="chart-title">SLA % by Function x Month</div>
+            <div class="chart-sub">Spot systematic weak areas</div>
+          </div>
+          <span class="chip" id="c_heatmapHint"><span class="dot"></span> % SLA Met</span>
+        </div>
+        <div class="divider-soft"></div>
+
+        <div class="table-responsive" style="max-height:340px; overflow:auto;">
+          <table class="table table-sm mb-0" id="c_heatmapTable">
+            <thead class="table-light">
+              <tr id="c_heatmapHeadRow">
+                <th style="position:sticky; left:0; background:#f8fafc; z-index:2;">Function</th>
+              </tr>
+            </thead>
+            <tbody id="c_heatmapBody">
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-4">
+      <div class="c chart-card h-100">
+        <div class="chart-header">
+          <div>
+            <div class="chart-title">Top SLA breach categories</div>
+            <div class="chart-sub">Where to act first</div>
+          </div>
+          <span class="chip" id="c_breachCatsHint"><span class="dot"></span> Top 10</span>
+        </div>
+        <div class="divider-soft"></div>
+        <canvas id="c_breachCategoryChart" height="150"></canvas>
+      </div>
+    </div>
+  </div> -->
+
+</div>
+<!-- Section D -->
+<div class="sectionbar">
+  <div class="section-head">
+    <div>
+      <div class="section-kicker">
+        <span class="badge-soft">Section D</span>
+        <div class="section-title">Capacity &amp; Utilisation (Can the team cope?)</div>
+      </div>
+      <div class="section-purpose">Purpose: Understand load vs capacity (queue-based proxy)</div>
+      <div class="section-debug" id="d_debug" style="display: none;"></div>
+    </div>
+  </div>
+
+  <!-- KPI Cards -->
+  <div class="row g-3 mb-3">
+    <div class="col-lg-3 col-md-6 col-sm-12">
+      <div class="c p-3">
+        <div class="kpi-l">Active Requests</div>
+        <div class="d-flex align-items-end justify-content-between">
+          <div id="d_kpiActive" class="kpi">—</div>
+        </div>
+        <div class="hint mt-1" id="d_kpiActiveDetail">—</div>
+      </div>
+    </div>
+
+    <div class="col-lg-3 col-md-6 col-sm-12">
+      <div class="c p-3">
+        <div class="kpi-l">Assignees with Active Work</div>
+        <div class="d-flex align-items-end justify-content-between">
+          <div id="d_kpiAssignees" class="kpi">—</div>
+        </div>
+        <div class="hint mt-1" id="d_kpiAssigneesDetail">—</div>
+      </div>
+    </div>
+
+    <div class="col-lg-3 col-md-6 col-sm-12">
+      <div class="c p-3">
+        <div class="kpi-l">Utilisation Proxy</div>
+        <div class="d-flex align-items-end justify-content-between">
+          <div id="d_kpiUtilisation" class="kpi">—</div>
+        </div>
+        <div class="hint mt-1" id="d_kpiUtilisationDetail">—</div>
+      </div>
+    </div>
+
+    <div class="col-lg-3 col-md-6 col-sm-12">
+      <div class="c p-3">
+        <div class="kpi-l">Completed</div>
+        <div class="d-flex align-items-end justify-content-between">
+          <div id="d_kpiCompleted" class="kpi">—</div>
+        </div>
+        <div class="hint mt-1" id="d_kpiCompletedDetail">—</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Visuals -->
+  <div class="row g-3">
+    <!-- Column: requests per assignee -->
+    <div class="col-lg-6">
+      <div class="c chart-card h-100">
+        <div class="chart-header">
+          <div>
+            <div class="chart-title">Requests per assignee</div>
+            <div class="chart-sub">Active (open) vs Completed</div>
+          </div>
+          <div class="chip-row">
+            <span class="chip" id="d_rangeChip"><span class="dot"></span> Range: —</span>
+            <span class="chip" id="d_countsChip"><span class="dot"></span> Active: — • Completed: —</span>
+          </div>
+        </div>
+        <div class="divider-soft"></div>
+        <canvas id="d_requestsPerAssigneeChart" height="150"></canvas>
+      </div>
+    </div>
+
+    <!-- Bubble: workload vs velocity -->
+    <div class="col-lg-6">
+      <div class="c chart-card h-100">
+        <div class="chart-header">
+          <div>
+            <div class="chart-title">Workload vs Velocity (Assignees)</div>
+            <div class="chart-sub">X = Active (open), Y = Completed, bubble size = avg open age</div>
+          </div>
+          <span class="chip" id="d_lineHint"><span class="dot"></span> Bigger bubble = older backlog</span>
+        </div>
+        <div class="divider-soft"></div>
+        <canvas id="d_assigneeBubbleChart" height="150"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Section E -->
+<div class="sectionbar">
+  <div class="section-head">
+    <div>
+      <div class="section-kicker">
+        <span class="badge-soft">Section E</span>
+        <div class="section-title">Individual Performance</div>
+      </div>
+      <div class="section-purpose">Purpose: Insights on user performance</div>
+      <div class="section-debug" id="e_debug" style="display: none;"></div>
+    </div>
+  </div>
+
+  <!-- Assignee KPI Cards (TOP) -->
+  <div class="c p-3 mb-3">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+      <div class="fw-semibold">Assignee KPI Cards</div>
+      <div class="small text-muted">Velocity • SLA% • Avg cycle • Backlog</div>
+    </div>
+    <div class="divider-soft"></div>
+    <div id="e_assigneeCards" class="row g-3"></div>
+  </div>
+
+  <!-- Line Charts (per assignee, aggregated) -->
+  <div class="row g-3">
+    <div class="col-lg-6">
+      <div class="c chart-card h-100">
+        <div class="chart-header">
+          <div>
+            <div class="chart-title">Velocity Trend (Completed)</div>
+            <div class="chart-sub">Completed tickets grouped by period per assignee</div>
+          </div>
+          <span class="chip" id="e_velHint"><span class="dot"></span> Auto daily/weekly/monthly</span>
+        </div>
+        <div class="divider-soft"></div>
+        <canvas id="e_velocityTrendChart" height="150"></canvas>
+      </div>
+    </div>
+
+    <div class="col-lg-6">
+      <div class="c chart-card h-100">
+        <div class="chart-header">
+          <div>
+            <div class="chart-title">Backlog Trend (Open)</div>
+            <div class="chart-sub">Open tickets snapshot grouped by period per assignee</div>
+          </div>
+          <span class="chip" id="e_backlogHint"><span class="dot"></span> Snapshot series</span>
+        </div>
+        <div class="divider-soft"></div>
+        <canvas id="e_backlogTrendChart" height="150"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Generic Breakdown (Dimension + Assignee x Dimension) -->
+<!-- HR Only: Vertical Breakdown -->
+<div class="sectionbar" id="hr_section" style="display:none;">
+  <div class="section-head">
+    <div>
+      <div class="section-kicker">
+        <span class="badge-soft">HR</span>
+        <div class="section-title">HR Vertical Breakdown</div>
+      </div>
+      <div class="section-purpose">Created vs Completed per vertical + assignee workload by vertical</div>
+      <div class="section-debug" id="hr_debug" style="display:none;"></div>
+    </div>
+  </div>
+
+  <div class="row g-3">
+    <!-- Totals by vertical -->
+    <div class="col-lg-6">
+      <div class="c chart-card h-100">
+        <div class="chart-header">
+          <div>
+            <div class="chart-title">Requests by Vertical</div>
+            <div class="chart-sub">Created vs Completed vs Active</div>
+          </div>
+          <span class="chip" id="hr_totals_hint"><span class="dot"></span> —</span>
+        </div>
+        <div class="divider-soft"></div>
+        <canvas id="hr_verticalStackChart" height="140"></canvas>
+      </div>
+    </div>
+
+    <!-- Assignee x vertical (Chart ONLY, no table) -->
+    <div class="col-lg-6">
+      <div class="c chart-card h-100">
+        <div class="chart-header">
+          <div>
+            <div class="chart-title">Assignee Workload by Vertical</div>
+            <div class="chart-sub">
+              Bars = Created (Active + Completed). Hover shows Created vs Completed.
+            </div>
+          </div>
+          <span class="chip" id="hr_assigneeVertical_hint">
+            <span class="dot"></span> —
+          </span>
+        </div>
+
+        <div class="divider-soft"></div>
+
+        <canvas id="hr_assigneeVerticalChart" height="140"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- scripts -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+  /* ============================================================
+     STARLINKS ONE DASHBOARD — FULLY OPTIMIZED (A–E)
+     - Fetch once (current + previous window)
+     - Normalize once
+     - Render all sections from same dataset
+     - Loader hooks: showLoader(msg), hideLoader()
+  ============================================================ */
+
+  /* ----------------------------
+     CONFIG
+  ---------------------------- */
+
+  /** Your module map (same as before) */
+  // const MODULES = {
+  //   PROC: {
+  //     label: "Procurement",
+  //     metadataTable: "/_api/sh_procurementmetadatas",
+  //     ticketNav: "sh_TicketNumber",
+  //     categoryField: "_sh_procurementcategory_value",
+  //     categoryType: "lookup",
+  //     filters: [
+  //     { label: "Category", field: "categoryLabel", type: "derived" }
+  //     // Add a second if needed: { label: "Sub-Category", field: "...", type: "derived" }
+  //   ]
+  //   },
+  //   P2P: {
+  //     label: "Finance (P2P)",
+  //     metadataTable: "/_api/sh_procurementmetadatas",
+  //     ticketNav: "sh_TicketNumber",
+  //     categoryField: "_sh_procurementcategory_value",
+  //     categoryType: "lookup"
+  //   },
+  //   HR: {
+  //     label: "HR",
+  //     metadataTable: "/_api/sh_hrmetadatas",
+  //     ticketNav: "sh_TicketNumber",
+  //     categoryField: "sh_hrservices",
+  //     categoryType: "string",
+  //     additionalDimensionField: "sh_vertical",
+  //     additionalDimensionType: "string",
+  //     filters: [
+  //       { label: "Vertical",  field: "additionalDimensionLabel", type: "derived" },
+  //       { label: "Service",   field: "categoryLabel",            type: "derived" }
+  //     ]
+  //   },
+  //   LEGAL: {
+  //     label: "Legal",
+  //     metadataTable: "/_api/sh_legalmetadatas",
+  //     ticketNav: "sh_TicketNumber",
+  //     categoryField: "_sh_requesttype_value",
+  //     categoryType: "lookup",
+  //     filters: [
+  //       { label: "Request Type", field: "categoryLabel", type: "derived" }
+  //     ]
+  //   },
+  //   IT: {
+  //     label: "IT",
+  //     metadataTable: "/_api/sh_itmetadatas",
+  //     ticketNav: "sh_TicketNumber",
+  //     categoryField: "sh_category",
+  //     categoryType: "lookup",
+  //     filters: [
+  //       { label: "Category",     field: "categoryLabel",            type: "derived" },
+  //       { label: "Applications", field: "additionalDimensionLabel", type: "derived" },
+  //       { label: "Assigned To",  field: "assigneeLabel",            type: "derived" },
+  //       { label: "Status",       field: "statusLabel",              type: "derived" }
+  //     ]
+  //   },
+  //   CS: {
+  //     label: "Customer Service",
+  //     metadataTable: "/_api/sh_customerservicemetadatas",
+  //     ticketNav: "sh_TicketNumber",
+  //     categoryField: "_sh_category_value",
+  //     categoryType: "lookup"
+  //   }
+  // };
+
+  const MODULES = {
+    PROC: {
+      label: "Procurement",
+      metadataTable: "/_api/sh_procurementmetadatas",
+      ticketNav: "sh_TicketNumber",
+      categoryField: "_sh_procurementcategory_value",
+      categoryType: "lookup",
+      additionalFields: [
+        { key: "postatus",       field: "sh_postatus",               type: "string", label: "PO Status"       },
+        { key: "approvalstatus", field: "sh_documentapprovalstatus", type: "string", label: "Approval Status" },
+        { key: "vendor",         field: "_sh_vendor_value",          type: "lookup", label: "Vendor"          }
+      ],
+      filters: [
+        { label: "PO Status",            field: "additional_postatus",       type: "derived" },
+        { label: "Approval Status",      field: "additional_approvalstatus", type: "derived" },
+        { label: "Vendor",               field: "additional_vendor",         type: "derived" },
+        { label: "Procurement Category", field: "categoryLabel",             type: "derived" }
+      ]
+    },
+    P2P: {
+      label: "Finance (P2P)",
+      ticketTable: "/_api/sh_tickets",
+      isChildModule: true,
+      stepFilter: ["Vendor Selection", "PO Creation", "GRN Posting", "GRN Entry"],
+      categoryField: "_sh_request_value",
+      categoryType: "lookup",
+      additionalFields: [],
+      filters: [
+        { label: "Step",        field: "categoryLabel",  type: "derived" },
+        { label: "Assigned To", field: "assigneeLabel",  type: "derived" }
+      ]
+    },
+    // P2P: {
+    //   label: "Finance (P2P)",
+    //   metadataTable: "/_api/sh_procurementmetadatas",
+    //   ticketNav: "sh_TicketNumber",
+    //   categoryField: "_sh_procurementcategory_value",
+    //   categoryType: "lookup",
+    //   additionalFields: [],
+    //   filters: []
+    // },
+    HR: {
+      label: "HR",
+      metadataTable: "/_api/sh_hrmetadatas",
+      ticketNav: "sh_TicketNumber",
+      categoryField: "sh_hrservices",
+      categoryType: "string",
+      additionalFields: [
+        { key: "vertical", field: "sh_vertical", type: "string", label: "Vertical" }
+      ],
+      filters: [
+        { label: "Vertical", field: "additional_vertical", type: "derived" },
+        { label: "Service", field: "categoryLabel", type: "derived" }
+      ]
+    },
+    LEGAL: {
+      label: "Legal",
+      metadataTable: "/_api/sh_legalmetadatas",
+      ticketNav: "sh_TicketNumber",
+      categoryField: "_sh_requesttype_value",
+      categoryType: "lookup",
+      additionalFields: [],
+      filters: [
+        { label: "Request Type", field: "categoryLabel", type: "derived" }
+      ]
+    },
+    IT: {
+      label: "IT",
+      metadataTable: "/_api/sh_itmetadatas",
+      ticketNav: "sh_TicketNumber",
+      categoryField: "sh_category",
+      categoryType: "lookup",
+      additionalFields: [
+        { key: "support", field: "sh_support", type: "string", label: "Applications" },
+        { key: "vertical", field: "sh_vertical", type: "string", label: "Vertical" }
+      ],
+      filters: [
+        { label: "Vertical", field: "additional_vertical", type: "derived" },
+        { label: "Applications", field: "additional_support", type: "derived" },
+        { label: "Category", field: "categoryLabel", type: "derived" }
+      ]
+    },
+    CS: {
+      label: "Customer Service",
+      metadataTable: "/_api/sh_customerservicemetadatas",
+      ticketNav: "sh_TicketNumber",
+      categoryField: "_sh_category_value",
+      categoryType: "lookup",
+
+      additionalFields: [
+        { key: "hub",           field: "_sh_hub_value",           type: "lookup", label: "Hub"            },
+        { key: "plpartner",     field: "_sh_plpartner_value",     type: "lookup", label: "3PL Partner"    },
+        { key: "sourcechannel", field: "_sh_sourcechannel_value", type: "lookup", label: "Source Channel" },
+        { key: "type",          field: "_sh_type_value",          type: "lookup", label: "Type"           }
+      ],
+      filters: [
+        { label: "Type",           field: "additional_type",          type: "derived" },
+        { label: "Category",       field: "categoryLabel",            type: "derived" },
+        { label: "Hub",            field: "additional_hub",           type: "derived" },
+        { label: "3PL Partner",    field: "additional_plpartner",     type: "derived" },
+        { label: "Source Channel", field: "additional_sourcechannel", type: "derived" }
+      ]
+    }
+  };
+
+  /**
+   * Section C needs “Function” and “Breach Category” mapping.
+   * If you want them different from category, set here.
+   */
+  const C_MODULES = {
+    PROC: { functionField: "_sh_procurementcategory_value", functionType: "lookup", breachCategoryField: "_sh_procurementcategory_value", breachCategoryType: "lookup" },
+    P2P: { functionField: "_sh_procurementcategory_value", functionType: "lookup", breachCategoryField: "_sh_procurementcategory_value", breachCategoryType: "lookup" },
+    HR: { functionField: "sh_hrservices", functionType: "string", breachCategoryField: "sh_hrservices", breachCategoryType: "string" },
+    IT: { functionField: "sh_scope", functionType: "string", breachCategoryField: "sh_scope", breachCategoryType: "string" },
+    LEGAL: { functionField: "_sh_requesttype_value", functionType: "lookup", breachCategoryField: "_sh_requesttype_value", breachCategoryType: "lookup" },
+    CS: { functionField: "_sh_category_value", functionType: "lookup", breachCategoryField: "_sh_category_value", breachCategoryType: "lookup" }
+  };
+
+  /** IMPORTANT: Replace with your actual “SLA Breach Date” logical name if different */
+  const SLA_BREACH_DATE_FIELD = "sh_sla"; // <- you used this in old C code
+
+  /** Brand colors (no default Chart.js blue) */
+  const BRAND = {
+    GREEN: "#006F4A",
+    TEAL: "#00A0AF",
+    ORANGE: "#FAA633",
+    GREY: "#94A0A9",
+    CHAR: "#58595B"
+  };
+
+  //const BRAND_SERIES = [BRAND.GREEN, BRAND.TEAL, BRAND.ORANGE, BRAND.GREY, BRAND.CHAR];
+
+  const BRAND_SERIES = [
+    BRAND.GREEN,
+    BRAND.ORANGE,
+    BRAND.TEAL,
+    BRAND.GREY,
+    BRAND.CHAR
+  ];
+
+
+  function hexToRgb(hex) {
+    const h = (hex || "").replace("#", "");
+    const full = h.length === 3 ? h.split("").map(x => x + x).join("") : h;
+    const n = parseInt(full, 16);
+    return { r: (n >> 16) & 255, g: (n >> 8) & 255, b: n & 255 };
+  }
+  function rgba(hex, a) {
+    const { r, g, b } = hexToRgb(hex);
+    return `rgba(${r},${g},${b},${a})`;
+  }
+  function hashStr(s) {
+    const str = (s ?? "").toString();
+    let h = 2166136261; // FNV-1a
+    for (let i = 0; i < str.length; i++) {
+      h ^= str.charCodeAt(i);
+      h = Math.imul(h, 16777619);
+    }
+    return (h >>> 0);
+  }
+  function brandColorForKey(key) {
+    const idx = hashStr(key) % BRAND_SERIES.length;
+    const base = BRAND_SERIES[idx];
+    return {
+      stroke: base,
+      fill20: rgba(base, 0.20)
+    };
+  }
+
+  /** Section E tuning */
+  const E_CFG = {
+    topSeries: 6,
+    weights: { velocity: 0.35, sla: 0.35, cycle: 0.15, backlog: 0.15 }
+  };
+
+  /* ----------------------------
+     DASH CORE (shared)
+  ---------------------------- */
+
+  function computeHRBreakdown(items) {
+  // HR vertical is already in: x.categoryLabel (sh_hrservices)
+  const clean = (s, fallback) => {
+    const v = (s ?? "").toString().replace(/\s+/g, " ").trim();
+    return v ? v : fallback;
+  };
+
+  const verticalTotals = new Map();         // vertical -> {created, completed, active}
+  const assigneeMatrix = new Map();         // assignee -> Map(vertical -> {active, completed})
+
+  items.forEach(x => {
+    //const vertical = clean(x.categoryLabel, "Unknown");
+    // const vertical = clean(x.additionalDimensionLabel, "Unknown");
+    const vertical = clean(x.additional_vertical, "Unknown");
+    const assignee = clean(x.assigneeLabel, "Unassigned");
+
+    // totals by vertical
+    if (!verticalTotals.has(vertical)) verticalTotals.set(vertical, { created: 0, completed: 0, active: 0 });
+    const t = verticalTotals.get(vertical);
+    t.created += 1;
+    if (x.isCompleted) t.completed += 1;
+    else t.active += 1;
+
+    // assignee x vertical
+    if (!assigneeMatrix.has(assignee)) assigneeMatrix.set(assignee, new Map());
+    const map = assigneeMatrix.get(assignee);
+    if (!map.has(vertical)) map.set(vertical, { active: 0, completed: 0 });
+    const c = map.get(vertical);
+    if (x.isCompleted) c.completed += 1;
+    else c.active += 1;
+  });
+
+  const verticals = [...verticalTotals.entries()]
+    .map(([vertical, v]) => ({ vertical, ...v }))
+    .sort((a, b) => b.created - a.created);
+
+  const assignees = [...assigneeMatrix.entries()]
+    .map(([name, map]) => {
+      let total = 0;
+      map.forEach(v => total += (v.active + v.completed));
+      return { name, map, total };
+    })
+    .sort((a, b) => b.total - a.total);
+
+  return { verticals, assignees };
+}
+
+function renderHRBreakdown(data) {
+  // show section
+  const sec = document.getElementById("hr_section");
+  if (sec) sec.style.display = "";
+
+  const totalCreated = data.verticals.reduce((s, r) => s + r.created, 0);
+  const totalCompleted = data.verticals.reduce((s, r) => s + r.completed, 0);
+  const totalActive = data.verticals.reduce((s, r) => s + r.active, 0);
+
+  Dash.setText("hr_totals_hint", `Created: ${totalCreated} • Completed: ${totalCompleted} • Active: ${totalActive}`);
+  renderHRAssigneeByVerticalChart(data);
+
+  // ----- Chart 1: Vertical stacked bar (Active vs Completed)
+  const vLabels = data.verticals.map(x => x.vertical);
+  const vActive = data.verticals.map(x => x.active);
+  const vCompleted = data.verticals.map(x => x.completed);
+
+  Dash.upsertChart("hr_vertical_stack", "hr_verticalStackChart", {
+    type: "bar",
+    data: {
+      labels: vLabels,
+      datasets: [
+        { label: "Active", data: vActive, backgroundColor: BRAND.GREEN, borderColor: BRAND.GREEN },
+        { label: "Completed", data: vCompleted, backgroundColor: BRAND.ORANGE, borderColor: BRAND.ORANGE }
+      ]
+    },
+    options: {
+      responsive: true,
+      indexAxis: "y", // ✅ makes bars horizontal
+      plugins: { legend: { display: true } },
+      scales: {
+        x: { stacked: true, beginAtZero: true, ticks: { precision: 0 } }, // ✅ value axis
+        y: { stacked: true, ticks: { autoSkip: false } } // ✅ category axis
+      }
+    }
+  });
+
+  // ----- Chart 2: Assignee stacked bar (Active vs Completed)
+  // (Top 10 assignees to keep chart readable)
+  const topAssignees = data.assignees.slice(0, 10);
+
+  const aLabels = topAssignees.map(x => x.name);
+  const aActive = topAssignees.map(a => {
+    let sum = 0; a.map.forEach(v => sum += v.active); return sum;
+  });
+  const aCompleted = topAssignees.map(a => {
+    let sum = 0; a.map.forEach(v => sum += v.completed); return sum;
+  });
+}
+
+// function renderHRAssigneeByVerticalChart(data) {
+//   const MAX_ASSIGNEES = 10;
+//   const assignees = data.assignees.slice(0, MAX_ASSIGNEES);
+
+//   // X segments = verticals
+//   const verticalKeys = data.verticals.map(v => v.vertical);
+
+//   // Y labels = assignees
+//   const labels = assignees.map(a => a.name);
+
+//   Dash.setText(
+//     "hr_assigneeVertical_hint",
+//     `Top ${labels.length} assignees • ${verticalKeys.length} verticals`
+//   );
+
+//   // Each dataset is a Vertical segment stacked across assignees
+//   const datasets = verticalKeys.map(vKey => {
+//     const c = brandColorForKey(vKey);
+//     return {
+//       label: vKey,
+//       data: assignees.map(a => {
+//         const cell = a.map.get(vKey) || { active: 0, completed: 0 };
+//         return cell.active + cell.completed; // Created
+//       }),
+//       backgroundColor: rgba(c.stroke, 0.28),
+//       borderColor: c.stroke,
+//       borderWidth: 1
+//     };
+//   });
+
+//   Dash.upsertChart("hr_assignee_by_vertical", "hr_assigneeVerticalChart", {
+//     type: "bar",
+//     data: { labels, datasets },
+//     options: {
+//       responsive: true,
+//       indexAxis: "y",              // horizontal bars (best for assignee labels)
+//       plugins: {
+//         legend: { display: true },
+//         tooltip: {
+//           callbacks: {
+//             label: (ctx) => {
+//               const assigneeName = ctx.label;      // y label
+//               const verticalName = ctx.dataset.label;
+
+//               const a = data.assignees.find(x => x.name === assigneeName);
+//               const cell = a?.map.get(verticalName) || { active: 0, completed: 0 };
+
+//               const created = cell.active + cell.completed;
+//               const completed = cell.completed;
+//               const active = cell.active;
+//               const pct = created ? (completed * 100 / created) : 0;
+
+//               return [
+//                 `${verticalName}`,
+//                 `Created: ${created}`,
+//                 `Completed: ${completed}`,
+//                 `Active: ${active}`,
+//                 `Completion: ${pct.toFixed(1)}%`
+//               ];
+//             }
+//           }
+//         }
+//       },
+//       scales: {
+//         x: { stacked: true, beginAtZero: true, ticks: { precision: 0 } },
+//         y: { stacked: true, ticks: { autoSkip: false } }
+//       }
+//     }
+//   });
+// }
+
+function renderHRAssigneeByVerticalChart(data) {
+  const MAX_ASSIGNEES = 10;
+  const assignees = data.assignees.slice(0, MAX_ASSIGNEES);
+
+  const verticalKeys = data.verticals.map(v => v.vertical);
+  const labels = assignees.map(a => a.name);
+
+  Dash.setText(
+    "hr_assigneeVertical_hint",
+    `Top ${labels.length} assignees • ${verticalKeys.length} verticals`
+  );
+
+  // ✅ brand-consistent tonal palette (same green, different opacity)
+  const toneAlpha = (i, n) => {
+    if (n <= 1) return 0.45;
+    const minA = 0.12, maxA = 0.70;              // tune if you want
+    return minA + (maxA - minA) * (i / (n - 1)); // evenly spaced
+  };
+
+  // const datasets = verticalKeys.map((vKey, i) => ({
+  //   label: vKey,
+  //   data: assignees.map(a => {
+  //     const cell = a.map.get(vKey) || { active: 0, completed: 0 };
+  //     return cell.active + cell.completed; // Created
+  //   }),
+  //   backgroundColor: rgba(BRAND.GREEN, toneAlpha(i, verticalKeys.length)),
+  //   borderColor: BRAND.GREEN,
+  //   borderWidth: 1
+  // }));
+
+  const datasets = verticalKeys.map((vKey) => {
+    const c = brandColorForKey(vKey); // picks from BRAND_SERIES deterministically
+    return {
+      label: vKey,
+      data: assignees.map(a => {
+        const cell = a.map.get(vKey) || { active: 0, completed: 0 };
+        return cell.active + cell.completed; // Created
+      }),
+      backgroundColor: rgba(c.stroke, 0.55), // 👈 stronger so it doesn't look washed out
+      borderColor: c.stroke,                 // 👈 keeps brand identity per vertical
+      borderWidth: 1
+    };
+  });
+
+  Dash.upsertChart("hr_assignee_by_vertical", "hr_assigneeVerticalChart", {
+    type: "bar",
+    data: { labels, datasets },
+    options: {
+      responsive: true,
+      indexAxis: "y",
+      plugins: {
+        legend: { display: true },
+        tooltip: {
+          callbacks: {
+            label: (ctx) => {
+              const assigneeName = ctx.label;
+              const verticalName = ctx.dataset.label;
+
+              const a = data.assignees.find(x => x.name === assigneeName);
+              const cell = a?.map.get(verticalName) || { active: 0, completed: 0 };
+
+              const created = cell.active + cell.completed;
+              const completed = cell.completed;
+              const active = cell.active;
+              const pct = created ? (completed * 100 / created) : 0;
+
+              return [
+                `${verticalName}`,
+                `Created: ${created}`,
+                `Completed: ${completed}`,
+                `Active: ${active}`,
+                `Completion: ${pct.toFixed(1)}%`
+              ];
+            }
+          }
+        }
+      },
+      scales: {
+        x: { stacked: true, beginAtZero: true, ticks: { precision: 0 } },
+        y: { stacked: true, ticks: { autoSkip: false } }
+      }
+    }
+  });
+}
+
+function hideHRBreakdown() {
+  const sec = document.getElementById("hr_section");
+  if (sec) sec.style.display = "none";
+}
+
+  function showLoader(message = "Processing…") {
+    const loader = document.getElementById("loaderOverlay");
+    const loaderMsg = document.getElementById("loaderMessage");
+
+    // Update loader message dynamically
+    if (loaderMsg) loaderMsg.textContent = message;
+
+    // Show loader overlay
+    loader.classList.remove("d-none");
+    loader.classList.add("d-flex");
+  }
+
+  function hideLoader() {
+      const loader = document.getElementById("loaderOverlay");
+      // Hide loader overlay
+      loader.classList.remove("d-flex");
+      loader.classList.add("d-none");
+  }
+
+  const Dash = (() => {
+    const $ = (id) => document.getElementById(id);
+    const setText = (id, txt) => { const el = $(id); if (el) el.textContent = (txt ?? ""); };
+
+    const PRESET_LABEL = {
+      today: "Today", yesterday: "Yesterday", last7: "Last 7 Days",
+      thisMonth: "This Month", lastMonth: "Last Month", lastQuarter: "Last Quarter",
+      thisYear: "This Year", last90: "Last 90 Days", last365: "Last 365 Days"
+    };
+
+    async function apiGet(url) {
+      const res = await fetch(url, {
+        method: "GET",
+        headers: {
+          "Accept": "application/json",
+          "OData-MaxVersion": "4.0",
+          "OData-Version": "4.0",
+          "Prefer": "odata.include-annotations=*"
+        }
+      });
+      const txt = await res.text();
+      if (!res.ok) throw new Error(txt);
+      return JSON.parse(txt);
+    }
+
+    async function fetchPaged(url) {
+      const out = [];
+      let next = url;
+      while (next) {
+        const data = await apiGet(next);
+        (data.value || []).forEach(r => out.push(r));
+        next = data["@odata.nextLink"] || null;
+      }
+      return out;
+    }
+
+    const odataFmt = (row, logical) =>
+      row?.[logical + "@OData.Community.Display.V1.FormattedValue"] ?? row?.[logical] ?? "";
+
+    const DAY = 86400000;
+    const startOfDay = (dt) => { const d = new Date(dt); d.setHours(0, 0, 0, 0); return d; };
+    const endOfDay = (dt) => { const d = new Date(dt); d.setHours(23, 59, 59, 999); return d; };
+    const startOfMonth = (dt) => new Date(dt.getFullYear(), dt.getMonth(), 1, 0, 0, 0, 0);
+    const endOfMonth = (dt) => new Date(dt.getFullYear(), dt.getMonth() + 1, 0, 23, 59, 59, 999);
+    const quarterOf = (dt) => Math.floor(dt.getMonth() / 3) + 1;
+    const startOfQuarter = (dt) => new Date(dt.getFullYear(), (quarterOf(dt) - 1) * 3, 1, 0, 0, 0, 0);
+    const endOfQuarter = (dt) => new Date(dt.getFullYear(), quarterOf(dt) * 3, 0, 23, 59, 59, 999);
+
+    function getDateWindow(preset) {
+      const now = new Date();
+      const todayStart = startOfDay(now);
+      const todayEnd = endOfDay(now);
+
+      let start, end;
+
+      switch (preset) {
+        case "today": start = todayStart; end = todayEnd; break;
+        case "yesterday":
+          start = startOfDay(new Date(now.getTime() - DAY));
+          end = endOfDay(new Date(now.getTime() - DAY));
+          break;
+        case "last7":
+          start = startOfDay(new Date(now.getTime() - 6 * DAY));
+          end = todayEnd;
+          break;
+        case "thisMonth":
+          start = startOfMonth(now); end = todayEnd; break;
+        case "lastMonth": {
+          const lm = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+          start = startOfMonth(lm); end = endOfMonth(lm);
+          break;
+        }
+        case "lastQuarter": {
+          const qStart = startOfQuarter(now);
+          const prevEnd = new Date(qStart.getTime() - 1);
+          start = startOfQuarter(prevEnd); end = endOfQuarter(prevEnd);
+          break;
+        }
+        case "thisYear":
+          start = new Date(now.getFullYear(), 0, 1, 0, 0, 0, 0); end = todayEnd; break;
+        case "last365":
+          start = startOfDay(new Date(now.getTime() - 364 * DAY)); end = todayEnd; break;
+        case "custom": {
+          const s = Dash.$("a_startDate")?.value;
+          const e = Dash.$("a_endDate")?.value;
+          start = s ? startOfDay(new Date(s)) : startOfDay(new Date(now.getTime() - 89 * DAY));
+          end   = e ? endOfDay(new Date(e))   : todayEnd;
+          break;
+        }
+        case "last90":
+        default:
+          start = startOfDay(new Date(now.getTime() - 89 * DAY)); end = todayEnd;
+      }
+
+      const lengthMs = end.getTime() - start.getTime();
+      const prevEnd = new Date(start.getTime() - 1);
+      const prevStart = new Date(prevEnd.getTime() - lengthMs);
+
+      return { start, end, prevStart, prevEnd };
+    }
+
+    const isoDay = (d) => new Date(d).toISOString().slice(0, 10);
+    const monthKey = (d) => new Date(d).toISOString().slice(0, 7);
+
+    function buildDateLabels(start, end) {
+      const labels = [];
+      const d = startOfDay(start);
+      const e = startOfDay(end);
+      while (d.getTime() <= e.getTime()) {
+        labels.push(isoDay(d));
+        d.setDate(d.getDate() + 1);
+      }
+      return labels;
+    }
+
+    const median = (arr) => {
+      if (!arr?.length) return null;
+      const a = [...arr].sort((x, y) => x - y);
+      const mid = Math.floor(a.length / 2);
+      return (a.length % 2) ? a[mid] : (a[mid - 1] + a[mid]) / 2;
+    };
+
+    const minutesBetween = (a, b) => Math.max(0, Math.round((b.getTime() - a.getTime()) / 60000));
+
+    function formatMinutes(mins) {
+      if (mins == null || !Number.isFinite(mins)) return "—";
+      const total = Math.max(0, Math.round(mins));
+      const days = Math.floor(total / (24 * 60));
+      const rem = total % (24 * 60);
+      const hrs = Math.floor(rem / 60);
+      const m = rem % 60;
+      return `${days}d ${hrs}h ${m}m`;
+    }
+
+    function parseDate(v) {
+      if (!v) return null;
+      const d = new Date(v);
+      return Number.isFinite(d.getTime()) ? d : null;
+    }
+
+    function isCompletedLabel(statusLabel) {
+      return (statusLabel || "").trim().toLowerCase() === "completed";
+    }
+
+    // TTC parsing (string or numeric)
+    function parseTtcToMinutes(ttcRaw) {
+      if (ttcRaw == null) return null;
+      if (typeof ttcRaw === "number" && Number.isFinite(ttcRaw)) return ttcRaw;
+
+      if (typeof ttcRaw === "string") {
+        const t = ttcRaw.trim();
+        if (/^\d+(\.\d+)?$/.test(t)) return Number(t);
+
+        const s = t.toLowerCase();
+        const d = (s.match(/(\d+)\s*d(ay)?/) || [])[1];
+        const h = (s.match(/(\d+)\s*h(r)?/) || [])[1];
+        const m = (s.match(/(\d+)\s*m(in)?/) || [])[1];
+
+        const days = d ? parseInt(d, 10) : 0;
+        const hrs = h ? parseInt(h, 10) : 0;
+        const mins = m ? parseInt(m, 10) : 0;
+        const total = (days * 24 * 60) + (hrs * 60) + mins;
+        return total || null;
+      }
+      return null;
+    }
+
+    // Charts manager (destroy/recreate reliably)
+    const charts = new Map();
+    function upsertChart(key, canvasId, config) {
+      const el = $(canvasId);
+      if (!el) return null;
+      const existing = charts.get(key);
+      if (existing) existing.destroy();
+      const chart = new Chart(el, config);
+      charts.set(key, chart);
+      return chart;
+    }
+
+    // Utility: normalize strings (for heatmap keys)
+    function norm(s) {
+      return (s ?? "")
+        .toString()
+        .replace(/\u00A0/g, " ")
+        .replace(/\s+/g, " ")
+        .trim()
+        .toLowerCase();
+    }
+
+    // pick lookup/string from metadata row
+    function pickMetaField(metaRow, fieldName, type) {
+      if (!fieldName) return "Unknown";
+      if (type === "lookup") {
+        const lbl = odataFmt(metaRow, fieldName);
+        return (lbl && lbl.trim()) ? lbl.trim() : "Unknown";
+      }
+      const v = metaRow?.[fieldName];
+      return (v && ("" + v).trim()) ? ("" + v).trim() : "Unknown";
+    }
+
+    return {
+      $, setText,
+      PRESET_LABEL,
+      apiGet, fetchPaged, odataFmt,
+      getDateWindow, buildDateLabels, isoDay, monthKey,
+      median, minutesBetween, formatMinutes, parseDate,
+      isCompletedLabel, parseTtcToMinutes,
+      upsertChart,
+      norm, pickMetaField
+    };
+  })();
+
+  function applyDepartmentAccessRules() {
+    const ddl = Dash.$("a_module");
+    if (!ddl) return;
+
+    // Ensure user's dept is valid
+    const userDept = MODULES[ACCESS.userDept] ? ACCESS.userDept : "PROC";
+
+    // If user cannot view all, lock dropdown to userDept
+    if (!ACCESS.canViewAll) {
+      // Remove/hide ALL option
+      const allOpt = ddl.querySelector('option[value="ALL"]');
+      if (allOpt) allOpt.remove();
+
+      // Force selection
+      ddl.value = userDept;
+
+      // Optional: lock dropdown so they cannot change dept
+      ddl.disabled = true;
+    } else {
+      // Privileged: enable dropdown, allow ALL
+      ddl.disabled = false;
+
+      // Default selection for privileged users can be ALL (or keep current)
+      if (!ddl.value) ddl.value = "ALL";
+    }
+  }
+
+  /* ----------------------------
+     ONE FETCH for ALL SECTIONS
+  ---------------------------- */
+
+  function unionUnique(arr) {
+    const s = new Set(arr.filter(Boolean));
+    return [...s];
+  }
+
+  function buildMetaSelectForModule(moduleKey) {
+    const M = MODULES[moduleKey];
+    const C = C_MODULES[moduleKey] || {};
+    
+    // return unionUnique([
+    //   "createdon",
+    //   "_sh_ticketnumber_value",
+    //   M.categoryField,
+    //   C.functionField,
+    //   C.breachCategoryField
+    // ]);
+
+    const fields = unionUnique([
+      "createdon",
+      "_sh_ticketnumber_value",
+      M.categoryField,
+      C.functionField,
+      C.breachCategoryField
+    ]);
+
+    // ✅ add additional dimension if configured
+    // if (M.additionalDimensionField) {
+    //   fields.push(M.additionalDimensionField);
+    // }
+
+    (M.additionalFields || []).forEach(f => fields.push(f.field));
+
+    return unionUnique(fields);
+
+  }
+
+  function buildTicketSelectSuperset() {
+    // Superset for A–E (keep lean but complete)
+    return [
+      "createdon",
+      "modifiedon",
+      "sh_completedon",
+      "sh_ticketstatus",
+      "sh_slabreach",
+      SLA_BREACH_DATE_FIELD,
+      "_sh_assignedto_value",
+      "sh_timetocomplete"
+    ];
+  }
+
+  async function fetchUnifiedRows(moduleKey, win) {
+    const M = MODULES[moduleKey];
+
+    const metaSelect = buildMetaSelectForModule(moduleKey);
+    const ticketSelect = buildTicketSelectSuperset();
+
+    const filter = `createdon ge ${win.start.toISOString()} and createdon le ${win.end.toISOString()}`;
+
+    const url =
+      `${M.metadataTable}` +
+      `?$select=${metaSelect.join(",")}` +
+      `&$expand=${M.ticketNav}($select=${ticketSelect.join(",")})` +
+      `&$filter=${encodeURIComponent(filter)}` +
+      `&$top=5000`;
+
+    return Dash.fetchPaged(url);
+  }
+
+  async function fetchChildRows(moduleKey, win) {
+    const M = MODULES[moduleKey];
+
+    const ticketSelect = [
+      "createdon",
+      "modifiedon",
+      "sh_completedon",
+      "sh_ticketstatus",
+      "sh_slabreach",
+      SLA_BREACH_DATE_FIELD,
+      "_sh_assignedto_value",
+      "sh_timetocomplete",
+      "_sh_request_value",
+      "_sh_parentticket_value"
+    ].join(",");
+
+    const dateFilter = `createdon ge ${win.start.toISOString()} and createdon le ${win.end.toISOString()}`;
+
+    // Filter by parent ticket not null — using correct field name
+    const filter = `${dateFilter} and _sh_parentticket_value ne null`;
+
+    const url =
+      `${M.ticketTable}` +
+      `?$select=${ticketSelect}` +
+      `&$filter=${encodeURIComponent(filter)}` +
+      `&$top=5000`;
+
+    return Dash.fetchPaged(url);
+  }
+
+  function normalizeRowsToItems(moduleKey, rows) {
+    const M = MODULES[moduleKey];
+    const C = C_MODULES[moduleKey] || {};
+
+    const now = new Date();
+
+    return rows.map(meta => {
+      const t = meta?.[M.ticketNav];
+      if (!t) return null;
+
+      const ticketCreatedIso = t.createdon || meta.createdon;
+      const created = Dash.parseDate(ticketCreatedIso);
+      if (!created) return null;
+
+      const statusLabel = (Dash.odataFmt(t, "sh_ticketstatus") || "").trim();
+      const isCompleted = Dash.isCompletedLabel(statusLabel);
+
+      // completion fallback used in B/E
+      const completedAt = Dash.parseDate(t.sh_completedon) || Dash.parseDate(t.modifiedon);
+
+      const assignedId = t["_sh_assignedto_value"] ?? null;
+      const assignedLabelFmt = Dash.odataFmt(t, "_sh_assignedto_value");
+      const assigneeLabel = assignedId
+        ? ((assignedLabelFmt && assignedLabelFmt.trim()) ? assignedLabelFmt.trim() : "Assignee")
+        : "Unassigned";
+
+      const breachVal = t.sh_slabreach;
+      const slaMeasured = (breachVal === true || breachVal === false);
+      const slaBreached = (breachVal === true);
+
+      const breachDate = Dash.parseDate(t[SLA_BREACH_DATE_FIELD]);
+
+      let delayMins = null;
+      if (slaBreached && breachDate) {
+        const end = (isCompleted && completedAt) ? completedAt : now;
+        delayMins = Dash.minutesBetween(breachDate, end);
+      }
+
+      const ttcMinutes = Dash.parseTtcToMinutes(t.sh_timetocomplete);
+
+      const categoryLabel = Dash.pickMetaField(meta, M.categoryField, M.categoryType);
+
+      // ✅ additional dimension (generic)
+      // const additionalDimensionLabel = M.additionalDimensionField
+      //   ? Dash.pickMetaField(meta, M.additionalDimensionField, M.additionalDimensionType)
+      //   : null;
+
+      const additionalFieldValues = {};
+      (M.additionalFields || []).forEach(f => {
+        additionalFieldValues[`additional_${f.key}`] = Dash.pickMetaField(meta, f.field, f.type);
+      });
+
+      const functionLabel = C.functionField
+        ? Dash.pickMetaField(meta, C.functionField, C.functionType)
+        : categoryLabel;
+
+      const breachCategoryLabel = C.breachCategoryField
+        ? Dash.pickMetaField(meta, C.breachCategoryField, C.breachCategoryType)
+        : functionLabel;
+
+      return {
+        // time keys
+        created,
+        createdIso: ticketCreatedIso,
+        createdDay: Dash.isoDay(created),
+        createdMonth: Dash.monthKey(created),
+
+        // status
+        statusLabel,
+        isCompleted,
+        completedAt,
+
+        // assignment
+        assignedId,
+        assigneeLabel,
+
+        // SLA
+        slaMeasured,
+        slaBreached,
+        breachDate,
+        delayMins,
+
+        // TTC
+        ttcMinutes,
+
+        // taxonomy
+        categoryLabel,
+        functionLabel,
+        
+        // additionalDimensionLabel,
+        functionKey: Dash.norm(functionLabel),
+        breachCategoryLabel,
+        ...additionalFieldValues
+      };
+    }).filter(Boolean);
+  }
+
+  function normalizeChildRowsToItems(moduleKey, rows) {
+    const M = MODULES[moduleKey];
+    const now = new Date();
+
+    return rows.map(t => {
+      if (!t) return null;
+
+      const created = Dash.parseDate(t.createdon);
+      if (!created) return null;
+
+      // Resolve step label from formatted value annotation
+      const categoryLabel = Dash.odataFmt(t, "_sh_request_value") || "Unknown";
+
+      // Client-side step filter — only include configured steps
+      if (M.stepFilter && M.stepFilter.length) {
+        if (!M.stepFilter.includes(categoryLabel)) return null;
+      }
+
+      const statusLabel = (Dash.odataFmt(t, "sh_ticketstatus") || "").trim();
+      const isCompleted = Dash.isCompletedLabel(statusLabel);
+      const completedAt = Dash.parseDate(t.sh_completedon) || Dash.parseDate(t.modifiedon);
+
+      const assignedId = t["_sh_assignedto_value"] ?? null;
+      const assignedLabelFmt = Dash.odataFmt(t, "_sh_assignedto_value");
+      const assigneeLabel = assignedId
+        ? ((assignedLabelFmt && assignedLabelFmt.trim()) ? assignedLabelFmt.trim() : "Assignee")
+        : "Unassigned";
+
+      const breachVal = t.sh_slabreach;
+      const slaMeasured = (breachVal === true || breachVal === false);
+      const slaBreached = (breachVal === true);
+      const breachDate = Dash.parseDate(t[SLA_BREACH_DATE_FIELD]);
+
+      let delayMins = null;
+      if (slaBreached && breachDate) {
+        const end = (isCompleted && completedAt) ? completedAt : now;
+        delayMins = Dash.minutesBetween(breachDate, end);
+      }
+
+      const ttcMinutes = Dash.parseTtcToMinutes(t.sh_timetocomplete);
+
+      const additionalFieldValues = {};
+      (M.additionalFields || []).forEach(f => {
+        additionalFieldValues[`additional_${f.key}`] = Dash.pickMetaField(t, f.field, f.type);
+      });
+
+      return {
+        created,
+        createdIso: t.createdon,
+        createdDay: Dash.isoDay(created),
+        createdMonth: Dash.monthKey(created),
+        statusLabel,
+        isCompleted,
+        completedAt,
+        assignedId,
+        assigneeLabel,
+        slaMeasured,
+        slaBreached,
+        breachDate,
+        delayMins,
+        ttcMinutes,
+        categoryLabel,
+        functionLabel: categoryLabel,
+        functionKey: Dash.norm(categoryLabel),
+        breachCategoryLabel: categoryLabel,
+        ...additionalFieldValues
+      };
+    }).filter(Boolean);
+  }                                                                                                                                                                                                                                                                                                                                                                                             
+  
+  /* ----------------------------
+     RENDER: SECTION A
+  ---------------------------- */
+
+  function computeA(items, prevItems, win) {
+    const createdTotal = items.length;
+    const completedTotal = items.reduce((s, x) => s + (x.isCompleted ? 1 : 0), 0);
+
+    // Unassigned open
+    const unassignedOpen = items.reduce((s, x) => s + ((!x.isCompleted && x.assignedId == null) ? 1 : 0), 0);
+
+    // Avg TTC (completed only)
+    const ttc = items.filter(x => x.isCompleted).map(x => x.ttcMinutes).filter(v => v != null && Number.isFinite(v));
+    const avgTtc = ttc.length ? (ttc.reduce((a, b) => a + b, 0) / ttc.length) : null;
+
+    // series created vs completed by createdDay
+    const labels = Dash.buildDateLabels(win.start, win.end);
+    const createdByDay = new Map(labels.map(d => [d, 0]));
+    const completedByDay = new Map(labels.map(d => [d, 0]));
+
+    items.forEach(x => {
+      if (!createdByDay.has(x.createdDay)) return;
+      createdByDay.set(x.createdDay, createdByDay.get(x.createdDay) + 1);
+      if (x.isCompleted) completedByDay.set(x.createdDay, completedByDay.get(x.createdDay) + 1);
+    });
+
+    const createdSeries = labels.map(d => createdByDay.get(d) || 0);
+    const completedSeries = labels.map(d => completedByDay.get(d) || 0);
+
+    // Pareto categories (top5 + other)
+    const byCat = new Map();
+    items.forEach(x => {
+      const c = x.categoryLabel || "Unknown";
+      byCat.set(c, (byCat.get(c) || 0) + 1);
+    });
+    // const sorted = [...byCat.entries()].sort((a, b) => b[1] - a[1]);
+    // const top5 = sorted.slice(0, 5);
+    // const other = sorted.slice(5).reduce((s, [, v]) => s + v, 0);
+
+    // const catLabels = top5.map(([k]) => k).concat(other ? ["Other"] : []);
+    // const catValues = top5.map(([, v]) => v).concat(other ? [other] : []);
+
+    const sorted = [...byCat.entries()].sort((a, b) => b[1] - a[1]);
+
+    const catLabels = sorted.map(([k]) => k);
+    const catValues = sorted.map(([, v]) => v);
+
+    const catTotal = catValues.reduce((a, b) => a + b, 0) || 1;
+    let run = 0;
+    const cumPct = catValues.map(v => { run += v; return run * 100 / catTotal; });
+    let idx80 = cumPct.findIndex(p => p >= 80);
+    idx80 = idx80 === -1 ? (cumPct.length - 1) : idx80;
+
+    // Inflow delta vs prev (created count)
+    const prevCreated = prevItems.length;
+    const diff = createdTotal - prevCreated;
+    const pct = prevCreated ? (diff * 100 / prevCreated) : (createdTotal ? 100 : 0);
+    const mode = (labels.length <= 31) ? "WoW" : "MoM";
+
+    return {
+      createdTotal, completedTotal,
+      labels, createdSeries, completedSeries,
+      catLabels, catValues, cumPct, idx80,
+      avgTtc,
+      unassignedOpen,
+      prevCreated, diff, pct, mode
+    };
+  }
+
+  function renderA(moduleKey, preset, m) {
+    const presetLabel = Dash.PRESET_LABEL[preset] || "Selected";
+
+    Dash.setText("a_kpiTicketsLabel", `Tickets (${presetLabel})`);
+    Dash.setText("a_kpiTtcLabel", `Avg Time to Complete (${presetLabel})`);
+    Dash.setText("a_kpiUnassignedLabel", `Unassigned (${presetLabel})`);
+
+    Dash.setText("a_kpiTickets", `${m.completedTotal} / ${m.createdTotal}`);
+    Dash.setText("a_kpiTicketsDetail", "Completed / Raised");
+
+    Dash.setText("a_kpiAvgTtc", m.avgTtc == null ? "—" : Dash.formatMinutes(m.avgTtc));
+    Dash.setText("a_kpiAvgTtcDetail", "Calculated from completed tickets only");
+
+    Dash.setText("a_kpiUnassigned", `${m.unassignedOpen}`);
+    Dash.setText("a_kpiUnassignedDetail", "Tickets with no owners");
+
+    const sign = m.diff >= 0 ? "+" : "";
+    Dash.setText("a_kpiInflowDelta", `${sign}${m.diff} (${sign}${m.pct.toFixed(1)}%)`);
+    Dash.setText("a_inflowModeChip", m.mode);
+    Dash.setText("a_kpiInflowDetail", `Created: ${m.createdTotal} | Previous: ${m.prevCreated}`);
+
+    Dash.setText("a_lineTotals", `Created: ${m.createdTotal} • Completed: ${m.completedTotal}`);
+    Dash.setText("a_rangeChip", `Range: ${presetLabel}`);
+    Dash.setText("a_paretoHint", `~80% reached by top ${Math.min(m.idx80 + 1, m.catLabels.length)} categories`);
+
+    Dash.upsertChart("a_createdCompleted", "a_createdCompletedChart", {
+      type: "line",
+      data: {
+        labels: m.labels,
+        datasets: [
+          { label: "Created", data: m.createdSeries, borderColor: BRAND.GREEN, backgroundColor: BRAND.GREEN, pointRadius: 2, tension: 0.25 },
+          { label: "Completed", data: m.completedSeries, borderColor: BRAND.ORANGE, backgroundColor: BRAND.ORANGE, pointRadius: 2, tension: 0.25 }
+        ]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { display: true } },
+        scales: { x: { ticks: { autoSkip: true, maxRotation: 0 } } }
+      }
+    });
+
+    const paretoWrapper = document.getElementById("a_paretoChartWrapper");
+      if (paretoWrapper) {
+        paretoWrapper.style.height = Math.max(130, m.catLabels.length * 36) + "px";
+      }
+
+    Dash.upsertChart("a_pareto", "a_paretoChart", {
+      type: "bar",
+      data: {
+        labels: m.catLabels,
+        datasets: [{ label: "Requests", data: m.catValues, backgroundColor: BRAND.GREEN, borderColor: BRAND.GREEN }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        indexAxis: "y",
+        plugins: {
+          legend: { display: true },
+          tooltip: { callbacks: { afterLabel: (ctx) => `Cumulative: ${m.cumPct[ctx.dataIndex].toFixed(1)}%` } }
+        },
+        scales: {
+          y: {
+            ticks: {
+              autoSkip: false // ✅ show all category labels
+            }
+          },
+          x: {
+            beginAtZero: true
+          }
+        }
+        //scales: { x: { ticks: { autoSkip: true, maxRotation: 0 } } }
+      }
+    });
+
+    Dash.setText("a_debug", `Loaded ${MODULES[moduleKey].label}: ${m.createdTotal} created / ${m.completedTotal} completed (${presetLabel}).`);
+  }
+
+  /* ----------------------------
+     RENDER: SECTION B
+  ---------------------------- */
+
+  function computeB(items, win) {
+    const createdTotal = items.length;
+    const completed = items.filter(x => x.isCompleted);
+    const open = items.filter(x => !x.isCompleted);
+    const completedTotal = completed.length;
+
+    const cycleMins = completed.map(x => {
+      if (!x.created || !x.completedAt) return null;
+      return Dash.minutesBetween(x.created, x.completedAt);
+    }).filter(v => v != null && Number.isFinite(v));
+
+    const avgCycle = cycleMins.length ? cycleMins.reduce((a, b) => a + b, 0) / cycleMins.length : null;
+    const medCycle = Dash.median(cycleMins);
+    const throughputPct = createdTotal ? (completedTotal * 100 / createdTotal) : 0;
+
+    // Aging buckets
+    const now = new Date();
+    const bucketOrder = ["0–3 days", "4–7 days", "8–14 days", "15+ days"];
+    const buckets = Object.fromEntries(bucketOrder.map(k => [k, 0]));
+    const ageBucket = (days) => (days <= 3) ? "0–3 days" : (days <= 7) ? "4–7 days" : (days <= 14) ? "8–14 days" : "15+ days";
+
+    open.forEach(x => {
+      const days = (now.getTime() - x.created.getTime()) / 86400000;
+      buckets[ageBucket(days)]++;
+    });
+
+    // Trend avg/median by created day
+    const labels = Dash.buildDateLabels(win.start, win.end);
+    const byDay = new Map(labels.map(d => [d, []]));
+
+    completed.forEach(x => {
+      if (!x.completedAt) return;
+      if (!byDay.has(x.createdDay)) return;
+      byDay.get(x.createdDay).push(Dash.minutesBetween(x.created, x.completedAt));
+    });
+
+    const avgSeries = labels.map(d => {
+      const arr = byDay.get(d) || [];
+      return arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : null;
+    });
+    const medSeries = labels.map(d => {
+      const arr = byDay.get(d) || [];
+      return arr.length ? Dash.median(arr) : null;
+    });
+
+    return {
+      createdTotal,
+      completedTotal,
+      avgCycle,
+      medCycle,
+      throughputPct,
+      throughputDetail: `(${completedTotal} / ${createdTotal}) %`,
+      labels,
+      avgSeries,
+      medSeries,
+      bucketOrder,
+      bucketValues: bucketOrder.map(k => buckets[k])
+    };
+  }
+
+  function renderB(preset, m) {
+    const presetLabel = Dash.PRESET_LABEL[preset] || "Selected";
+
+    Dash.setText("b_rangeChip", `Range: ${presetLabel}`);
+    Dash.setText("b_countsChip", `Created: ${m.createdTotal} • Completed: ${m.completedTotal}`);
+
+    Dash.setText("b_kpiCompleted", `${m.completedTotal}`);
+    Dash.setText("b_kpiAvgCycle", Dash.formatMinutes(m.avgCycle));
+    Dash.setText("b_kpiMedianCycle", Dash.formatMinutes(m.medCycle));
+    Dash.setText("b_kpiThroughput", `${m.throughputPct.toFixed(1)}%`);
+    Dash.setText("b_kpiThroughputHint", m.throughputDetail);
+
+    // ✅ Avg = GREEN, Median = ORANGE (forced)
+    Dash.upsertChart("b_cycleTrend", "b_cycleTrendChart", {
+      type: "line",
+      data: {
+        labels: m.labels,
+        datasets: [
+          {
+            label: "Avg cycle time (mins)",
+            data: m.avgSeries,
+            borderColor: BRAND.GREEN,
+            backgroundColor: rgba(BRAND.GREEN, 0.20),
+            pointBackgroundColor: BRAND.GREEN,
+            pointRadius: 2,
+            tension: 0.25,
+            fill: false
+          },
+          {
+            label: "Median cycle time (mins)",
+            data: m.medSeries,
+            borderColor: BRAND.ORANGE,
+            backgroundColor: rgba(BRAND.ORANGE, 0.20),
+            pointBackgroundColor: BRAND.ORANGE,
+            pointRadius: 2,
+            tension: 0.25,
+            fill: false
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        spanGaps: true,
+        plugins: { legend: { display: true } },
+        scales: { x: { ticks: { autoSkip: true, maxRotation: 0 } } }
+      }
+    });
+
+    Dash.upsertChart("b_openAging", "b_openAgingChart", {
+      type: "bar",
+      data: {
+        labels: m.bucketOrder,
+        datasets: [{ label: "Open requests", data: m.bucketValues, backgroundColor: BRAND.GREEN, borderColor: BRAND.GREEN }]
+      },
+      options: { 
+        responsive: true,
+        // maintainAspectRatio: false,  // ✅ horizontal bars
+        indexAxis: "y",
+        plugins: { legend: { display: true } },
+        scales: {
+          y: {
+            ticks: {
+              autoSkip: false // always show bucket labels
+            }
+          },
+          x: {
+            beginAtZero: true,
+            ticks: {
+              precision: 0
+            }
+          }
+        }
+      }
+    });
+  }
+
+  /* ----------------------------
+     RENDER: SECTION C (SLA)
+  ---------------------------- */
+
+  function heatColor(pct) {
+    const p = Math.max(0, Math.min(100, pct));
+    const light = 96 - (p * 0.35); // 96 -> ~61
+    return `hsl(145, 40%, ${light}%)`;
+  }
+
+  function computeC(items, prevItems, win) {
+    const measured = items.filter(x => x.slaMeasured);
+    const measuredCount = measured.length;
+    const breachedCount = measured.filter(x => x.slaBreached).length;
+    const metCount = measuredCount - breachedCount;
+
+    const slaMetPct = measuredCount ? (metCount * 100 / measuredCount) : 0;
+    const slaBreachPct = measuredCount ? (breachedCount * 100 / measuredCount) : 0;
+
+    const days = Math.ceil((win.end.getTime() - win.start.getTime()) / 86400000) + 1;
+    const trendMode = (days <= 31) ? "Daily" : "Monthly";
+
+    const trendMap = new Map(); // key -> {measured, breached}
+    measured.forEach(x => {
+      const k = (trendMode === "Daily") ? x.createdDay : x.createdMonth;
+      if (!k) return;
+      if (!trendMap.has(k)) trendMap.set(k, { measured: 0, breached: 0 });
+      const t = trendMap.get(k);
+      t.measured++;
+      if (x.slaBreached) t.breached++;
+    });
+
+    const trendLabels = [...trendMap.keys()].sort();
+    const slaTrend = trendLabels.map(k => {
+      const t = trendMap.get(k);
+      const met = t.measured - t.breached;
+      return t.measured ? (met * 100 / t.measured) : 0;
+    });
+
+    // Heatmap: function x month
+    const monthsSet = new Set();
+    const funcSet = new Set();
+    const funcLabelByKey = new Map();
+    const heat = new Map(); // fKey|||mon -> {measured, breached}
+
+    measured.forEach(x => {
+      const mon = x.createdMonth;
+      if (!mon) return;
+      const fKey = x.functionKey || Dash.norm(x.functionLabel);
+      const fLabel = (x.functionLabel || "Unknown").trim();
+      monthsSet.add(mon);
+      funcSet.add(fKey);
+      if (!funcLabelByKey.has(fKey)) funcLabelByKey.set(fKey, fLabel);
+
+      const key = `${fKey}|||${mon}`;
+      if (!heat.has(key)) heat.set(key, { measured: 0, breached: 0 });
+      const cell = heat.get(key);
+      cell.measured++;
+      if (x.slaBreached) cell.breached++;
+    });
+
+    const months = [...monthsSet].sort();
+    const functionKeys = [...funcSet].sort();
+
+    // Top breach categories
+    const catMap = new Map();
+    measured.filter(x => x.slaBreached).forEach(x => {
+      const c = x.breachCategoryLabel || "Unknown";
+      catMap.set(c, (catMap.get(c) || 0) + 1);
+    });
+    const top = [...catMap.entries()].sort((a, b) => b[1] - a[1]).slice(0, 10);
+    const breachCatLabels = top.map(([k]) => k);
+    const breachCatValues = top.map(([, v]) => v);
+
+    // Trend delta vs previous window
+    const prevMeasured = prevItems.filter(x => x.slaMeasured);
+    const prevMeasuredCount = prevMeasured.length;
+    const prevBreachedCount = prevMeasured.filter(x => x.slaBreached).length;
+    const prevMetCount = prevMeasuredCount - prevBreachedCount;
+    const prevSlaMetPct = prevMeasuredCount ? (prevMetCount * 100 / prevMeasuredCount) : 0;
+
+    const diff = slaMetPct - prevSlaMetPct;
+    const sign = diff >= 0 ? "+" : "";
+    const deltaText = `${sign}${diff.toFixed(1)} pp`;
+
+    // Avg delay (breached with breach date)
+    const breached = items.filter(x => x.slaBreached);
+    const delayList = breached.map(x => x.delayMins).filter(v => v != null && Number.isFinite(v));
+    const avgDelayMins = delayList.length ? (delayList.reduce((a, b) => a + b, 0) / delayList.length) : null;
+    const breachedMissingBreachDate = breached.filter(x => x.delayMins == null).length;
+
+    return {
+      measuredCount, metCount, breachedCount,
+      slaMetPct, slaBreachPct,
+
+      trendMode, trendLabels, slaTrend,
+
+      months, functionKeys, funcLabelByKey, heat,
+
+      breachCatLabels, breachCatValues,
+
+      avgDelayMins, breachedMissingBreachDate,
+
+      prevSlaMetPct, deltaText
+    };
+  }
+
+  function renderC(moduleKey, preset, m) {
+    const presetLabel = Dash.PRESET_LABEL[preset] || "Selected";
+
+    Dash.setText("c_kpiSLAMetLabel", `SLA Met % (${presetLabel})`);
+    Dash.setText("c_kpiSlaMetPct", `${m.slaMetPct.toFixed(1)}`);
+    Dash.setText("c_kpiSlaMetDetail", `Met: ${m.metCount} / Measured: ${m.measuredCount}`);
+
+    Dash.setText("c_kpiSLABreachLabel", `SLA Breach % (${presetLabel})`);
+    Dash.setText("c_kpiSlaBreachPct", `${m.slaBreachPct.toFixed(1)}`);
+    Dash.setText("c_kpiSlaBreachDetail", `Breached: ${m.breachedCount} / Measured: ${m.measuredCount}`);
+
+    Dash.setText("c_kpiAvgDelay", (m.avgDelayMins == null) ? "—" : Dash.formatMinutes(m.avgDelayMins));
+    if (m.avgDelayMins == null) {
+      Dash.setText("c_kpiAvgDelayDetail", "No breached tickets with SLA breach date in this range.");
+    } else {
+      Dash.setText("c_kpiAvgDelayDetail",
+        m.breachedMissingBreachDate
+          ? `Avg delay over breached tickets (missing breach date: ${m.breachedMissingBreachDate})`
+          : "Avg delay over breached tickets"
+      );
+    }
+
+    const mode = (m.trendMode === "Daily") ? "WoW" : "MoM";
+    Dash.setText("c_kpiTrendDelta", m.deltaText);
+    Dash.setText("c_trendModeChip", mode);
+    Dash.setText("c_kpiTrendDetail", `Current: ${m.slaMetPct.toFixed(1)}% | Previous: ${m.prevSlaMetPct.toFixed(1)}%`);
+
+    Dash.setText("c_rangeChip", `Range: ${presetLabel}`);
+    Dash.setText("c_slaCountsChip", `Met: ${m.metCount} • Breached: ${m.breachedCount}`);
+
+    Dash.upsertChart("c_trend", "c_slaTrendChart", {
+      type: "line",
+      data: {
+        labels: m.trendLabels,
+        datasets: [{
+          label: `SLA % Met (${m.trendMode})`,
+          data: m.slaTrend,
+          borderColor: BRAND.GREEN,
+          backgroundColor: rgba(BRAND.GREEN, 0.20),
+          pointBackgroundColor: BRAND.GREEN,
+          tension: 0.25,
+          pointRadius: 2,
+          fill: false
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { display: true },
+          tooltip: { callbacks: { label: (ctx) => `SLA Met: ${Number(ctx.raw).toFixed(1)}%` } }
+        },
+        scales: {
+          x: { ticks: { autoSkip: true, maxRotation: 0 } },
+          y: { suggestedMin: 0, suggestedMax: 100 }
+        }
+      }
+    });
+
+    renderCHeatmap(m);
+
+    Dash.upsertChart("c_breachCats", "c_breachCategoryChart", {
+      type: "bar",
+      data: {
+        labels: m.breachCatLabels,
+        datasets: [{ label: "Breaches", data: m.breachCatValues, backgroundColor: BRAND.ORANGE, borderColor: BRAND.ORANGE }]
+      },
+      options: { 
+        responsive: true,
+        // maintainAspectRatio: false,  // ✅ horizontal bars
+        indexAxis: "y",
+        plugins: { legend: { display: true } },
+        scales: {
+          y: {
+            ticks: {
+              autoSkip: false // always show bucket labels
+            }
+          },
+          x: {
+            beginAtZero: true,
+            ticks: {
+              precision: 0
+            }
+          }
+        }
+      }
+      // options: { 
+      //   responsive: true, 
+      //   plugins: { legend: { display: true } }, 
+      //   scales: { 
+      //     x: { ticks: { autoSkip: true, maxRotation: 0 } } } }
+    });
+
+    Dash.setText("c_debug", `${MODULES[moduleKey].label}: Measured=${m.measuredCount}, Met=${m.slaMetPct.toFixed(1)}% (${presetLabel}).`);
+  }
+
+  function renderCHeatmap(m) {
+    const headRow = document.getElementById("c_heatmapHeadRow");
+    const body = document.getElementById("c_heatmapBody");
+    if (!headRow || !body) return;
+
+    headRow.innerHTML =
+      `<th style="position:sticky; left:0; background:#f8fafc; z-index:2;">Function</th>` +
+      m.months.map(mon => `<th class="text-center">${mon}</th>`).join("");
+
+    body.innerHTML = "";
+
+    if (!m.functionKeys.length || !m.months.length) {
+      body.innerHTML = `<tr><td class="text-muted" colspan="${1 + Math.max(1, m.months.length)}">No SLA measured data in this range.</td></tr>`;
+      return;
+    }
+
+    m.functionKeys.forEach(fKey => {
+      const tr = document.createElement("tr");
+
+      const left = document.createElement("td");
+      left.textContent = m.funcLabelByKey.get(fKey) || fKey;
+      left.style.position = "sticky";
+      left.style.left = "0";
+      left.style.background = "#fff";
+      left.style.zIndex = "1";
+      left.style.fontWeight = "700";
+      tr.appendChild(left);
+
+      m.months.forEach(mon => {
+        const key = `${fKey}|||${mon}`;
+        const cell = m.heat.get(key);
+
+        let pct = null;
+        let text = "—";
+        let title = "No data";
+
+        if (cell && cell.measured) {
+          const met = cell.measured - cell.breached;
+          pct = (met * 100 / cell.measured);
+          text = `${pct.toFixed(0)}%`;
+          title = `Measured: ${cell.measured}, Breached: ${cell.breached}`;
+        }
+
+        const td = document.createElement("td");
+        td.className = "text-center";
+        td.textContent = text;
+        td.title = title;
+
+        if (pct != null) {
+          td.style.background = heatColor(pct);
+          td.style.borderRadius = "10px";
+        }
+        tr.appendChild(td);
+      });
+
+      body.appendChild(tr);
+    });
+  }
+
+  /* ----------------------------
+     RENDER: SECTION D (Capacity) — unchanged
+  ---------------------------- */
+
+  function computeD(items, win) {
+    const labels = Dash.buildDateLabels(win.start, win.end);
+
+    const activeByAssignee = new Map();
+    const completedByAssignee = new Map();
+
+    let activeTotal = 0;
+    let completedTotal = 0;
+
+    items.forEach(x => {
+      const key = x.assigneeLabel || "Unassigned";
+      if (x.isCompleted) {
+        completedTotal++;
+        completedByAssignee.set(key, (completedByAssignee.get(key) || 0) + 1);
+      } else {
+        activeTotal++;
+        activeByAssignee.set(key, (activeByAssignee.get(key) || 0) + 1);
+      }
+    });
+
+    const assigneesWithActive = [...activeByAssignee.keys()].filter(k => k !== "Unassigned");
+    const assigneeCount = assigneesWithActive.length;
+    const utilisation = assigneeCount ? (activeTotal / assigneeCount) : 0;
+
+    const all = new Set([...activeByAssignee.keys(), ...completedByAssignee.keys()]);
+    const rows = [...all].map(name => ({
+      name,
+      active: activeByAssignee.get(name) || 0,
+      completed: completedByAssignee.get(name) || 0,
+      score: (activeByAssignee.get(name) || 0) + (completedByAssignee.get(name) || 0)
+    })).sort((a, b) => b.score - a.score);
+
+    const topN = 10;
+    const top = rows.slice(0, topN);
+    const other = rows.slice(topN).reduce((acc, r) => {
+      acc.active += r.active;
+      acc.completed += r.completed;
+      return acc;
+    }, { active: 0, completed: 0 });
+
+    const assigneeLabels = top.map(r => r.name).concat((other.active || other.completed) ? ["Other"] : []);
+    const activeSeries = top.map(r => r.active).concat((other.active || other.completed) ? [other.active] : []);
+    const completedSeries = top.map(r => r.completed).concat((other.active || other.completed) ? [other.completed] : []);
+
+    const now = new Date();
+    const bubbleMap = new Map();
+    const ensure = (u) => {
+      if (!bubbleMap.has(u)) bubbleMap.set(u, { user: u, active: 0, completed: 0, openAgeSumMins: 0, openCount: 0 });
+      return bubbleMap.get(u);
+    };
+
+    items.forEach(x => {
+      const user = x.assigneeLabel || "Unassigned";
+      const s = ensure(user);
+      if (x.isCompleted) {
+        s.completed++;
+      } else {
+        s.active++;
+        s.openCount++;
+        s.openAgeSumMins += Dash.minutesBetween(x.created, now);
+      }
+    });
+
+    const bubblePoints = [];
+    bubbleMap.forEach(s => {
+      const avgOpenAgeMins = s.openCount ? (s.openAgeSumMins / s.openCount) : 0;
+      const avgOpenAgeDays = avgOpenAgeMins / (60 * 24);
+      const r = Math.max(4, Math.min(18, Math.round(avgOpenAgeDays * 2)));
+      bubblePoints.push({ x: s.active, y: s.completed, r, user: s.user, avgOpenAgeDays });
+    });
+
+    return {
+      activeTotal,
+      completedTotal,
+      assigneeCount,
+      utilisation,
+
+      assigneeLabels,
+      activeSeries,
+      completedSeries,
+
+      bubblePoints,
+
+      labels
+    };
+  }
+
+  function renderD(moduleKey, preset, m) {
+    const presetLabel = Dash.PRESET_LABEL[preset] || "Selected";
+
+    Dash.setText("d_kpiActive", `${m.activeTotal}`);
+    Dash.setText("d_kpiActiveDetail", `Open tickets (${presetLabel})`);
+
+    Dash.setText("d_kpiAssignees", `${m.assigneeCount}`);
+    Dash.setText("d_kpiAssigneesDetail", `Excluding Unassigned Tickets`);
+
+    Dash.setText("d_kpiUtilisation", `${m.utilisation.toFixed(2)}`);
+    Dash.setText("d_kpiUtilisationDetail", `Active ÷ Assignees : ${m.activeTotal} ÷ ${m.assigneeCount || 0}`);
+
+    Dash.setText("d_kpiCompleted", `${m.completedTotal}`);
+    Dash.setText("d_kpiCompletedDetail", `Completed tickets (${presetLabel})`);
+
+    Dash.setText("d_rangeChip", `Range: ${presetLabel}`);
+    Dash.setText("d_countsChip", `Active: ${m.activeTotal} • Completed: ${m.completedTotal}`);
+
+    Dash.upsertChart("d_requestsPerAssignee", "d_requestsPerAssigneeChart", {
+      type: "bar",
+      data: {
+        labels: m.assigneeLabels,
+        datasets: [
+          { label: "Active (Open)", data: m.activeSeries, backgroundColor: BRAND.GREEN, borderColor: BRAND.GREEN },
+          { label: "Completed", data: m.completedSeries, backgroundColor: BRAND.ORANGE, borderColor: BRAND.ORANGE }
+        ]
+      },
+      //options: { responsive: true, plugins: { legend: { display: true } }, scales: { x: { ticks: { autoSkip: true, maxRotation: 0 } } } }
+      options: { 
+        responsive: true,
+        // maintainAspectRatio: false,  // ✅ horizontal bars
+        indexAxis: "y",
+        plugins: { legend: { display: true } },
+        scales: {
+          y: {
+            ticks: {
+              autoSkip: false // always show bucket labels
+            }
+          },
+          x: {
+            beginAtZero: true,
+            ticks: {
+              precision: 0
+            }
+          }
+        }
+      }
+    });
+
+    Dash.upsertChart("d_bubble", "d_assigneeBubbleChart", {
+      type: "bubble",
+      data: { datasets: [{ label: "Assignees", data: m.bubblePoints, backgroundColor: rgba(BRAND.GREEN, 0.25), borderColor: BRAND.GREEN }] },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { display: true },
+          tooltip: {
+            callbacks: {
+              label: (ctx) => {
+                const p = ctx.raw;
+                return `${p.user}: Active ${p.x}, Completed ${p.y}, Avg open age ${p.avgOpenAgeDays.toFixed(1)}d`;
+              }
+            }
+          }
+        },
+        scales: {
+          x: { title: { display: true, text: "Active (Open) Tickets" }, beginAtZero: true },
+          y: { title: { display: true, text: "Completed (in dataset)" }, beginAtZero: true }
+        }
+      }
+    });
+
+    Dash.setText("d_debug", `${MODULES[moduleKey].label}: Active=${m.activeTotal}, Assignees=${m.assigneeCount}, Utilisation=${m.utilisation.toFixed(2)} (${presetLabel})`);
+  }
+
+  /* ----------------------------
+     RENDER: SECTION E (Individuals) — ✅ FIXED COLORS (NO BLUE)
+  ---------------------------- */
+
+  function escapeHtml(s) {
+    return (s ?? "").toString()
+      .replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
+  }
+
+  function computeECards(items) {
+    const map = new Map();
+    const ensure = (name) => {
+      if (!map.has(name)) {
+        map.set(name, { name, velocity: 0, backlog: 0, measured: 0, breached: 0, cycleSum: 0, cycleCount: 0 });
+      }
+      return map.get(name);
+    };
+
+    items.forEach(x => {
+      const u = x.assigneeLabel || "Unassigned";
+      const s = ensure(u);
+
+      if (x.isCompleted) {
+        s.velocity++;
+        if (x.completedAt) {
+          const mins = Dash.minutesBetween(x.created, x.completedAt);
+          s.cycleSum += mins;
+          s.cycleCount++;
+        }
+      } else {
+        s.backlog++;
+      }
+
+      if (x.slaMeasured) {
+        s.measured++;
+        if (x.slaBreached) s.breached++;
+      }
+    });
+
+    const rows = [...map.values()].filter(r => r.name !== "Unassigned");
+    rows.forEach(r => {
+      r.slaPct = r.measured ? ((r.measured - r.breached) * 100 / r.measured) : null;
+      r.avgCycle = r.cycleCount ? (r.cycleSum / r.cycleCount) : null;
+    });
+
+    return scoreERows(rows);
+  }
+
+  function minMax(rows, key) {
+    const vals = rows.map(r => r[key]).filter(v => v != null && Number.isFinite(v));
+    if (!vals.length) return { min: 0, max: 0 };
+    return { min: Math.min(...vals), max: Math.max(...vals) };
+  }
+  function norm01(val, min, max) {
+    if (val == null || !Number.isFinite(val)) return 0;
+    if (max === min) return 0.5;
+    return (val - min) / (max - min);
+  }
+
+  function scoreERows(rows) {
+    const mmVel = minMax(rows, "velocity");
+    const mmSla = minMax(rows, "slaPct");
+    const mmCyc = minMax(rows, "avgCycle");
+    const mmBak = minMax(rows, "backlog");
+
+    rows.forEach(r => {
+      const nVel = norm01(r.velocity, mmVel.min, mmVel.max);
+      const nSla = norm01(r.slaPct ?? 0, mmSla.min, mmSla.max);
+
+      const cycVal = (r.avgCycle == null) ? mmCyc.max : r.avgCycle; // lower better
+      const nCyc = 1 - norm01(cycVal, mmCyc.min, mmCyc.max);
+
+      const nBak = 1 - norm01(r.backlog, mmBak.min, mmBak.max);
+
+      r.composite =
+        nVel * E_CFG.weights.velocity +
+        nSla * E_CFG.weights.sla +
+        nCyc * E_CFG.weights.cycle +
+        nBak * E_CFG.weights.backlog;
+    });
+
+    return rows;
+  }
+
+  function pickEGranularity(win) {
+    const days = Math.ceil((win.end.getTime() - win.start.getTime()) / 86400000) + 1;
+    if (days <= 31) return "day";
+    if (days <= 140) return "week";
+    return "month";
+  }
+
+  function weekKey(d) {
+    const date = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+    const dayNum = date.getUTCDay() || 7;
+    date.setUTCDate(date.getUTCDate() + 4 - dayNum);
+    const yearStart = new Date(Date.UTC(date.getUTCFullYear(), 0, 1));
+    const weekNo = Math.ceil((((date - yearStart) / 86400000) + 1) / 7);
+    const yy = date.getUTCFullYear();
+    const ww = String(weekNo).padStart(2, "0");
+    return `${yy}-W${ww}`;
+  }
+  function bucketKey(d, gran) {
+    if (gran === "day") return d.toISOString().slice(0, 10);
+    if (gran === "week") return weekKey(d);
+    const yy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, "0");
+    return `${yy}-${mm}`;
+  }
+
+  function buildESeries(items, win) {
+    const gran = pickEGranularity(win);
+    const periodSet = new Set();
+
+    const vel = new Map();
+    const bak = new Map();
+
+    const ensureMap = (m, user) => {
+      if (!m.has(user)) m.set(user, new Map());
+      return m.get(user);
+    };
+
+    items.forEach(x => {
+      const user = x.assigneeLabel || "Unassigned";
+      if (user === "Unassigned") return;
+
+      if (x.isCompleted) {
+        const dt = x.completedAt || x.created;
+        const p = bucketKey(dt, gran);
+        periodSet.add(p);
+        const m = ensureMap(vel, user);
+        m.set(p, (m.get(p) || 0) + 1);
+      }
+
+      if (!x.isCompleted) {
+        const p = bucketKey(x.created, gran);
+        periodSet.add(p);
+        const m = ensureMap(bak, user);
+        m.set(p, (m.get(p) || 0) + 1);
+      }
+    });
+
+    const labels = [...periodSet].sort();
+    return { gran, labels, vel, bak };
+  }
+
+  function pickTopUsersForLines(cardRows) {
+    const sorted = [...cardRows].sort((a, b) => (b.velocity + b.backlog) - (a.velocity + a.backlog));
+    const top = sorted.slice(0, E_CFG.topSeries).map(r => r.name);
+    const rest = sorted.slice(E_CFG.topSeries).map(r => r.name);
+    return { top, rest };
+  }
+
+  /**
+   * ✅ UPDATED: Build datasets WITH BRAND COLORS (no Chart.js blue)
+   * - Each assignee gets a deterministic brand color via hash
+   * - Other group is charcoal dashed
+   */
+  // function seriesToDatasets(labels, perUserMap, topUsers, restUsers, otherDash = true) {
+  //   const datasets = [];
+
+  //   topUsers.forEach(u => {
+  //     const m = perUserMap.get(u) || new Map();
+  //     const c = brandColorForKey(u);
+  //     datasets.push({
+  //       label: `${u}`,
+  //       data: labels.map(k => m.get(k) || 0),
+  //       borderColor: c.stroke,
+  //       backgroundColor: c.fill20,
+  //       pointBackgroundColor: c.stroke,
+  //       pointRadius: 2,
+  //       tension: 0.25,
+  //       fill: false
+  //     });
+  //   });
+
+  //   if (restUsers.length) {
+  //     const otherMap = new Map();
+  //     restUsers.forEach(u => {
+  //       const m = perUserMap.get(u) || new Map();
+  //       labels.forEach(k => otherMap.set(k, (otherMap.get(k) || 0) + (m.get(k) || 0)));
+  //     });
+
+  //     datasets.push({
+  //       label: `Other (${restUsers.length})`,
+  //       data: labels.map(k => otherMap.get(k) || 0),
+  //       borderColor: BRAND.CHAR,
+  //       backgroundColor: rgba(BRAND.CHAR, 0.15),
+  //       pointBackgroundColor: BRAND.CHAR,
+  //       pointRadius: 2,
+  //       borderDash: otherDash ? [6, 4] : undefined,
+  //       tension: 0.25,
+  //       fill: false
+  //     });
+  //   }
+
+  //   return datasets;
+  // }
+
+
+  function seriesToDatasets(labels, perUserMap, topUsers, restUsers, otherDash = true) {
+    const datasets = [];
+
+    // Top users: unique brand color per assignee (deterministic)
+    topUsers.forEach(u => {
+      const m = perUserMap.get(u) || new Map();
+      const c = brandColorForKey(u); // uses BRAND_SERIES = [GREEN,TEAL,ORANGE,GREY,CHAR]
+
+      datasets.push({
+        label: `${u}`,
+        data: labels.map(k => m.get(k) || 0),
+
+        borderColor: c.stroke,
+        backgroundColor: c.fill20,
+        pointBackgroundColor: c.stroke,
+        pointBorderColor: c.stroke,
+        pointRadius: 2,
+
+        tension: 0.25,
+        fill: false
+      });
+    });
+
+    // Rest users grouped as "Other" (use neutral brand color)
+    if (restUsers.length) {
+      const otherMap = new Map();
+
+      restUsers.forEach(u => {
+        const m = perUserMap.get(u) || new Map();
+        labels.forEach(k => {
+          otherMap.set(k, (otherMap.get(k) || 0) + (m.get(k) || 0));
+        });
+      });
+
+      datasets.push({
+        label: `Other (${restUsers.length})`,
+        data: labels.map(k => otherMap.get(k) || 0),
+
+        borderColor: BRAND.CHAR,                 // neutral (no blue)
+        backgroundColor: rgba(BRAND.CHAR, 0.12),
+        pointBackgroundColor: BRAND.CHAR,
+        pointBorderColor: BRAND.CHAR,
+        pointRadius: 2,
+
+        borderDash: otherDash ? [6, 4] : undefined,
+        tension: 0.25,
+        fill: false
+      });
+    }
+
+    return datasets;
+  }
+
+
+  function renderE(items, win) {
+    const cardRows = computeECards(items);
+    renderEAssigneeCards(cardRows);
+
+    const series = buildESeries(items, win);
+    const { top, rest } = pickTopUsersForLines(cardRows);
+
+    // Velocity lines (now brand-colored)
+    Dash.upsertChart("e_velocity", "e_velocityTrendChart", {
+      type: "line",
+      data: { labels: series.labels, datasets: seriesToDatasets(series.labels, series.vel, top, rest, true) },
+      options: {
+        responsive: true,
+        spanGaps: true,
+        plugins: { legend: { display: true } },
+        scales: { x: { ticks: { autoSkip: true, maxRotation: 0 } }, y: { beginAtZero: true } }
+      }
+    });
+
+    // Backlog lines (now brand-colored)
+    Dash.upsertChart("e_backlog", "e_backlogTrendChart", {
+      type: "line",
+      data: { labels: series.labels, datasets: seriesToDatasets(series.labels, series.bak, top, rest, true) },
+      options: {
+        responsive: true,
+        spanGaps: true,
+        plugins: { legend: { display: true } },
+        scales: { x: { ticks: { autoSkip: true, maxRotation: 0 } }, y: { beginAtZero: true } }
+      }
+    });
+
+    const velHint = document.getElementById("e_velHint");
+    if (velHint) velHint.innerHTML = `<span class="dot"></span> Grouping: ${series.gran.toUpperCase()}`;
+
+    Dash.setText("e_debug", `${cardRows.length} assignees | Lines: Top ${top.length}${rest.length ? " + Other" : ""}`);
+  }
+
+  function renderEAssigneeCards(rows) {
+    const host = document.getElementById("e_assigneeCards");
+    if (!host) return;
+
+    host.innerHTML = "";
+
+    if (!rows.length) {
+      host.innerHTML = `<div class="text-muted">No assignee data in this range.</div>`;
+      return;
+    }
+
+    rows
+      .sort((a, b) => b.composite - a.composite)
+      .forEach(r => {
+        const cycleText = (r.avgCycle == null) ? "—" : Dash.formatMinutes(r.avgCycle);
+        const slaText = (r.slaPct == null) ? "—" : `${r.slaPct.toFixed(1)}%`;
+
+        const col = document.createElement("div");
+        col.className = "col-xl-3 col-lg-4 col-md-6 col-sm-12";
+        col.innerHTML = `
+        <div class="c p-3 h-100">
+          <div class="d-flex justify-content-between align-items-start">
+            <div class="fw-semibold small">${escapeHtml(r.name)}</div>
+            <span class="chip" title="Balanced composite score">Score ${(r.composite * 100).toFixed(0)}</span>
+          </div>
+          <div class="divider-soft my-2"></div>
+
+          <div class="d-flex justify-content-between">
+            <div class="small text-muted">Velocity</div>
+            <div class="fw-semibold">${r.velocity}</div>
+          </div>
+          <div class="d-flex justify-content-between">
+            <div class="small text-muted">SLA %</div>
+            <div class="fw-semibold">${slaText}</div>
+          </div>
+          <div class="d-flex justify-content-between">
+            <div class="small text-muted">Avg Cycle</div>
+            <div class="fw-semibold">${cycleText}</div>
+          </div>
+          <div class="d-flex justify-content-between">
+            <div class="small text-muted">Backlog</div>
+            <div class="fw-semibold">${r.backlog}</div>
+          </div>
+        </div>
+      `;
+        host.appendChild(col);
+      });
+  }
+
+//   function rebuildDynamicFilters(moduleKey, items) {
+//   const container = document.getElementById("dyn_filters_container");
+
+//   // TEMP DEBUG
+//   console.log("Container found:", container);
+//   console.log("Filters to render:", (MODULES[moduleKey] || {}).filters);
+
+//   if (!container) return;
+
+//   const filters = (MODULES[moduleKey] || {}).filters || [];
+
+//   // Capture current selections before wiping DOM
+//   const prevSelections = {};
+//   container.querySelectorAll("select[data-filter-idx]").forEach(sel => {
+//     prevSelections[sel.dataset.filterIdx] = sel.value;
+//   });
+
+//   // Clear and regenerate
+//   container.innerHTML = "";
+
+//   filters.forEach((cfg, idx) => {
+//     // Collect distinct values for this field
+//     const valSet = new Set();
+//     items.forEach(x => {
+//       const v = (x[cfg.field] ?? "").toString().trim();
+//       if (v && v !== "Unknown") valSet.add(v);
+//     });
+
+//     const sorted = [...valSet].sort((a, b) => a.localeCompare(b));
+
+//     // Build control
+//     const wrap = document.createElement("div");
+//     wrap.style.cssText = "display:flex; flex-direction:column; gap:4px;";
+
+//     const label = document.createElement("label");
+//     label.className = "form-label";
+//     label.style.marginBottom = "0";
+//     label.textContent = cfg.label;
+//     label.htmlFor = `dyn_filter_${idx}`;
+
+//     const sel = document.createElement("select");
+//     sel.id = `dyn_filter_${idx}`;
+//     sel.className = "form-select form-select-sm";
+//     sel.style.minWidth = "160px";
+//     sel.dataset.filterIdx = idx;
+//     sel.dataset.filterField = cfg.field;
+
+//     const defaultOpt = document.createElement("option");
+//     defaultOpt.value = "";
+//     defaultOpt.textContent = "All";
+//     sel.appendChild(defaultOpt);
+
+//     sorted.forEach(v => {
+//       const opt = document.createElement("option");
+//       opt.value = v;
+//       opt.textContent = v;
+//       if (prevSelections[idx] === v) opt.selected = true;
+//       sel.appendChild(opt);
+//     });
+
+//     wrap.appendChild(label);
+//     wrap.appendChild(sel);
+//     container.appendChild(wrap);
+//   });
+// }
+
+  // function applyDynamicFilters(moduleKey, items) {
+  //   const container = document.getElementById("dyn_filters_container");
+  //   if (!container) return items;
+
+  //   let result = items;
+
+  //   container.querySelectorAll("select[data-filter-idx]").forEach(sel => {
+  //     const val = sel.value;
+  //     if (!val) return; // "All" — skip
+
+  //     const field = sel.dataset.filterField;
+  //     result = result.filter(x => {
+  //       return (x[field] ?? "").toString().trim() === val;
+  //     });
+  //   });
+
+  //   return result;
+  // }
+
+  function rebuildDynamicFilters(moduleKey, items) {
+    const container = document.getElementById("dyn_filters_container");
+    const filterBar = document.getElementById("dyn_filterbar");
+    if (!container) return;
+
+    const filters = (MODULES[moduleKey] || {}).filters || [];
+    // Show filter bar only if module has filters configured
+    if (filterBar) filterBar.style.display = filters.length ? "" : "none";
+
+    // Capture current selections before wiping DOM
+    const prevSelections = {};
+    container.querySelectorAll("select[data-filter-idx]").forEach(sel => {
+      prevSelections[sel.dataset.filterIdx] = sel.value;
+    });
+
+    container.innerHTML = "";
+
+    filters.forEach((cfg, idx) => {
+      // Collect distinct values
+      const valSet = new Set();
+      items.forEach(x => {
+        const v = (x[cfg.field] ?? "").toString().trim();
+        if (v && v !== "Unknown") valSet.add(v);
+      });
+
+      const sorted = [...valSet].sort((a, b) => a.localeCompare(b));
+
+      const wrap = document.createElement("div");
+      wrap.style.cssText = "display:flex; flex-direction:column; gap:4px;";
+
+      const label = document.createElement("label");
+      label.className = "form-label";
+      label.style.marginBottom = "0";
+      label.textContent = cfg.label;
+      label.htmlFor = `dyn_filter_${idx}`;
+
+      const sel = document.createElement("select");
+      sel.id = `dyn_filter_${idx}`;
+      sel.className = "form-select form-select-sm";
+      sel.style.minWidth = "130px";
+      sel.dataset.filterIdx = idx;
+      sel.dataset.filterField = cfg.field;
+
+      const defaultOpt = document.createElement("option");
+      defaultOpt.value = "";
+      defaultOpt.textContent = "All";
+      sel.appendChild(defaultOpt);
+
+      sorted.forEach(v => {
+        const opt = document.createElement("option");
+        opt.value = v;
+        opt.textContent = v;
+        if (prevSelections[idx] === v) opt.selected = true;
+        sel.appendChild(opt);
+      });
+
+      wrap.appendChild(label);
+      wrap.appendChild(sel);
+      container.appendChild(wrap);
+    });
+  }
+
+  function applyDynamicFilters(moduleKey, items) {
+  const container = document.getElementById("dyn_filters_container");
+  if (!container) return items;
+
+  let result = items;
+
+  container.querySelectorAll("select[data-filter-idx]").forEach(sel => {
+    const val = sel.value;
+    if (!val) return;
+    const field = sel.dataset.filterField;
+    result = result.filter(x => (x[field] ?? "").toString().trim() === val);
+  });
+
+  return result;
+}
+
+  function renderActiveFilterChips(moduleKey) {
+    const container = document.getElementById("dyn_filters_container");
+    const chipsRow = document.getElementById("dyn_active_filters");
+    if (!chipsRow) return;
+
+    const filters = (MODULES[moduleKey] || {}).filters || [];
+    const activeChips = [];
+
+    if (container) {
+      container.querySelectorAll("select[data-filter-idx]").forEach(sel => {
+        const val = sel.value;
+        if (!val) return;
+
+        const idx = parseInt(sel.dataset.filterIdx);
+        const cfg = filters[idx];
+        if (!cfg) return;
+
+        activeChips.push({ label: cfg.label, value: val, idx });
+      });
+    }
+
+    if (!activeChips.length) {
+      chipsRow.style.display = "none";
+      chipsRow.innerHTML = "";
+      return;
+    }
+
+    chipsRow.style.display = "flex";
+    chipsRow.innerHTML = `<span style="font-size:12px; color:#6c757d; align-self:center;">Active filters:</span>`;
+
+    activeChips.forEach(({ label, value, idx }) => {
+      const chip = document.createElement("span");
+      chip.style.cssText = `
+        display:inline-flex; align-items:center; gap:6px;
+        background:#e8f4ee; border:1px solid #006F4A;
+        border-radius:20px; padding:3px 10px 3px 12px;
+        font-size:12px; color:#006F4A; font-weight:500;
+      `;
+      chip.innerHTML = `
+        <span>${label}: <strong>${value}</strong></span>
+        <span data-clear-idx="${idx}" style="
+          cursor:pointer; font-size:14px; line-height:1;
+          color:#006F4A; font-weight:700;
+          padding:0 2px; border-radius:50%;
+        " title="Clear this filter">×</span>
+      `;
+
+      // Wire × to clear filter and re-apply
+      chip.querySelector(`[data-clear-idx]`).addEventListener("click", () => {
+        const sel = document.getElementById(`dyn_filter_${idx}`);
+        if (sel) sel.value = "";
+        loadDashboardAll();
+      });
+
+      chipsRow.appendChild(chip);
+    });
+
+    // Clear all link
+    const clearAll = document.createElement("span");
+    clearAll.style.cssText = "font-size:12px; color:#6c757d; cursor:pointer; align-self:center; text-decoration:underline;";
+    clearAll.textContent = "Clear all";
+    clearAll.addEventListener("click", () => {
+      if (container) {
+        container.querySelectorAll("select[data-filter-idx]").forEach(sel => sel.value = "");
+      }
+      loadDashboardAll();
+    });
+    chipsRow.appendChild(clearAll);
+  }
+
+  function updateResultsBadge(count) {
+    const badge = document.getElementById("dyn_results_badge");
+    const countEl = document.getElementById("dyn_results_count");
+    if (!badge || !countEl) return;
+
+    countEl.textContent = count.toLocaleString();
+    badge.style.display = count != null ? "inline-flex" : "none";
+  }
+
+  /* ----------------------------
+     LOAD ALL (single Apply)
+  ---------------------------- */
+
+
+  async function loadDashboardAll() {
+    const moduleKey = Dash.$("a_module")?.value;
+    if (!moduleKey) {
+      Dash.setText("debugMsg", "No department access");
+      return;
+    }
+
+
+    // Enforce access at runtime (even if someone manipulates DOM)
+    // if (!ACCESS.canViewAll) {
+    //   moduleKey = MODULES[ACCESS.userDept] ? ACCESS.userDept : "PROC";
+    // }
+
+    const isAll = (moduleKey === "ALL");
+    const preset = Dash.$("a_dateRange")?.value || "last90";
+    if (preset === "custom") {
+      const startVal = Dash.$("a_startDate")?.value;
+      const endVal   = Dash.$("a_endDate")?.value;
+
+      if (!startVal || !endVal) {
+        alert("Please select both a Start Date and End Date before applying.");
+        return;
+      }
+
+      if (new Date(startVal) > new Date(endVal)) {
+        alert("Start Date cannot be after End Date. Please correct the range.");
+        return;
+      }
+    }
+
+    const win = Dash.getDateWindow(preset);
+
+    try {
+      if (typeof showLoader === "function") showLoader(`Loading ${MODULES[moduleKey].label} dashboard...`);
+
+      // const [rows, prevRows] = await Promise.all([
+      //   fetchUnifiedRows(moduleKey, win),
+      //   fetchUnifiedRows(moduleKey, { start: win.prevStart, end: win.prevEnd })
+      // ]);
+
+      // let items = normalizeRowsToItems(moduleKey, rows);
+      // const prevItems = normalizeRowsToItems(moduleKey, prevRows);
+
+      const isChildModule = MODULES[moduleKey].isChildModule === true;
+
+      const [rows, prevRows] = await Promise.all([
+        isChildModule ? fetchChildRows(moduleKey, win)         : fetchUnifiedRows(moduleKey, win),
+        isChildModule ? fetchChildRows(moduleKey, { start: win.prevStart, end: win.prevEnd }) : fetchUnifiedRows(moduleKey, { start: win.prevStart, end: win.prevEnd })
+      ]);
+
+      let items = isChildModule
+        ? normalizeChildRowsToItems(moduleKey, rows)
+        : normalizeRowsToItems(moduleKey, rows);
+
+      let prevItems = isChildModule
+        ? normalizeChildRowsToItems(moduleKey, prevRows)
+        : normalizeRowsToItems(moduleKey, prevRows);
+
+      // TEMP DEBUG — remove after fixing
+      console.log("Sample item:", items[0]);
+      console.log("Module additionalFields:", MODULES[moduleKey].additionalFields);
+      console.log("Filter config:", MODULES[moduleKey].filters);
+
+      rebuildDynamicFilters(moduleKey, items);
+      items = applyDynamicFilters(moduleKey, items);
+
+      // Show active filter chips and results badge
+      renderActiveFilterChips(moduleKey);
+      updateResultsBadge(items.length);
+
+      // const items = normalizeRowsToItems(moduleKey, rows);
+      if (moduleKey === "HR" && !isChildModule) {
+        const hrData = computeHRBreakdown(items);
+        renderHRBreakdown(hrData);
+      } else {
+        hideHRBreakdown();
+      }
+
+      
+
+      const a = computeA(items, prevItems, win);
+      renderA(moduleKey, preset, a);
+
+      const b = computeB(items, win);
+      renderB(preset, b);
+      Dash.setText("b_debug", `Loaded ${items.length} records (shared dataset).`);
+
+      const c = computeC(items, prevItems, win);
+      renderC(moduleKey, preset, c);
+
+      const d = computeD(items, win);
+      renderD(moduleKey, preset, d);
+
+      renderE(items, win);
+
+      Dash.setText("debugMsg", `Loaded ${MODULES[moduleKey].label} • ${Dash.PRESET_LABEL[preset] || preset}`);
+
+    } catch (e) {
+      console.error("Dashboard load error:", e);
+      Dash.setText("debugMsg", "Error (see console)");
+      Dash.setText("a_debug", "Error (see console)");
+      Dash.setText("b_debug", "Error (see console)");
+      Dash.setText("c_debug", "Error (see console)");
+      Dash.setText("d_debug", "Error (see console)");
+      Dash.setText("e_debug", "Error (see console)");
+    } finally {
+      if (typeof hideLoader === "function") hideLoader();
+    }
+  }
+
+  /* ----------------------------
+     INIT (single wiring)
+  ---------------------------- */
+  (function initDashboard() {
+    Dash.$("a_apply")?.addEventListener("click", loadDashboardAll);
+
+    // ── NEW: reset dynamic filters when department changes ──
+    Dash.$("a_module")?.addEventListener("change", function () {
+      const container = document.getElementById("dyn_filters_container");
+      if (container) container.innerHTML = "";
+
+      const filterBar = document.getElementById("dyn_filterbar");
+      if (filterBar) filterBar.style.display = "none";
+
+      const chipsRow = document.getElementById("dyn_active_filters");
+      if (chipsRow) { chipsRow.style.display = "none"; chipsRow.innerHTML = ""; }
+
+      const badge = document.getElementById("dyn_results_badge");
+      if (badge) badge.style.display = "none";
+    });
+    // ───────────────────────────────────────────────────────
+
+    // auto-load only if a department exists
+    if (Dash.$("a_module")?.value) {
+      loadDashboardAll();
+    }
+  })();
+</script>
+
+<script>
+  // const dateRangeSelect = document.getElementById("a_dateRange");
+  // const customRangeContainer = document.getElementById("a_customRange");
+
+  // dateRangeSelect.addEventListener("change", function () {
+
+  //   if (this.value === "custom") {
+  //     document.getElementById("a_startDate").value = "";
+  //     document.getElementById("a_endDate").value = "";
+  //     customRangeContainer.classList.remove("d-none");
+  //   } else {
+  //     customRangeContainer.classList.add("d-none");
+  //   }
+
+  // });
+
+  const dateRangeSelect = document.getElementById("a_dateRange");
+  const customRangeContainer = document.getElementById("a_customRange");
+
+  dateRangeSelect.addEventListener("change", function () {
+    if (this.value === "custom") {
+      document.getElementById("a_startDate").value = "";
+      document.getElementById("a_endDate").value = "";
+      customRangeContainer.style.display = "flex";
+    } else {
+      customRangeContainer.style.display = "none";
+    }
+  });
+</script>
+
+{%- endif -%}
+
+
+
+{% include "Ticketing System - Loader" %}
+
+{%- assign userEmail = user.emailaddress1 | downcase -%}
+
+{%- if userEmail == "rehan.memon@starlinks-me.com"  -%}
+
+<!-- Topbar -->
+<div class="topbar">
+  <div class="topbar-left">
+    <div class="topbar-title">Starlinks One — Executive Dashboard</div>
+    <div class="topbar-sub">Adoption, performance, and business impact across every department since launch.</div>
+    <div class="topbar-meta">
+      <span class="chip"><span class="dot"></span><span id="ex_debugMsg">Loading…</span></span>
+      <span class="chip"><span class="dot"></span>Owner View</span>
+      <span class="chip"><span class="dot"></span><span id="ex_lastRefreshed">—</span></span>
+    </div>
+  </div>
+  <div class="topbar-right" style="align-items:flex-end;">
+    <button id="ex_refresh" class="btn btn-primary" style="height:38px;">Refresh Data</button>
+  </div>
+</div>
+
+<!-- ============== SECTION 1: SCALE & ADOPTION ============== -->
+<div class="sectionbar">
+  <div class="section-head">
+    <div>
+      <div class="section-kicker">
+        <span class="badge-soft">Section 1</span>
+        <div class="section-title">Platform Scale &amp; Adoption</div>
+      </div>
+      <div class="section-purpose">How far Starlinks One has spread, and who is actually using it.</div>
+    </div>
+  </div>
+
+  <div style="display:flex; flex-wrap:wrap; gap:12px; margin-bottom:12px;">
+    <div class="c p-3" style="flex:1 1 180px;">
+      <div class="kpi-l">Total Tickets (All-Time)</div>
+      <div id="ex_kpiTotalTickets" class="kpi">—</div>
+      <div class="hint mt-1" id="ex_kpiTotalTicketsDetail">—</div>
+    </div>
+    <div class="c p-3" style="flex:1 1 180px;">
+      <div class="kpi-l">Departments Live</div>
+      <div id="ex_kpiDeptsLive" class="kpi">—</div>
+      <div class="hint mt-1">of 6 onboarded</div>
+    </div>
+    <div class="c p-3" style="flex:1 1 180px;">
+      <div class="kpi-l">Active Requestors</div>
+      <div id="ex_kpiRequestors" class="kpi">—</div>
+      <div class="hint mt-1">Distinct people who raised a ticket</div>
+    </div>
+    <div class="c p-3" style="flex:1 1 180px;">
+      <div class="kpi-l">Active Assignees</div>
+      <div id="ex_kpiAssignees" class="kpi">—</div>
+      <div class="hint mt-1">Distinct people resolving tickets</div>
+    </div>
+    <div class="c p-3" style="flex:1 1 180px;">
+      <div class="kpi-l">Avg Tickets / Month</div>
+      <div id="ex_kpiAvgPerMonth" class="kpi">—</div>
+      <div class="hint mt-1">Since first ticket</div>
+    </div>
+  </div>
+
+  <div class="row g-3 mb-3">
+    <div class="col-lg-7">
+      <div class="c chart-card h-100">
+        <div class="chart-header">
+          <div>
+            <div class="chart-title">Tickets by Department (monthly)</div>
+            <div class="chart-sub">Where adoption is coming from, and when each team came on board</div>
+          </div>
+          <span class="chip" id="ex_deptChartHint"><span class="dot"></span> —</span>
+        </div>
+        <div class="divider-soft"></div>
+        <canvas id="ex_deptMonthlyChart" height="160"></canvas>
+      </div>
+    </div>
+    <div class="col-lg-5">
+      <div class="c chart-card h-100">
+        <div class="chart-header">
+          <div>
+            <div class="chart-title">Engagement Trend</div>
+            <div class="chart-sub">Active requestors vs. active assignees, monthly</div>
+          </div>
+        </div>
+        <div class="divider-soft"></div>
+        <canvas id="ex_engagementChart" height="160"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="c p-3">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+      <div class="fw-semibold">Department Rollout Timeline</div>
+      <div class="small text-muted">First ticket date per department</div>
+    </div>
+    <div class="divider-soft"></div>
+    <div id="ex_goLiveList" class="row g-3 mt-1"></div>
+  </div>
+</div>
+
+<!-- ============== SECTION 2: DEPARTMENT PERFORMANCE ============== -->
+<div class="sectionbar">
+  <div class="section-head">
+    <div>
+      <div class="section-kicker">
+        <span class="badge-soft">Section 2</span>
+        <div class="section-title">Department Performance Overview</div>
+      </div>
+      <div class="section-purpose">How each department is using the platform and managing requests. Click a column to sort.</div>
+    </div>
+  </div>
+
+  <div id="ex_deptBadges" class="row g-3 mb-3"></div>
+
+  <div class="c p-3">
+    <div class="table-responsive">
+      <table class="table table-sm mb-0" id="ex_deptTable">
+        <thead class="table-light">
+          <tr>
+            <th data-key="label" style="cursor:pointer;">Department ⇅</th>
+            <th data-key="total" style="cursor:pointer;" class="text-end">Tickets ⇅</th>
+            <th data-key="slaPct" style="cursor:pointer;" class="text-end">SLA % ⇅</th>
+            <th data-key="avgCycle" style="cursor:pointer;" class="text-end">Avg Cycle ⇅</th>
+            <th data-key="throughputPct" style="cursor:pointer;" class="text-end">Throughput % ⇅</th>
+            <th data-key="momGrowth" style="cursor:pointer;" class="text-end">MoM Growth ⇅</th>
+            <th data-key="requestors" style="cursor:pointer;" class="text-end">Requestors ⇅</th>
+            <th data-key="assignees" style="cursor:pointer;" class="text-end">Assignees ⇅</th>
+          </tr>
+        </thead>
+        <tbody id="ex_deptTableBody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ============== SECTION 3: ADOPTION & ENGAGEMENT ============== -->
+<div class="sectionbar">
+  <div class="section-head">
+    <div>
+      <div class="section-kicker">
+        <span class="badge-soft">Section 3</span>
+        <div class="section-title">Adoption &amp; Engagement</div>
+      </div>
+      <div class="section-purpose">Who is raising requests, and who is resolving them.</div>
+    </div>
+  </div>
+
+  <div class="row g-3 mb-3">
+    <div class="col-lg-6">
+      <div class="c p-3 h-100" style="border-left:4px solid #006F4A;">
+        <div class="kpi-l">Most Active Requestor</div>
+        <div class="d-flex justify-content-between align-items-end">
+          <div id="ex_topRequestorName" class="kpi" style="font-size:1.4rem;">—</div>
+          <div class="text-end">
+            <div class="kpi" id="ex_topRequestorCount">—</div>
+            <div class="small text-muted">tickets raised</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-6">
+      <div class="c p-3 h-100" style="border-left:4px solid #00A0AF;">
+        <div class="kpi-l">Most Active Resolver</div>
+        <div class="d-flex justify-content-between align-items-end">
+          <div id="ex_topAssigneeName" class="kpi" style="font-size:1.4rem;">—</div>
+          <div class="text-end">
+            <div class="kpi" id="ex_topAssigneeCount">—</div>
+            <div class="small text-muted">tickets completed</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-3">
+    <div class="col-lg-6">
+      <div class="c chart-card h-100">
+        <div class="chart-header">
+          <div>
+            <div class="chart-title">Top 10 Requestors</div>
+            <div class="chart-sub">By tickets raised, all-time</div>
+          </div>
+        </div>
+        <div class="divider-soft"></div>
+        <div style="position:relative; height:320px;"><canvas id="ex_topRequestorsChart"></canvas></div>
+      </div>
+    </div>
+    <div class="col-lg-6">
+      <div class="c chart-card h-100">
+        <div class="chart-header">
+          <div>
+            <div class="chart-title">Top 10 Resolvers</div>
+            <div class="chart-sub">By tickets completed, all-time</div>
+          </div>
+        </div>
+        <div class="divider-soft"></div>
+        <div style="position:relative; height:320px;"><canvas id="ex_topAssigneesChart"></canvas></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============== SECTION 4: COMPARATIVE ANALYTICS ============== -->
+<div class="sectionbar">
+  <div class="section-head">
+    <div>
+      <div class="section-kicker">
+        <span class="badge-soft">Section 4</span>
+        <div class="section-title">Comparative Analytics</div>
+      </div>
+      <div class="section-purpose">Departments and request types, side by side.</div>
+    </div>
+  </div>
+
+  <div class="row g-3 mb-3">
+    <div class="col-lg-6">
+      <div class="c chart-card h-100">
+        <div class="chart-header">
+          <div>
+            <div class="chart-title">SLA % by Department</div>
+            <div class="chart-sub">Highest compliance first</div>
+          </div>
+        </div>
+        <div class="divider-soft"></div>
+        <div style="position:relative; height:260px;"><canvas id="ex_slaByDeptChart"></canvas></div>
+      </div>
+    </div>
+    <div class="col-lg-6">
+      <div class="c chart-card h-100">
+        <div class="chart-header">
+          <div>
+            <div class="chart-title">Avg Cycle Time by Department</div>
+            <div class="chart-sub">Fastest first</div>
+          </div>
+        </div>
+        <div class="divider-soft"></div>
+        <div style="position:relative; height:260px;"><canvas id="ex_cycleByDeptChart"></canvas></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-3">
+    <div class="col-lg-6">
+      <div class="c chart-card h-100">
+        <div class="chart-header">
+          <div>
+            <div class="chart-title">Top Request Types by Volume</div>
+            <div class="chart-sub">Across all departments</div>
+          </div>
+        </div>
+        <div class="divider-soft"></div>
+        <div style="position:relative; height:300px;"><canvas id="ex_topCategoriesChart"></canvas></div>
+      </div>
+    </div>
+    <div class="col-lg-6">
+      <div class="c chart-card h-100">
+        <div class="chart-header">
+          <div>
+            <div class="chart-title">Request Types with Longest Avg Cycle Time</div>
+            <div class="chart-sub">Min. 3 completed tickets to qualify</div>
+          </div>
+        </div>
+        <div class="divider-soft"></div>
+        <div style="position:relative; height:300px;"><canvas id="ex_slowCategoriesChart"></canvas></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============== SECTION 5: LIFECYCLE & EFFICIENCY ============== -->
+<div class="sectionbar">
+  <div class="section-head">
+    <div>
+      <div class="section-kicker">
+        <span class="badge-soft">Section 5</span>
+        <div class="section-title">Lifecycle &amp; Efficiency Trends</div>
+      </div>
+      <div class="section-purpose">Monthly trends, since launch. Filter by department to isolate one for screenshotting / PDF comparison.</div>
+    </div>
+  </div>
+
+  <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+    <label for="ex_lifecycleCategorySelect" class="small text-muted mb-0" style="white-space:nowrap;">Department:</label>
+    <select id="ex_lifecycleCategorySelect" class="form-select form-select-sm" style="width:auto; min-width:280px;"></select>
+    <span class="chip"><span class="dot"></span>Showing: <strong id="ex_lifecycleSelectedLabel" style="margin-left:4px;">—</strong></span>
+    <span class="chip"><span class="dot"></span><span id="ex_lifecycleCategoryCount">—</span></span>
+  </div>
+
+  <div class="row g-3">
+    <div class="col-lg-4">
+      <div class="c chart-card h-100">
+        <div class="chart-header"><div><div class="chart-title">SLA % Trend</div></div></div>
+        <div class="divider-soft"></div>
+        <canvas id="ex_slaTrendChart" height="160"></canvas>
+      </div>
+    </div>
+    <div class="col-lg-4">
+      <div class="c chart-card h-100">
+        <div class="chart-header"><div><div class="chart-title">Avg Cycle Time Trend</div></div></div>
+        <div class="divider-soft"></div>
+        <canvas id="ex_cycleTrendChart" height="160"></canvas>
+      </div>
+    </div>
+    <div class="col-lg-4">
+      <div class="c chart-card h-100">
+        <div class="chart-header"><div><div class="chart-title">Throughput % Trend</div></div></div>
+        <div class="divider-soft"></div>
+        <canvas id="ex_throughputTrendChart" height="160"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============== SECTION 6: AUTOMATED INSIGHTS ============== -->
+<div class="sectionbar d-none">
+  <div class="section-head">
+    <div>
+      <div class="section-kicker">
+        <span class="badge-soft">Section 6</span>
+        <div class="section-title">Automated Insights</div>
+      </div>
+      <div class="section-purpose">Generated directly from the numbers above — every line ties back to a chart in this page.</div>
+    </div>
+  </div>
+  <div class="c p-3">
+    <div id="ex_insightsList"></div>
+  </div>
+</div>
+
+<!-- ============== SECTION 7: DATA QUALITY ============== -->
+<div class="sectionbar d-none">
+  <div class="section-head">
+    <div>
+      <div class="section-kicker">
+        <span class="badge-soft">Section 7</span>
+        <div class="section-title">Data Completeness</div>
+      </div>
+      <div class="section-purpose">Transparency on what the numbers above are based on.</div>
+    </div>
+  </div>
+  <div id="ex_dataQuality" style="display:flex; flex-wrap:wrap; gap:10px;"></div>
+</div>
+
+<!-- scripts -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+(function () {
+  "use strict";
+
+  /* ---------- Brand colors ---------- */
+  const BRAND = { GREEN: "#006F4A", TEAL: "#00A0AF", AMBER: "#FAA633", COOLGRAY: "#94A0A9", CHARCOAL: "#58595B" };
+  function rgba(hex, a) {
+    const h = hex.replace("#", "");
+    const n = parseInt(h, 16);
+    return `rgba(${(n >> 16) & 255},${(n >> 8) & 255},${n & 255},${a})`;
+  }
+
+  const DEPT_COLOR = {
+    PROC:  { stroke: BRAND.GREEN,    fill: rgba("#006F4A", 0.85) },
+    HR:    { stroke: BRAND.TEAL,     fill: rgba("#00A0AF", 0.85) },
+    IT:    { stroke: BRAND.AMBER,    fill: rgba("#FAA633", 0.85) },
+    LEGAL: { stroke: BRAND.COOLGRAY, fill: rgba("#94A0A9", 0.85) },
+    CS:    { stroke: BRAND.CHARCOAL, fill: rgba("#58595B", 0.85) },
+    P2P:   { stroke: BRAND.GREEN,    fill: rgba("#006F4A", 0.35) }
+  };
+
+  /* ---------- Module config ---------- */
+  const TICKET_FIELDS = "createdon,modifiedon,sh_completedon,sh_ticketstatus,sh_slabreach,sh_sla,_sh_assignedto_value,sh_timetocomplete,_sh_requestorperson_value";
+  const SLA_BREACH_DATE_FIELD = "sh_sla";
+
+  const STANDARD_MODULES = {
+    PROC:  { label: "Procurement",      metadataTable: "/_api/sh_procurementmetadatas",     ticketNav: "sh_TicketNumber" },
+    HR:    { label: "HR",               metadataTable: "/_api/sh_hrmetadatas",              ticketNav: "sh_TicketNumber" },
+    LEGAL: { label: "Legal",            metadataTable: "/_api/sh_legalmetadatas",           ticketNav: "sh_TicketNumber" },
+    IT:    { label: "IT",               metadataTable: "/_api/sh_itmetadatas",              ticketNav: "sh_TicketNumber" },
+    CS:    { label: "Customer Service", metadataTable: "/_api/sh_customerservicemetadatas", ticketNav: "sh_TicketNumber" }
+  };
+
+  const CHILD_MODULES = {
+    P2P: {
+      label: "Finance (P2P)",
+      ticketTable: "/_api/sh_tickets",
+      stepFilter: ["Vendor Selection", "PO Creation", "GRN Posting", "GRN Entry"]
+    }
+  };
+
+  const CATEGORY_FIELD_MAP = {
+    PROC:  { field: "_sh_procurementcategory_value", type: "lookup" },
+    HR:    { field: "sh_hrservices",                 type: "string" },
+    LEGAL: { field: "_sh_requesttype_value",         type: "lookup" },
+    IT:    { field: "sh_category",                   type: "lookup" },
+    CS:    { field: "_sh_category_value",            type: "lookup" }
+  };
+
+  const ALL_DEPT_KEYS = ["PROC", "P2P", "HR", "LEGAL", "IT", "CS"];
+
+  /* ---------- Quality thresholds (kept visible in UI, not hidden) ---------- */
+  const MIN_MEASURED_FOR_SLA_BADGE = 5;
+  const MIN_COMPLETED_FOR_CYCLE_BADGE = 3;
+  const MIN_COUNT_FOR_SLOW_CATEGORY = 3;
+  const MIN_TICKETS_PER_WINDOW_FOR_DELTA = 5;
+
+  /* ---------- Small utils ---------- */
+  const $ = (id) => document.getElementById(id);
+  const setText = (id, txt) => { const el = $(id); if (el) el.textContent = (txt ?? ""); };
+  const escapeHtml = (s) => (s ?? "").toString().replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
+
+  async function apiGet(url) {
+    const res = await fetch(url, {
+      method: "GET",
+      headers: { "Accept": "application/json", "OData-MaxVersion": "4.0", "OData-Version": "4.0", "Prefer": "odata.include-annotations=*" }
+    });
+    const txt = await res.text();
+    if (!res.ok) throw new Error(txt);
+    return JSON.parse(txt);
+  }
+
+  async function fetchPaged(url) {
+    const out = [];
+    let next = url;
+    while (next) {
+      const data = await apiGet(next);
+      (data.value || []).forEach(r => out.push(r));
+      next = data["@odata.nextLink"] || null;
+    }
+    return out;
+  }
+
+  const odataFmt = (row, logical) => row?.[logical + "@OData.Community.Display.V1.FormattedValue"] ?? row?.[logical] ?? "";
+
+  function parseDate(v) { if (!v) return null; const d = new Date(v); return Number.isFinite(d.getTime()) ? d : null; }
+  function isCompletedLabel(statusLabel) { return (statusLabel || "").trim().toLowerCase() === "completed"; }
+
+  function parseTtcToMinutes(ttcRaw) {
+    if (ttcRaw == null) return null;
+    if (typeof ttcRaw === "number" && Number.isFinite(ttcRaw)) return ttcRaw;
+    if (typeof ttcRaw === "string") {
+      const t = ttcRaw.trim();
+      if (/^\d+(\.\d+)?$/.test(t)) return Number(t);
+      const s = t.toLowerCase();
+      const d = (s.match(/(\d+)\s*d(ay)?/) || [])[1];
+      const h = (s.match(/(\d+)\s*h(r)?/) || [])[1];
+      const m = (s.match(/(\d+)\s*m(in)?/) || [])[1];
+      const total = (d ? parseInt(d, 10) * 1440 : 0) + (h ? parseInt(h, 10) * 60 : 0) + (m ? parseInt(m, 10) : 0);
+      return total || null;
+    }
+    return null;
+  }
+
+  function minutesBetween(a, b) { return Math.max(0, Math.round((b.getTime() - a.getTime()) / 60000)); }
+  function formatMinutes(mins) {
+    if (mins == null || !Number.isFinite(mins)) return "—";
+    const total = Math.max(0, Math.round(mins));
+    const days = Math.floor(total / 1440), rem = total % 1440, hrs = Math.floor(rem / 60), m = rem % 60;
+    return `${days}d ${hrs}h ${m}m`;
+  }
+
+  const monthKey = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+  const monthsBetween = (a, b) => (b.getFullYear() - a.getFullYear()) * 12 + (b.getMonth() - a.getMonth());
+
+  function buildMonthLabels(start, end) {
+    const labels = [];
+    const d = new Date(start.getFullYear(), start.getMonth(), 1);
+    const e = new Date(end.getFullYear(), end.getMonth(), 1);
+    while (d.getTime() <= e.getTime()) { labels.push(monthKey(d)); d.setMonth(d.getMonth() + 1); }
+    return labels;
+  }
+  function monthLabelPretty(ym) {
+    const [y, m] = ym.split("-").map(Number);
+    return new Date(y, m - 1, 1).toLocaleDateString(undefined, { month: "short", year: "numeric" });
+  }
+
+  function pickField(row, field, type) {
+    if (!field) return "Unknown";
+    if (type === "lookup") {
+      const lbl = odataFmt(row, field);
+      return (lbl && lbl.trim()) ? lbl.trim() : "Unknown";
+    }
+    const v = row?.[field];
+    return (v && ("" + v).trim()) ? ("" + v).trim() : "Unknown";
+  }
+
+  const charts = new Map();
+  function upsertChart(key, canvasId, config) {
+    const el = $(canvasId);
+    if (!el) return null;
+    const existing = charts.get(key);
+    if (existing) existing.destroy();
+    const chart = new Chart(el, config);
+    charts.set(key, chart);
+    return chart;
+  }
+
+  function showLoader(message) {
+    const loader = $("loaderOverlay"); const loaderMsg = $("loaderMessage");
+    if (loaderMsg) loaderMsg.textContent = message || "Processing…";
+    if (loader) { loader.classList.remove("d-none"); loader.classList.add("d-flex"); }
+  }
+  function hideLoader() {
+    const loader = $("loaderOverlay");
+    if (loader) { loader.classList.remove("d-flex"); loader.classList.add("d-none"); }
+  }
+
+  /* ---------- Fetch + normalize ---------- */
+
+  function ticketToItem(t, deptKey, deptLabel) {
+    if (!t) return null;
+    const created = parseDate(t.createdon);
+    if (!created) return null;
+
+    const statusLabel = (odataFmt(t, "sh_ticketstatus") || "").trim();
+    const isCompleted = isCompletedLabel(statusLabel);
+    const completedAt = parseDate(t.sh_completedon) || parseDate(t.modifiedon);
+
+    const assignedId = t["_sh_assignedto_value"] ?? null;
+    const assignedFmt = odataFmt(t, "_sh_assignedto_value");
+    const assigneeLabel = assignedId ? ((assignedFmt && assignedFmt.trim()) ? assignedFmt.trim() : "Assignee") : "Unassigned";
+
+    // Lookup field, same pattern as assignee: GUID establishes identity, the
+    // formatted value gives the proper display name (no email-guessing needed).
+    const requestorId = t["_sh_requestorperson_value"] ?? null;
+    const requestorFmt = odataFmt(t, "_sh_requestorperson_value");
+    const requestorLabel = requestorId
+      ? ((requestorFmt && requestorFmt.trim()) ? requestorFmt.trim() : "Requestor")
+      : "Unknown";
+
+    const breachVal = t.sh_slabreach;
+    const slaMeasured = (breachVal === true || breachVal === false);
+    const slaBreached = (breachVal === true);
+
+    const ttcMinutes = parseTtcToMinutes(t.sh_timetocomplete);
+
+    return {
+      created, createdMonth: monthKey(created),
+      statusLabel, isCompleted, completedAt,
+      assignedId, assigneeLabel,
+      requestorId, requestorLabel,
+      slaMeasured, slaBreached, ttcMinutes,
+      dept: deptKey, deptLabel,
+      categoryLabel: "Unknown"
+    };
+  }
+
+  async function fetchStandardModule(key) {
+    const cfg = STANDARD_MODULES[key];
+    const catCfg = CATEGORY_FIELD_MAP[key];
+    const metaSelect = ["createdon"];
+    if (catCfg) metaSelect.push(catCfg.field);
+
+    const url = `${cfg.metadataTable}?$select=${metaSelect.join(",")}&$expand=${cfg.ticketNav}($select=${TICKET_FIELDS})&$top=5000`;
+    const rows = await fetchPaged(url);
+
+    return rows.map(meta => {
+      const item = ticketToItem(meta?.[cfg.ticketNav], key, cfg.label);
+      if (!item) return null;
+      item.categoryLabel = catCfg ? pickField(meta, catCfg.field, catCfg.type) : "General";
+      return item;
+    }).filter(Boolean);
+  }
+
+  async function fetchChildModule(key) {
+    const cfg = CHILD_MODULES[key];
+    const select = `${TICKET_FIELDS},_sh_request_value,_sh_parentticket_value`;
+    const filter = encodeURIComponent("_sh_parentticket_value ne null");
+    const url = `${cfg.ticketTable}?$select=${select}&$filter=${filter}&$top=5000`;
+    const rows = await fetchPaged(url);
+
+    return rows
+      .filter(t => cfg.stepFilter.includes(odataFmt(t, "_sh_request_value")))
+      .map(t => {
+        const item = ticketToItem(t, key, cfg.label);
+        if (!item) return null;
+        item.categoryLabel = odataFmt(t, "_sh_request_value") || "Unknown";
+        return item;
+      }).filter(Boolean);
+  }
+
+  async function fetchAllDepartments() {
+    const byDept = {};
+    await Promise.all(ALL_DEPT_KEYS.map(async (key) => {
+      byDept[key] = STANDARD_MODULES[key] ? await fetchStandardModule(key) : await fetchChildModule(key);
+    }));
+    return byDept;
+  }
+
+  /* ---------- Section 1 computations ---------- */
+
+  function computeScale(platformItems, byDept) {
+    const totalTickets = platformItems.length;
+    const deptsLive = ALL_DEPT_KEYS.filter(k => (byDept[k] || []).length > 0).length;
+
+    const requestorSet = new Set(platformItems.filter(x => x.requestorLabel !== "Unknown").map(x => x.requestorLabel));
+    const assigneeSet = new Set(platformItems.filter(x => x.assigneeLabel !== "Unassigned").map(x => x.assigneeLabel));
+
+    const firstDate = platformItems.reduce((min, x) => (!min || x.created < min) ? x.created : min, null);
+    const now = new Date();
+    const monthsSpan = firstDate ? Math.max(1, monthsBetween(firstDate, now) + 1) : 1;
+    const avgPerMonth = monthsSpan ? totalTickets / monthsSpan : 0;
+
+    return { totalTickets, deptsLive, requestors: requestorSet.size, assignees: assigneeSet.size, avgPerMonth, firstDate, monthsSpan };
+  }
+
+  function buildDeptMonthlySeries(byDept, monthLabels) {
+    return ALL_DEPT_KEYS.map(key => {
+      const items = byDept[key] || [];
+      if (!items.length) return null;
+      const map = new Map(monthLabels.map(m => [m, 0]));
+      items.forEach(x => { if (map.has(x.createdMonth)) map.set(x.createdMonth, map.get(x.createdMonth) + 1); });
+      return { key, label: items[0].deptLabel, data: monthLabels.map(m => map.get(m) || 0) };
+    }).filter(Boolean);
+  }
+
+  function buildEngagementSeries(platformItems, monthLabels) {
+    const reqByMonth = new Map(monthLabels.map(m => [m, new Set()]));
+    const asgByMonth = new Map(monthLabels.map(m => [m, new Set()]));
+    platformItems.forEach(x => {
+      if (!reqByMonth.has(x.createdMonth)) return;
+      if (x.requestorLabel !== "Unknown") reqByMonth.get(x.createdMonth).add(x.requestorLabel);
+      if (x.assigneeLabel !== "Unassigned") asgByMonth.get(x.createdMonth).add(x.assigneeLabel);
+    });
+    return {
+      requestors: monthLabels.map(m => reqByMonth.get(m).size),
+      assignees: monthLabels.map(m => asgByMonth.get(m).size)
+    };
+  }
+
+  function buildGoLive(byDept) {
+    return ALL_DEPT_KEYS.map(key => {
+      const items = byDept[key] || [];
+      if (!items.length) return null;
+      const first = items.reduce((min, x) => (!min || x.created < min) ? x.created : min, null);
+      const last = items.reduce((max, x) => (!max || x.created > max) ? x.created : max, null);
+      const daysSinceActivity = Math.floor((new Date().getTime() - last.getTime()) / 86400000);
+      return { key, label: items[0].deptLabel, goLive: first, count: items.length, daysSinceActivity };
+    }).filter(Boolean).sort((a, b) => a.goLive - b.goLive);
+  }
+
+  function renderGoLive(rows) {
+    const host = $("ex_goLiveList"); if (!host) return;
+    host.innerHTML = "";
+    rows.forEach((r, idx) => {
+      const c = DEPT_COLOR[r.key] || { stroke: BRAND.CHARCOAL };
+      const col = document.createElement("div");
+      col.className = "col-lg-4 col-md-6 col-sm-12";
+      col.innerHTML = `
+        <div class="c p-3 h-100" style="border-left:4px solid ${c.stroke};">
+          <div class="d-flex justify-content-between align-items-start">
+            <div class="fw-semibold">${idx + 1}. ${escapeHtml(r.label)}</div>
+            <span class="chip">${r.count.toLocaleString()} tickets</span>
+          </div>
+          <div class="divider-soft my-2"></div>
+          <div class="small text-muted">Live since</div>
+          <div class="fw-semibold">${r.goLive.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}</div>
+          <div class="small text-muted mt-2">Last activity: ${r.daysSinceActivity === 0 ? "today" : r.daysSinceActivity + "d ago"}</div>
+        </div>`;
+      host.appendChild(col);
+    });
+  }
+
+  function renderSection1(monthLabels, scale, deptSeries, engagement, goLive) {
+    setText("ex_kpiTotalTickets", scale.totalTickets.toLocaleString());
+    setText("ex_kpiTotalTicketsDetail", scale.firstDate ? `Since ${scale.firstDate.toLocaleDateString(undefined, { month: "short", year: "numeric" })}` : "—");
+    setText("ex_kpiDeptsLive", `${scale.deptsLive}`);
+    setText("ex_kpiRequestors", `${scale.requestors}`);
+    setText("ex_kpiAssignees", `${scale.assignees}`);
+    setText("ex_kpiAvgPerMonth", scale.avgPerMonth.toFixed(0));
+    setText("ex_deptChartHint", `${monthLabels.length} months tracked`);
+
+    const pretty = monthLabels.map(monthLabelPretty);
+
+    upsertChart("deptMonthly", "ex_deptMonthlyChart", {
+      type: "bar",
+      data: {
+        labels: pretty,
+        datasets: deptSeries.map(s => {
+          const c = DEPT_COLOR[s.key] || { stroke: BRAND.CHARCOAL, fill: rgba("#58595B", 0.6) };
+          return { label: s.label, data: s.data, backgroundColor: c.fill, borderColor: c.stroke, borderWidth: 1 };
+        })
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { display: true, position: "bottom" } },
+        scales: { x: { stacked: true, ticks: { autoSkip: true, maxRotation: 0 } }, y: { stacked: true, beginAtZero: true, ticks: { precision: 0 } } }
+      }
+    });
+
+    upsertChart("engagement", "ex_engagementChart", {
+      type: "line",
+      data: {
+        labels: pretty,
+        datasets: [
+          { label: "Active Requestors", data: engagement.requestors, borderColor: BRAND.GREEN, backgroundColor: rgba("#006F4A", 0.15), pointRadius: 2, tension: 0.25 },
+          { label: "Active Assignees", data: engagement.assignees, borderColor: BRAND.TEAL, backgroundColor: rgba("#00A0AF", 0.15), pointRadius: 2, tension: 0.25 }
+        ]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { display: true, position: "bottom" } },
+        scales: { x: { ticks: { autoSkip: true, maxRotation: 0 } }, y: { beginAtZero: true, ticks: { precision: 0 } } }
+      }
+    });
+
+    renderGoLive(goLive);
+  }
+
+  /* ---------- Section 2: Department Performance ---------- */
+
+  function computeDeptRows(byDept) {
+    const now = new Date();
+    const lastMonthKey = monthKey(new Date(now.getFullYear(), now.getMonth() - 1, 1));
+    const priorMonthKey = monthKey(new Date(now.getFullYear(), now.getMonth() - 2, 1));
+
+    return ALL_DEPT_KEYS.map(key => {
+      const items = byDept[key] || [];
+      const label = STANDARD_MODULES[key]?.label || CHILD_MODULES[key]?.label || key;
+      if (!items.length) return { key, label, total: 0, slaPct: null, measuredCount: 0, avgCycle: null, completedCount: 0, throughputPct: 0, momGrowth: null, requestors: 0, assignees: 0 };
+
+      const measured = items.filter(x => x.slaMeasured);
+      const breached = measured.filter(x => x.slaBreached).length;
+      const slaPct = measured.length ? ((measured.length - breached) * 100 / measured.length) : null;
+
+      const completed = items.filter(x => x.isCompleted && x.completedAt);
+      const avgCycle = completed.length ? completed.reduce((s, x) => s + minutesBetween(x.created, x.completedAt), 0) / completed.length : null;
+
+      const throughputPct = items.length ? (completed.length * 100 / items.length) : 0;
+
+      const lastCount = items.filter(x => x.createdMonth === lastMonthKey).length;
+      const priorCount = items.filter(x => x.createdMonth === priorMonthKey).length;
+      const momGrowth = priorCount > 0 ? ((lastCount - priorCount) * 100 / priorCount) : null;
+
+      const requestors = new Set(items.filter(x => x.requestorLabel !== "Unknown").map(x => x.requestorLabel)).size;
+      const assignees = new Set(items.filter(x => x.assigneeLabel !== "Unassigned").map(x => x.assigneeLabel)).size;
+
+      return { key, label, total: items.length, slaPct, measuredCount: measured.length, avgCycle, completedCount: completed.length, throughputPct, momGrowth, requestors, assignees };
+    });
+  }
+
+  function renderDeptBadges(rows) {
+    const host = $("ex_deptBadges"); if (!host) return;
+    host.innerHTML = "";
+
+    const slaEligible = rows.filter(r => r.measuredCount >= MIN_MEASURED_FOR_SLA_BADGE && r.slaPct != null);
+    const cycleEligible = rows.filter(r => r.completedCount >= MIN_COMPLETED_FOR_CYCLE_BADGE && r.avgCycle != null);
+    const growthEligible = rows.filter(r => r.momGrowth != null);
+    const adoptionEligible = rows.filter(r => r.requestors > 0);
+
+    const topSLA = slaEligible.length ? slaEligible.reduce((a, b) => (b.slaPct > a.slaPct ? b : a)) : null;
+    const fastestCycle = cycleEligible.length ? cycleEligible.reduce((a, b) => (b.avgCycle < a.avgCycle ? b : a)) : null;
+    const fastestGrowing = growthEligible.length ? growthEligible.reduce((a, b) => (b.momGrowth > a.momGrowth ? b : a)) : null;
+    const highestAdoption = adoptionEligible.length ? adoptionEligible.reduce((a, b) => (b.requestors > a.requestors ? b : a)) : null;
+
+    const cards = [
+      { icon: "🏆", title: "Top SLA Compliance", row: topSLA, value: topSLA ? `${topSLA.slaPct.toFixed(1)}%` : "—", note: `min. ${MIN_MEASURED_FOR_SLA_BADGE} measured tickets` },
+      { icon: "⚡", title: "Fastest Avg Cycle Time", row: fastestCycle, value: fastestCycle ? formatMinutes(fastestCycle.avgCycle) : "—", note: `min. ${MIN_COMPLETED_FOR_CYCLE_BADGE} completed tickets` },
+      { icon: "📈", title: "Fastest Growing (MoM)", row: fastestGrowing, value: fastestGrowing ? `${fastestGrowing.momGrowth >= 0 ? "+" : ""}${fastestGrowing.momGrowth.toFixed(0)}%` : "—", note: "last vs. prior full month" },
+      { icon: "👥", title: "Highest Adoption", row: highestAdoption, value: highestAdoption ? `${highestAdoption.requestors} requestors` : "—", note: "distinct requestors, all-time" }
+    ];
+
+    cards.forEach(c => {
+      const col = document.createElement("div");
+      col.className = "col-lg-3 col-md-6 col-sm-12";
+      col.innerHTML = `
+        <div class="c p-3 h-100">
+          <div class="small text-muted">${c.icon} ${c.title}</div>
+          <div class="kpi" style="font-size:1.3rem; margin-top:4px;">${c.row ? escapeHtml(c.row.label) : "—"}</div>
+          <div class="fw-semibold" style="color:#006F4A;">${c.value}</div>
+          <div class="small text-muted mt-1">${c.note}</div>
+        </div>`;
+      host.appendChild(col);
+    });
+  }
+
+  let deptRowsCache = [];
+  let deptSortKey = "total";
+  let deptSortAsc = false;
+
+  let lifecyclePlatformItems = [];
+  let lifecycleMonthLabels = [];
+  let lifecycleDepartments = []; // [{ key, label, items }] per department, sorted by volume desc
+
+  function renderDeptTable() {
+    const body = $("ex_deptTableBody"); if (!body) return;
+
+    const rows = [...deptRowsCache].sort((a, b) => {
+      const av = a[deptSortKey], bv = b[deptSortKey];
+      const an = (av == null) ? -Infinity : (typeof av === "string" ? av : av);
+      const bn = (bv == null) ? -Infinity : (typeof bv === "string" ? bv : bv);
+      if (typeof an === "string") return deptSortAsc ? an.localeCompare(bn) : bn.localeCompare(an);
+      return deptSortAsc ? an - bn : bn - an;
+    });
+
+    body.innerHTML = rows.map(r => `
+      <tr>
+        <td class="fw-semibold">${escapeHtml(r.label)}</td>
+        <td class="text-end">${r.total.toLocaleString()}</td>
+        <td class="text-end">${r.slaPct == null ? "—" : r.slaPct.toFixed(1) + "%"}</td>
+        <td class="text-end">${formatMinutes(r.avgCycle)}</td>
+        <td class="text-end">${r.throughputPct.toFixed(1)}%</td>
+        <td class="text-end">${r.momGrowth == null ? "—" : (r.momGrowth >= 0 ? "+" : "") + r.momGrowth.toFixed(0) + "%"}</td>
+        <td class="text-end">${r.requestors}</td>
+        <td class="text-end">${r.assignees}</td>
+      </tr>`).join("");
+  }
+
+  function wireDeptTableSort() {
+    document.querySelectorAll("#ex_deptTable th[data-key]").forEach(th => {
+      th.addEventListener("click", () => {
+        const key = th.dataset.key;
+        if (deptSortKey === key) deptSortAsc = !deptSortAsc;
+        else { deptSortKey = key; deptSortAsc = false; }
+        renderDeptTable();
+      });
+    });
+  }
+
+  /* ---------- Section 3: Adoption & Engagement ---------- */
+
+  function topNByCount(items, keyFn, n) {
+    const map = new Map();
+    items.forEach(x => {
+      const k = keyFn(x);
+      if (!k || k === "Unknown" || k === "Unassigned") return;
+      map.set(k, (map.get(k) || 0) + 1);
+    });
+    return [...map.entries()].sort((a, b) => b[1] - a[1]).slice(0, n);
+  }
+
+  function renderHBar(canvasId, chartKey, labels, data, color) {
+    upsertChart(chartKey, canvasId, {
+      type: "bar",
+      data: { labels, datasets: [{ label: "Count", data, backgroundColor: rgba(color, 0.7), borderColor: color, borderWidth: 1 }] },
+      options: {
+        responsive: true, maintainAspectRatio: false, indexAxis: "y",
+        plugins: { legend: { display: false } },
+        scales: { x: { beginAtZero: true, ticks: { precision: 0 } }, y: { ticks: { autoSkip: false } } }
+      }
+    });
+  }
+
+  function renderSection3(platformItems) {
+    const topRequestors = topNByCount(platformItems, x => x.requestorLabel, 10);
+    const topAssignees = topNByCount(platformItems.filter(x => x.isCompleted), x => x.assigneeLabel, 10);
+
+    const reqLabels = topRequestors.map(([name]) => name);
+    const reqData = topRequestors.map(([, c]) => c);
+    renderHBar("ex_topRequestorsChart", "topRequestors", reqLabels, reqData, BRAND.GREEN);
+
+    const asgLabels = topAssignees.map(([name]) => name);
+    const asgData = topAssignees.map(([, c]) => c);
+    renderHBar("ex_topAssigneesChart", "topAssignees", asgLabels, asgData, BRAND.TEAL);
+
+    setText("ex_topRequestorName", reqLabels[0] || "—");
+    setText("ex_topRequestorCount", reqData[0] != null ? reqData[0].toLocaleString() : "—");
+    setText("ex_topAssigneeName", asgLabels[0] || "—");
+    setText("ex_topAssigneeCount", asgData[0] != null ? asgData[0].toLocaleString() : "—");
+  }
+
+  /* ---------- Section 4: Comparative Analytics ---------- */
+
+  function renderSection4(deptRows, platformItems) {
+    const slaRows = deptRows.filter(r => r.measuredCount >= MIN_MEASURED_FOR_SLA_BADGE && r.slaPct != null).sort((a, b) => b.slaPct - a.slaPct);
+    renderHBar("ex_slaByDeptChart", "slaByDept", slaRows.map(r => r.label), slaRows.map(r => +r.slaPct.toFixed(1)), BRAND.GREEN);
+
+    const cycleRows = deptRows.filter(r => r.completedCount >= MIN_COMPLETED_FOR_CYCLE_BADGE && r.avgCycle != null).sort((a, b) => a.avgCycle - b.avgCycle);
+    renderHBar("ex_cycleByDeptChart", "cycleByDept", cycleRows.map(r => r.label), cycleRows.map(r => +(r.avgCycle / 60).toFixed(1)), BRAND.AMBER);
+    const cycleChart = charts.get("cycleByDept");
+    if (cycleChart) { cycleChart.data.datasets[0].label = "Hours"; cycleChart.options.plugins.tooltip = { callbacks: { label: (ctx) => `${ctx.raw} hours avg` } }; cycleChart.update(); }
+
+    // Top categories by volume (composite key to disambiguate same label across departments)
+    const catVolMap = new Map();
+    const catLabelMap = new Map();
+    platformItems.forEach(x => {
+      const key = `${x.categoryLabel}|||${x.deptLabel}`;
+      if (x.categoryLabel === "Unknown") return;
+      catVolMap.set(key, (catVolMap.get(key) || 0) + 1);
+      catLabelMap.set(key, `${x.categoryLabel} (${x.deptLabel})`);
+    });
+    const topCats = [...catVolMap.entries()].sort((a, b) => b[1] - a[1]).slice(0, 10);
+    renderHBar("ex_topCategoriesChart", "topCategories", topCats.map(([k]) => catLabelMap.get(k)), topCats.map(([, v]) => v), BRAND.TEAL);
+
+    // Slowest categories (avg cycle time), min sample size
+    const catCycleMap = new Map();
+    platformItems.forEach(x => {
+      if (!x.isCompleted || !x.completedAt || x.categoryLabel === "Unknown") return;
+      const key = `${x.categoryLabel}|||${x.deptLabel}`;
+      if (!catCycleMap.has(key)) catCycleMap.set(key, []);
+      catCycleMap.get(key).push(minutesBetween(x.created, x.completedAt));
+    });
+    const slowCats = [...catCycleMap.entries()]
+      .filter(([, arr]) => arr.length >= MIN_COUNT_FOR_SLOW_CATEGORY)
+      .map(([k, arr]) => [k, arr.reduce((a, b) => a + b, 0) / arr.length])
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 10);
+    renderHBar("ex_slowCategoriesChart", "slowCategories", slowCats.map(([k]) => catLabelMap.get(k)), slowCats.map(([, v]) => +(v / 60).toFixed(1)), "#c0392b");
+    const slowChart = charts.get("slowCategories");
+    if (slowChart) { slowChart.data.datasets[0].label = "Hours"; slowChart.options.plugins.tooltip = { callbacks: { label: (ctx) => `${ctx.raw} hours avg` } }; slowChart.update(); }
+
+    return { slaRows, cycleRows, topCats: topCats.map(([k, v]) => ({ label: catLabelMap.get(k), count: v })), slowCats: slowCats.map(([k, v]) => ({ label: catLabelMap.get(k), avgMins: v })) };
+  }
+
+  /* ---------- Section 5: Lifecycle trends (filterable by department) ---------- */
+
+  function buildDepartmentIndex(byDept) {
+    return ALL_DEPT_KEYS
+      .map(key => {
+        const items = byDept[key] || [];
+        if (!items.length) return null;
+        const label = STANDARD_MODULES[key]?.label || CHILD_MODULES[key]?.label || key;
+        return { key, label, items };
+      })
+      .filter(Boolean)
+      .sort((a, b) => b.items.length - a.items.length);
+  }
+
+  function populateLifecycleCategoryFilter(departments) {
+    const sel = $("ex_lifecycleCategorySelect");
+    if (!sel) return;
+    const prevValue = sel.value;
+    const options = [`<option value="-1">All Departments (Platform-wide)</option>`]
+      .concat(departments.map((d, idx) => `<option value="${idx}">${escapeHtml(d.label)} — ${d.items.length.toLocaleString()}</option>`));
+    sel.innerHTML = options.join("");
+    // Preserve the user's selection across a refresh, if it still exists
+    if (prevValue && [...sel.options].some(o => o.value === prevValue)) sel.value = prevValue;
+  }
+
+  function applyLifecycleFilter() {
+    const sel = $("ex_lifecycleCategorySelect");
+    const raw = sel ? sel.value : "-1";
+    const idx = parseInt(raw, 10);
+
+    let items, label;
+    if (Number.isNaN(idx) || idx < 0 || !lifecycleDepartments[idx]) {
+      items = lifecyclePlatformItems;
+      label = "All Departments (Platform-wide)";
+    } else {
+      items = lifecycleDepartments[idx].items;
+      label = lifecycleDepartments[idx].label;
+    }
+
+    setText("ex_lifecycleSelectedLabel", label);
+    setText("ex_lifecycleCategoryCount", `${items.length.toLocaleString()} tickets`);
+
+    // Scope the x-axis to this selection's own first ticket, not the
+    // platform-wide range — otherwise a department that only went live
+    // recently shows mostly empty months before its first ticket.
+    const ownFirstDate = items.reduce((min, x) => (!min || x.created < min) ? x.created : min, null);
+    const monthLabels = ownFirstDate ? buildMonthLabels(ownFirstDate, new Date()) : lifecycleMonthLabels;
+
+    renderSection5(items, monthLabels);
+  }
+
+  function wireLifecycleFilter() {
+    $("ex_lifecycleCategorySelect")?.addEventListener("change", applyLifecycleFilter);
+  }
+
+  function renderSection5(items, monthLabels) {
+    const pretty = monthLabels.map(monthLabelPretty);
+
+    const slaByMonth = new Map(monthLabels.map(m => [m, { measured: 0, breached: 0 }]));
+    const cycleByMonth = new Map(monthLabels.map(m => [m, []]));
+    const createdByMonth = new Map(monthLabels.map(m => [m, 0]));
+    const completedOfCreatedByMonth = new Map(monthLabels.map(m => [m, 0]));
+
+    items.forEach(x => {
+      if (!slaByMonth.has(x.createdMonth)) return;
+      createdByMonth.set(x.createdMonth, createdByMonth.get(x.createdMonth) + 1);
+      if (x.slaMeasured) {
+        const c = slaByMonth.get(x.createdMonth);
+        c.measured++;
+        if (x.slaBreached) c.breached++;
+      }
+      if (x.isCompleted) {
+        completedOfCreatedByMonth.set(x.createdMonth, completedOfCreatedByMonth.get(x.createdMonth) + 1);
+        if (x.completedAt) cycleByMonth.get(x.createdMonth).push(minutesBetween(x.created, x.completedAt));
+      }
+    });
+
+    const slaTrend = monthLabels.map(m => { const c = slaByMonth.get(m); return c.measured ? ((c.measured - c.breached) * 100 / c.measured) : null; });
+    const cycleTrend = monthLabels.map(m => { const arr = cycleByMonth.get(m); return arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : null; });
+    const throughputTrend = monthLabels.map(m => { const created = createdByMonth.get(m); return created ? (completedOfCreatedByMonth.get(m) * 100 / created) : null; });
+
+    upsertChart("slaTrend", "ex_slaTrendChart", {
+      type: "line",
+      data: { labels: pretty, datasets: [{ label: "SLA % Met", data: slaTrend, borderColor: BRAND.GREEN, backgroundColor: rgba("#006F4A", 0.15), pointRadius: 2, tension: 0.25, spanGaps: true }] },
+      options: { responsive: true, spanGaps: true, plugins: { legend: { display: false } }, scales: { y: { suggestedMin: 0, suggestedMax: 100 }, x: { ticks: { autoSkip: true, maxRotation: 0 } } } }
+    });
+
+    upsertChart("cycleTrend", "ex_cycleTrendChart", {
+      type: "line",
+      data: { labels: pretty, datasets: [{ label: "Avg Cycle (mins)", data: cycleTrend, borderColor: BRAND.AMBER, backgroundColor: rgba("#FAA633", 0.15), pointRadius: 2, tension: 0.25, spanGaps: true }] },
+      options: { responsive: true, spanGaps: true, plugins: { legend: { display: false } }, scales: { x: { ticks: { autoSkip: true, maxRotation: 0 } } } }
+    });
+
+    upsertChart("throughputTrend", "ex_throughputTrendChart", {
+      type: "line",
+      data: { labels: pretty, datasets: [{ label: "Throughput %", data: throughputTrend, borderColor: BRAND.TEAL, backgroundColor: rgba("#00A0AF", 0.15), pointRadius: 2, tension: 0.25, spanGaps: true }] },
+      options: { responsive: true, spanGaps: true, plugins: { legend: { display: false } }, scales: { y: { suggestedMin: 0, suggestedMax: 100 }, x: { ticks: { autoSkip: true, maxRotation: 0 } } } }
+    });
+  }
+
+  /* ---------- Section 6: Automated Insights ---------- */
+
+  function windowStats(items, start, end) {
+    const subset = items.filter(x => x.created >= start && x.created <= end);
+    const measured = subset.filter(x => x.slaMeasured);
+    const slaPct = measured.length ? ((measured.length - measured.filter(x => x.slaBreached).length) * 100 / measured.length) : null;
+    const cycles = subset.filter(x => x.isCompleted && x.completedAt).map(x => minutesBetween(x.created, x.completedAt));
+    const avgCycle = cycles.length ? cycles.reduce((a, b) => a + b, 0) / cycles.length : null;
+    return { count: subset.length, measuredCount: measured.length, slaPct, avgCycle };
+  }
+
+  function buildInsights(byDept, deptRows, comparative, scale) {
+    const insights = [];
+    const now = new Date();
+
+    ALL_DEPT_KEYS.forEach(key => {
+      const items = byDept[key] || [];
+      if (!items.length) return;
+      const label = STANDARD_MODULES[key]?.label || CHILD_MODULES[key]?.label || key;
+
+      const firstDate = items.reduce((min, x) => (!min || x.created < min) ? x.created : min, null);
+      const earlyStart = firstDate;
+      const earlyEnd = new Date(firstDate.getTime() + 89 * 86400000);
+      const recentStart = new Date(now.getTime() - 89 * 86400000);
+      const recentEnd = now;
+
+      // guard: skip if windows overlap (department too new for a fair before/after read)
+      if (recentStart <= earlyEnd) return;
+
+      const early = windowStats(items, earlyStart, earlyEnd);
+      const recent = windowStats(items, recentStart, recentEnd);
+
+      if (early.measuredCount >= MIN_TICKETS_PER_WINDOW_FOR_DELTA && recent.measuredCount >= MIN_TICKETS_PER_WINDOW_FOR_DELTA && early.slaPct != null && recent.slaPct != null) {
+        const diff = recent.slaPct - early.slaPct;
+        if (Math.abs(diff) >= 5) {
+          insights.push({
+            type: diff > 0 ? "positive" : "warning",
+            text: diff > 0
+              ? `${label} improved SLA compliance from ${early.slaPct.toFixed(0)}% to ${recent.slaPct.toFixed(0)}% (first 90 days vs. last 90 days).`
+              : `${label}'s SLA compliance dropped from ${early.slaPct.toFixed(0)}% to ${recent.slaPct.toFixed(0)}% (first 90 days vs. last 90 days) — worth a look.`
+          });
+        }
+      }
+
+      if (early.count >= MIN_TICKETS_PER_WINDOW_FOR_DELTA && recent.count >= MIN_TICKETS_PER_WINDOW_FOR_DELTA && early.avgCycle != null && recent.avgCycle != null) {
+        const pctChange = ((recent.avgCycle - early.avgCycle) * 100 / early.avgCycle);
+        if (Math.abs(pctChange) >= 10) {
+          insights.push({
+            type: pctChange < 0 ? "positive" : "warning",
+            text: pctChange < 0
+              ? `${label} cut average cycle time by ${Math.abs(pctChange).toFixed(0)}% (first 90 days vs. last 90 days).`
+              : `${label}'s average cycle time increased by ${pctChange.toFixed(0)}% (first 90 days vs. last 90 days) — worth a look.`
+          });
+        }
+      }
+    });
+
+    // Highest adoption
+    const adoptionEligible = deptRows.filter(r => r.requestors > 0);
+    if (adoptionEligible.length) {
+      const top = adoptionEligible.reduce((a, b) => (b.requestors > a.requestors ? b : a));
+      insights.push({ type: "neutral", text: `${top.label} has the highest user adoption, with ${top.requestors} distinct requestors raising tickets.` });
+    }
+
+    // Fastest growing
+    const growthEligible = deptRows.filter(r => r.momGrowth != null && r.momGrowth > 0);
+    if (growthEligible.length) {
+      const top = growthEligible.reduce((a, b) => (b.momGrowth > a.momGrowth ? b : a));
+      insights.push({ type: "positive", text: `${top.label} grew ticket volume by ${top.momGrowth.toFixed(0)}% month-over-month — the fastest-growing team this period.` });
+    }
+
+    // Slowest request type
+    if (comparative.slowCats.length) {
+      const slowest = comparative.slowCats[0];
+      insights.push({ type: "warning", text: `"${slowest.label}" has the longest average cycle time at ${(slowest.avgMins / 60).toFixed(1)} hours — a candidate for process review.` });
+    }
+
+    // Platform-wide SLA early vs recent
+    const platformItems = ALL_DEPT_KEYS.flatMap(k => byDept[k] || []);
+    if (scale.firstDate) {
+      const earlyEnd = new Date(scale.firstDate.getTime() + 89 * 86400000);
+      const recentStart = new Date(now.getTime() - 89 * 86400000);
+      if (recentStart > earlyEnd) {
+        const early = windowStats(platformItems, scale.firstDate, earlyEnd);
+        const recent = windowStats(platformItems, recentStart, now);
+        if (early.slaPct != null && recent.slaPct != null) {
+          insights.push({
+            type: "neutral",
+            text: `Platform-wide SLA compliance moved from ${early.slaPct.toFixed(0)}% in the first 90 days to ${recent.slaPct.toFixed(0)}% in the last 90 days.`
+          });
+        }
+      }
+    }
+
+    return insights;
+  }
+
+  function renderInsights(insights) {
+    const host = $("ex_insightsList"); if (!host) return;
+    if (!insights.length) { host.innerHTML = `<div class="text-muted">Not enough data yet to generate reliable insights.</div>`; return; }
+
+    const iconFor = { positive: "✅", warning: "⚠️", neutral: "ℹ️" };
+    const colorFor = { positive: "#006F4A", warning: "#c0392b", neutral: "#58595B" };
+
+    host.innerHTML = insights.map(i => `
+      <div style="display:flex; gap:10px; align-items:flex-start; padding:10px 0; border-bottom:0.5px solid #e9ecef;">
+        <span style="font-size:1.1rem;">${iconFor[i.type]}</span>
+        <span style="color:${colorFor[i.type]};">${escapeHtml(i.text)}</span>
+      </div>`).join("");
+  }
+
+  /* ---------- Section 7: Data quality ---------- */
+
+  function renderDataQuality(platformItems) {
+    const host = $("ex_dataQuality"); if (!host) return;
+    const total = platformItems.length || 1;
+
+    const pctAssigned = (platformItems.filter(x => x.assigneeLabel !== "Unassigned").length * 100 / total);
+    const pctRequestorKnown = (platformItems.filter(x => x.requestorLabel !== "Unknown").length * 100 / total);
+    const pctSlaTracked = (platformItems.filter(x => x.slaMeasured).length * 100 / total);
+    const pctCategoryKnown = (platformItems.filter(x => x.categoryLabel !== "Unknown").length * 100 / total);
+
+    const items = [
+      { label: "Assignee captured", pct: pctAssigned },
+      { label: "Requestor captured", pct: pctRequestorKnown },
+      { label: "SLA tracked", pct: pctSlaTracked },
+      { label: "Category captured", pct: pctCategoryKnown }
+    ];
+
+    host.innerHTML = items.map(i => `
+      <span class="chip"><span class="dot"></span>${i.label}: <strong style="margin-left:4px;">${i.pct.toFixed(0)}%</strong></span>
+    `).join("");
+  }
+
+  /* ---------- Orchestration ---------- */
+
+  async function loadAll() {
+    try {
+      showLoader("Loading platform-wide data across all departments…");
+      setText("ex_debugMsg", "Loading…");
+
+      const byDept = await fetchAllDepartments();
+      const platformItems = ALL_DEPT_KEYS.flatMap(k => byDept[k] || []);
+
+      if (!platformItems.length) { setText("ex_debugMsg", "No data found."); hideLoader(); return; }
+
+      const scale = computeScale(platformItems, byDept);
+      const now = new Date();
+      const monthLabels = buildMonthLabels(scale.firstDate, now);
+
+      const deptSeries = buildDeptMonthlySeries(byDept, monthLabels);
+      const engagement = buildEngagementSeries(platformItems, monthLabels);
+      const goLive = buildGoLive(byDept);
+      renderSection1(monthLabels, scale, deptSeries, engagement, goLive);
+
+      deptRowsCache = computeDeptRows(byDept);
+      renderDeptBadges(deptRowsCache);
+      renderDeptTable();
+
+      renderSection3(platformItems);
+
+      const comparative = renderSection4(deptRowsCache, platformItems);
+
+      lifecyclePlatformItems = platformItems;
+      lifecycleMonthLabels = monthLabels;
+      lifecycleDepartments = buildDepartmentIndex(byDept);
+      populateLifecycleCategoryFilter(lifecycleDepartments);
+      applyLifecycleFilter();
+
+      const insights = buildInsights(byDept, deptRowsCache, comparative, scale);
+      renderInsights(insights);
+
+      renderDataQuality(platformItems);
+
+      setText("ex_debugMsg", `Loaded ${platformItems.length.toLocaleString()} tickets across ${scale.deptsLive} departments`);
+      setText("ex_lastRefreshed", `Refreshed ${now.toLocaleTimeString()}`);
+    } catch (e) {
+      console.error("Executive dashboard error:", e);
+      setText("ex_debugMsg", "Error (see console)");
+    } finally {
+      hideLoader();
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", function () {
+    $("ex_refresh")?.addEventListener("click", loadAll);
+    wireDeptTableSort();
+    wireLifecycleFilter();
+    loadAll();
+  });
+})();
+</script>
+
+{%- endif -%}

@@ -1,0 +1,54 @@
+- adx_name: Restrict Read on Test Page
+  adx_right: 2
+  adx_scope: 1
+  adx_webpageaccesscontrolrule_webrole:
+  - c5ed9554-79a1-4c31-bea9-a940211a85a0
+  adx_webpageaccesscontrolruleid: 24d9e118-9750-d927-9c8f-cf5630381365
+  adx_webpageid: 98ca99be-7b94-a5b9-db6c-8ab89e6d6623
+- adx_name: Restrict Read on Analytics
+  adx_right: 2
+  adx_scope: 1
+  adx_webpageaccesscontrolrule_webrole:
+  - 706af9e5-60d0-f011-8543-0022480dc2d4
+  - a056d286-4322-41f8-82af-46802e0ea645
+  adx_webpageaccesscontrolruleid: 3ac12910-8f09-69f3-ea7f-8fd94d30d95f
+  adx_webpageid: 625031b4-cd8b-6c24-7327-71918f3c8131
+- adx_name: Restrict Read on Submit-Ticket
+  adx_right: 2
+  adx_scope: 1
+  adx_webpageaccesscontrolrule_webrole:
+  - c5ed9554-79a1-4c31-bea9-a940211a85a0
+  adx_webpageaccesscontrolruleid: 5498939e-cd3f-4781-388d-b16c88dfb7da
+  adx_webpageid: d62d804a-50d5-5cdd-e371-1fe5280772e0
+- adx_name: Grant Change to Administrators
+  adx_right: 1
+  adx_webpageaccesscontrolrule_webrole:
+  - a056d286-4322-41f8-82af-46802e0ea645
+  adx_webpageaccesscontrolruleid: a7fa6cec-166c-4ba2-8406-859b95624fe1
+  adx_webpageid: cae540ce-639d-4931-871d-ace27b89b263
+- adx_name: Grant Change to Content
+  adx_right: 1
+  adx_webpageaccesscontrolruleid: aa657ea4-69c0-457f-ad17-3ffa5975c3a7
+- adx_name: Restrict Read on Home
+  adx_right: 2
+  adx_scope: 2
+  adx_webpageaccesscontrolrule_webrole:
+  - c5ed9554-79a1-4c31-bea9-a940211a85a0
+  adx_webpageaccesscontrolruleid: b83671c9-c1f0-9531-84c6-057e98444d80
+  adx_webpageid: cae540ce-639d-4931-871d-ace27b89b263
+  statecode: 1
+  statuscode: 2
+- adx_name: Restrict Read on Track-Ticket
+  adx_right: 2
+  adx_scope: 1
+  adx_webpageaccesscontrolrule_webrole:
+  - c5ed9554-79a1-4c31-bea9-a940211a85a0
+  adx_webpageaccesscontrolruleid: cb82c5ce-24f9-d065-04c8-f4c1f887b3c0
+  adx_webpageid: 98bf6c24-8a6d-1b83-c2b8-bce5e1eaf6f5
+- adx_name: Restrict Read on View-Ticket
+  adx_right: 2
+  adx_scope: 1
+  adx_webpageaccesscontrolrule_webrole:
+  - c5ed9554-79a1-4c31-bea9-a940211a85a0
+  adx_webpageaccesscontrolruleid: fb7cab26-10a2-05dd-0160-1eba7db33730
+  adx_webpageid: d1b5d983-5436-d5ea-da56-782f5eeb5d30

@@ -1,0 +1,307 @@
+{% assign baseurl = request.url |split: request.path | first %}
+<div class="modal" id="pdfViewerModal">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Modal title</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true"></span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Modal body text goes here.</p>
+                <div id="pdfViewer"
+                    style="width: 100%; background-color: rgb(82, 86, 89); overflow-x: auto; overflow-y: auto;">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary">Save changes</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="close-pdfviewer">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Show loader div -->
+<div id="loaderOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.8); z-index: 9999; text-align: center;">
+  <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
+    <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+    <div>Processing...</div>
+  </div>
+</div>
+
+<!-- PDF.js Library -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
+<script>
+  pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js";
+</script>
+
+<script>
+  // Flow trigger URL
+  var flowBaseURL = "{{ baseurl }}";
+  var _getFileAsBase64FlowUrl = flowBaseURL + "/_api/cloudflow/v1.0/trigger/e14cb26f-bb07-f011-bae3-6045bd69e9dc";
+  var displayPDFInModal = "true";
+
+  // Show/hide loader helpers
+  function showLoader() {
+    var loader = document.getElementById("loaderOverlay");
+    if (loader) loader.style.display = "block";
+  }
+
+  function hideLoader() {
+    var loader = document.getElementById("loaderOverlay");
+    if (loader) loader.style.display = "none";
+  }
+
+  // Error message
+  function ShowError(message) {
+    alert(message);
+  }
+
+  // Fetch file
+  function FetchAndHandleFile(filePath, callback) {
+    var data = { filePath: filePath };
+    var payload = { eventData: JSON.stringify(data) };
+    shell.ajaxSafePost({
+      type: "POST",
+      contentType: "application/json",
+      url: _getFileAsBase64FlowUrl,
+      processData: false,
+      data: JSON.stringify(payload),
+      global: false,
+    })
+    .done(function (response) {
+      const fileData = JSON.parse(response);
+      callback(fileData);
+    })
+    .fail(function () {
+      ShowError("Error fetching file content");
+    });
+  }
+
+  // Open SharePoint document for view/download
+  function OpenSharePointDocument(filePath, IsPreview, fileName) {
+    var data = { filePath: filePath };
+    var payload = { eventData: JSON.stringify(data) };
+    shell.ajaxSafePost({
+      type: "POST",
+      contentType: "application/json",
+      url: _getFileAsBase64FlowUrl,
+      processData: false,
+      data: JSON.stringify(payload),
+      global: false,
+    })
+    .done(function (response) {
+      let fileData = JSON.parse(response);
+      if (!IsPreview) {
+        DownloadBase64File(fileData.filecontents, fileName);
+      } else {
+        document.getElementById("pdfViewerModalLabel").innerText =
+          fileData.filename || fileName;
+        RenderPdfFromBase64(fileData.filecontents);
+      }
+      hideLoader();
+    })
+    .fail(function () {
+      ShowError("Error loading file content");
+      hideLoader();
+    });
+  }
+
+  // Download file
+  function DownloadBase64File(base64Data, fileName) {
+    const link = document.createElement("a");
+    link.href = "data:application/pdf;base64," + base64Data;
+    link.download = fileName;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+
+  // Print file
+  function PrintBase64File(base64Data) {
+    const byteCharacters = atob(base64Data);
+    const byteNumbers = new Array(byteCharacters.length);
+    for (let i = 0; i < byteCharacters.length; i++) {
+      byteNumbers[i] = byteCharacters.charCodeAt(i);
+    }
+    const byteArray = new Uint8Array(byteNumbers);
+    const blob = new Blob([byteArray], { type: "application/pdf" });
+    const blobUrl = URL.createObjectURL(blob);
+    const printWindow = window.open(blobUrl);
+    printWindow.onload = function () {
+      printWindow.focus();
+      printWindow.print();
+    };
+  }
+
+  // PDF rendering
+  function RenderPdfFromBase64(base64Content) {
+    $("#txtPageNumber").val("");
+    const byteCharacters = atob(base64Content);
+    const byteNumbers = new Array(byteCharacters.length);
+    for (let i = 0; i < byteCharacters.length; i++) {
+      byteNumbers[i] = byteCharacters.charCodeAt(i);
+    }
+    const byteArray = new Uint8Array(byteNumbers);
+    pdfjsLib
+      .getDocument(byteArray)
+      .promise.then((pdf) => {
+        RenderPages(pdf);
+      })
+      .catch((err) => {
+        console.error("Error loading PDF:", err);
+      });
+  }
+
+  function RenderPages(pdf) {
+    const container = document.getElementById("pdfViewer");
+    $("#pdfViewer").empty();
+    $("#zoomOut").prop("disabled", true);
+    let zoomScale = 1;
+    $("#spnCurrentPage").text(`Page 1`);
+    UpdateZoomLabel();
+
+    function renderPage(pageNumber) {
+      pdf.getPage(pageNumber).then((page) => {
+        const scale = 4;
+        const viewport = page.getViewport({ scale });
+        const canvas = document.createElement("canvas");
+        canvas.id = `pdf-canvas-${pageNumber}`;
+        canvas.style.width = "98%";
+        const context = canvas.getContext("2d");
+        canvas.height = viewport.height;
+        canvas.width = viewport.width;
+        const renderContext = {
+          canvasContext: context,
+          viewport: viewport,
+        };
+        page.render(renderContext);
+        const label = document.createElement("div");
+        label.className = "page-label";
+        label.textContent = `Page ${pageNumber}`;
+        container.appendChild(label);
+        container.appendChild(canvas);
+      });
+    }
+
+    for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+      renderPage(pageNum);
+    }
+    $("#spnCurrentPage").text(`Page 1 of ${pdf.numPages}`);
+    $("#pdfViewerWrapper").show();
+    if (displayPDFInModal) {
+      $("#pdfViewerModal").modal("show");
+    }
+  }
+
+  var zoomScale = 1;
+  function UpdateZoomLabel() {
+    $("#zoomValue").text(`${Math.round(zoomScale * 100)}%`);
+  }
+  function UpdateCanvasWidth() {
+    $("canvas[id^='pdf-canvas']").css("width", `${100 * 0.98 * zoomScale}%`);
+  }
+
+  // Clean up PDF viewer on close
+  function handleFileClose(event) {
+    const removeCurrentFile = document.getElementById("pdfViewer");
+    while (removeCurrentFile && removeCurrentFile.hasChildNodes()) {
+      removeCurrentFile.removeChild(removeCurrentFile.firstChild);
+    }
+  }
+
+  // Main event bindings and initialization
+  $(document).ready(function () {
+    fetchAndRenderCompanyDocs();
+
+    // Unified event handler for dynamic buttons/links
+    $(document).on("click", ".doc-action-item", function (e) {
+      e.preventDefault();
+      showLoader();
+      var selectedAction = $(this).attr("data-action");
+      var fileName = $(this).attr("data-file-name") || "Document.pdf";
+      var filePath;
+      if (selectedAction === "view") {
+        filePath = $(this).attr("data-file-path");
+        OpenSharePointDocument(filePath, true, fileName);
+      } else if (selectedAction === "download") {
+        filePath = $(this).attr("href");
+        FetchAndHandleFile(filePath, (fileData) => {
+          DownloadBase64File(fileData.filecontents, fileData.filename || fileName);
+          hideLoader();
+        });
+      } else if (selectedAction === "print") {
+        filePath = $(this).attr("href");
+        FetchAndHandleFile(filePath, (fileData) => {
+          PrintBase64File(fileData.filecontents);
+          hideLoader();
+        });
+      }
+    });
+
+    // PDF viewer controls
+    const zoomInBtn = $("#zoomIn");
+    const zoomOutBtn = $("#zoomOut");
+    let container = $("#pdfViewer");
+    const btnGoToPage = $("#btnGoToPage");
+
+    container.on("scroll", () => {
+      let pageCanvas = $("canvas[id^='pdf-canvas']");
+      pageCanvas.each((index, canvas) => {
+        let canvasTop = $(canvas).offset().top;
+        let containerTop = container.offset().top;
+        let containerBottom = containerTop + container.height();
+        if (canvasTop >= containerTop && canvasTop <= containerBottom) {
+          $("#spnCurrentPage").text(
+            `Page ${index + 1} of ${pageCanvas.length}`
+          );
+        }
+      });
+    });
+
+    btnGoToPage.on("click", () => {
+      let pageNumber = parseInt($("#txtPageNumber").val());
+      if (pageNumber > 0) {
+        let pageCanvas = $(`#pdf-canvas-${pageNumber}`);
+        if (pageCanvas.length > 0) {
+          pageCanvas[0].scrollIntoView();
+          $("#spnCurrentPage").text(
+            `Page ${pageNumber} of ${$("canvas[id^='pdf-canvas']").length}`
+          );
+        } else {
+          alert("Page number is not valid");
+        }
+      } else {
+        alert("Page number is not valid");
+      }
+    });
+
+    zoomInBtn.on("click", () => {
+      zoomScale += 0.5;
+      if (zoomScale >= 3) {
+        zoomInBtn.prop("disabled", true);
+      }
+      zoomOutBtn.prop("disabled", false);
+      UpdateCanvasWidth();
+      UpdateZoomLabel();
+    });
+
+    zoomOutBtn.on("click", () => {
+      zoomScale -= 0.5;
+      if (zoomScale <= 1) {
+        zoomOutBtn.prop("disabled", true);
+      }
+      UpdateCanvasWidth();
+      UpdateZoomLabel();
+    });
+
+    $("#close-pdfviewer").on("click", handleFileClose);
+  });
+
+  
+
+
+</script>

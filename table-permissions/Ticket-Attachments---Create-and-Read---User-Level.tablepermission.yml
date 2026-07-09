@@ -1,0 +1,18 @@
+adx_accountrelationship: 
+adx_append: true
+adx_appendto: true
+adx_contactrelationship: 
+adx_create: true
+adx_delete: false
+adx_entitylogicalname: sh_ticketattachment
+adx_entityname: Ticket Attachments - Create and Read - User Level
+adx_entitypermission_webrole:
+- c5ed9554-79a1-4c31-bea9-a940211a85a0
+adx_entitypermissionid: 9512501e-7024-49d8-a581-2ac5ffe77bee
+adx_parententitypermission: 
+adx_parentrelationship: 
+adx_read: true
+adx_scope: 756150000
+adx_write: true
+statecode: 1
+statuscode: 2

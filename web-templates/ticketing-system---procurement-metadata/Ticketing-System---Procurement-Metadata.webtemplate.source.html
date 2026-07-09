@@ -1,0 +1,475 @@
+<fieldset class="p-4 mb-3 col-12">
+  <!-- <legend>Request Details</legend> -->
+  <legend class="d-flex justify-content-between align-items-center w-100">
+    <span>Request Details</span>
+    {% if mode == 'view' %}
+    <!-- <span class="d-flex gap-2">
+
+      <span class="chip">
+        Vendor Name
+        <span class="dot"></span>{{ metadata.sh_vendor.name | default: "Unavailable" }}
+      </span>
+
+      {% if metadata.sh_prepaymentrequired %}
+      <span class="chip">
+        Prepayment Amount
+        <span class="dot"></span>{{ metadata.sh_prepaymentamount | default: "Unavailable" }}
+      </span>
+
+      {% endif %}
+  
+
+      <span class="chip">
+        PO Number
+        <span class="dot"></span>{{ metadata.sh_ponumber | default: "Unavailable" }}
+      </span>
+
+    </span> -->
+    {% endif %}
+  </legend>
+  <div class="row">
+
+    <!-- Project Name -->
+    <div class="col-12 col-md-4 mb-3">
+      <label for="sh_projectname" class="form-label">Project Name *</label>
+      <input type="text" class="form-control" id="sh_projectname"
+             value="{{ metadata.sh_projectname }}"
+             {% if mode == "view" %}readonly{% endif %}
+             required>
+    </div>
+
+    <!-- Service Needed By -->
+    <div class="col-12 col-md-4 mb-3">
+      <label for="sh_serviceneededby" class="form-label">Service Needed By *</label>
+      <input type="date" class="form-control" id="sh_serviceneededby"
+
+        value="{% if metadata.sh_serviceneededby %}{{ metadata.sh_serviceneededby | date: 'yyyy-MM-dd' }}{% endif %}"
+        {% if mode == "view" %}readonly{% endif %}
+        required>
+    </div>
+
+                 <!-- value="{{ metadata.sh_serviceneededby | date: 'yyyy-MM-dd' }}" -->
+    <!-- Location -->
+    <!-- <div class="col-12 col-md-4 mb-3">
+      <label for="sh_location" class="form-label">Location *</label>
+      <input type="text" class="form-control" id="sh_location"
+             value="{{ metadata.sh_location }}"
+             placeholder="Format: City/Warehouse (e.g. - Riyadh/WH14)"
+             {% if mode == "view" %}readonly{% endif %}
+             required>
+    </div> -->
+
+    <!-- Country -->
+    <div class="col-12 col-md-4 mb-3">
+      <label for="sh_country" class="form-label">Country *</label>
+      <select class="form-select" id="sh_country"
+              {% if mode == "view" %}disabled{% endif %}
+              required>
+        {% if metadata.sh_country %}
+          <option selected>{{ metadata.sh_country.name }}</option>
+        {% endif %}
+      </select>
+    </div>
+
+    <!-- Procurement Category -->
+    <div class="col-12 col-md-4 mb-3">
+      <label for="sh_procurementcategory" class="form-label">Procurement Category *</label>
+      <select class="form-select" id="sh_procurementcategory"
+              {% if mode == "view" %}disabled{% endif %}
+              required>
+        {% if metadata.sh_procurementcategory %}
+          <option selected>{{ metadata.sh_procurementcategory.name }}</option>
+        {% endif %}
+      </select>
+    </div>
+
+     <!-- Procurement Sub Category -->
+    <!-- <div class="col-12 col-md-4 mb-3">
+      <label for="sh_subcategory" class="form-label">Sub Category *</label>
+      <select class="form-select" id="sh_subcategory"
+              {% if mode == "view" %}disabled{% endif %}
+              multiple required>
+        {% if metadata.sh_subcategory %}
+          <option value="{{ metadata.sh_subcategory }}" selected>{{ metadata.sh_subcategory }}</option>
+        {% endif %}
+      </select>
+    </div> -->
+
+      <!-- Sub category -->
+    <!-- <div class="col-12 col-md-4 mb-3">
+      <label class="form-label">Sub category *</label>
+      <div class="dropdown w-100">
+        <button class="btn btn-light border w-100 text-start dropdown-toggle"
+                type="button" data-bs-toggle="dropdown" id="sh_subcategory">
+          Select Sub Category
+        </button>
+        <ul class="dropdown-menu w-100 p-2"
+            style="max-height: 250px; overflow-y: auto;"
+            id="sh_subcategory"></ul>
+      </div>
+    </div> -->
+
+    <!-- Currency -->
+    <div class="col-12 col-md-4 mb-3">
+      <label for="transactioncurrencyid" class="form-label">Currency *</label>
+      <select class="form-select" id="transactioncurrencyid"
+              {% if mode == "view" %}disabled{% endif %}
+              required>
+        {% if metadata.transactioncurrencyid %}
+          <option value="{{ metadata.transactioncurrencyid.id }}" selected>
+            {{ metadata.transactioncurrencyid.name }}
+          </option>
+        {% endif %}
+      </select>
+    </div>
+
+    <!-- Projected Budget -->
+    <div class="col-12 col-md-4 mb-3">
+      <label for="sh_projectedbudget" class="form-label">Projected Budget *</label>
+      <input type="number" class="form-control" id="sh_projectedbudget" min="0"
+        value="{{ metadata.sh_projectedbudget }}"
+        {% if mode == "view" %}readonly{% endif %}
+        required>
+    </div>
+
+    <!-- Project Details -->
+    <div class="col-12 mb-3">
+      <label for="sh_projectdetails" class="form-label">Project Details *</label>
+      <textarea class="form-control" id="sh_projectdetails" rows="3"
+        {% if mode == "view" %}readonly{% endif %}
+        required>{{ metadata.sh_projectdetails }}</textarea>
+    </div>
+
+
+  </div>
+
+  <legend>Financial Dimensions</legend>
+  <div class="row">
+
+    <div class="col-12 col-md-4 mb-3">
+      <label for="sh_findimvertical" class="form-label">Vertical *</label>
+      <select class="form-select" id="sh_findimvertical"
+              {% if mode == "view" %}disabled{% endif %} required>
+        {% if metadata.sh_findimvertical %}
+          <option selected>{{ metadata.sh_findimvertical.name }}</option>
+        {% endif %}
+      </select>
+    </div>
+
+    <!-- <div class="col-12 col-md-4 mb-3">
+      <label for="sh_findimdepartment" class="form-label">Department *</label>
+      <select class="form-select" id="sh_findimdepartment"
+              {% if mode == "view" %}disabled{% endif %} required>
+        {% if metadata.sh_findimdepartment %}
+          <option selected>{{ metadata.sh_findimdepartment.name }}</option>
+        {% endif %}
+      </select>
+    </div> -->
+
+
+
+    <!-- <div class="col-12 col-md-4 mb-3">
+      <label for="sh_findimregion" class="form-label">Region *</label>
+      <select class="form-select" id="sh_findimregion"
+              {% if mode == "view" %}disabled{% endif %} required>
+        {% if metadata.sh_findimregion %}
+          <option selected>{{ metadata.sh_findimregion.name }}</option>
+        {% endif %}
+      </select>
+    </div> -->
+
+    <!-- <div class="col-12 col-md-4 mb-3">
+      <label for="sh_findimcountry" class="form-label">Country *</label>
+      <select class="form-select" id="sh_findimcountry"
+              {% if mode == "view" %}disabled{% endif %} required>
+        {% if metadata.sh_findimcountry %}
+          <option selected>{{ metadata.sh_findimcountry.name }} </option>
+        {% endif %}
+      </select>
+    </div> -->
+
+    <!-- <div class="col-12 col-md-4 mb-3">
+      <label for="sh_findimcity" class="form-label">City *</label>
+      <select class="form-select" id="sh_findimcity"
+              {% if mode == "view" %}disabled{% endif %} required>
+        {% if metadata.sh_findimcity %}
+          <option selected>{{ metadata.sh_findimcity.name }}</option>
+        {% endif %}
+      </select>
+    </div> -->
+
+    <div class="col-12 col-md-4 mb-3">
+      <label for="sh_findimsite" class="form-label">Site *</label>
+      <select class="form-select" id="sh_findimsite"
+              {% if mode == "view" %}disabled{% endif %} required>
+        {% if metadata.sh_findimsite %}
+          <option selected>{{ metadata.sh_findimsite.name }}</option>
+        {% endif %}
+      </select>
+    </div>
+
+     <div class="col-12 col-md-4 mb-3">
+      <label for="sh_findimsubservice" class="form-label">Sub-Service *</label>
+      <select class="form-select" id="sh_findimsubservice"
+              {% if mode == "view" %}disabled{% endif %} required>
+        {% if metadata.sh_findimsubservice %}
+          <option selected>{{ metadata.sh_findimsubservice.name }}</option>
+        {% endif %}
+      </select>
+    </div>
+
+    <div class="col-12 col-md-4 mb-3">
+      <label for="sh_findimservice" class="form-label">Service *</label>
+      <select class="form-select" id="sh_findimservice"
+              disabled required>
+        {% if metadata.sh_findimservice %}
+          <option selected>{{ metadata.sh_findimservice.name }}</option>
+        {% endif %}
+      </select>
+    </div>
+
+  
+    <div class="col-12 col-md-4 mb-3">
+      <label for="sh_findimcostcentre" class="form-label">Cost Center *</label>
+      <select class="form-select" id="sh_findimcostcentre"
+              {% if mode == "view" %}disabled{% endif %} required>
+        {% if metadata.sh_findimcostcentre %}
+          <option selected>{{ metadata.sh_findimcostcentre.name }}</option>
+        {% endif %}
+      </select>
+    </div>
+
+    <div class="col-12 col-md-4 mb-3" id="div-legalentity">
+      <label for="sh_legalentityname" class="form-label">Legal Entity *</label>
+      <select class="form-select" id="sh_legalentityname" {% if mode == "view" %}disabled{% endif %} required>
+
+        {% assign currentLegalEntityValue = metadata.sh_legalentity.Value | string %}
+
+        <!-- Blank default option -->
+        <option value="" {% if currentLegalEntityValue == blank %}selected{% endif %}   disabled selected>
+        Select
+        </option>
+
+        <option value="126450000" {% if currentLegalEntityValue == "126450000" %}selected{% endif %}>5030 | Starlinks Company</option>
+        <option value="126450001" {% if currentLegalEntityValue == "126450001" %}selected{% endif %}>5031 | Starlinks Global Ltd</option>
+        <option value="126450002" {% if currentLegalEntityValue == "126450002" %}selected{% endif %}>5032 | Starlinks Corporation Logistic Services L.L.C</option>
+        <option value="126450003" {% if currentLegalEntityValue == "126450003" %}selected{% endif %}>5033 | Starlinks Solutions</option>
+
+      </select>
+    </div>
+
+    <!-- <div class="col-12 col-md-4 mb-3">
+      <label class="form-label d-block"></label>
+      <div class="form-check mt-1">
+        <input class="form-check-input" type="checkbox" id="sh_partialdeliveryallowed"
+          {% if metadata.sh_partialdeliveryallowed %}checked{% endif %}
+          {% if mode == "view" %}disabled{% endif %}
+          onchange="document.getElementById('partialDeliveryCol').style.display = this.checked ? 'block' : 'none'">
+        <label class="form-label form-check-label" for="sh_partialdeliveryallowed">Partial Delivery Allowed</label>
+      </div>
+    </div> -->
+
+    <div class="col-12 col-md-8 mb-3" style="display:none;">
+      <label for="approvedVendorSearch" class="form-label">Approved Vendor</label>
+      <div style="position:relative;">
+       <input
+          type="text"
+          class="form-control"
+          id="approvedVendorSearch"
+          autocomplete="off"
+          placeholder="Search by vendor name or number..."
+          {% if mode == "view" %}readonly{% endif %}
+          value="{% if metadata['sh_approvedvendorid'] %}{{ metadata['sh_approvedvendorid'] }} | {{ metadata.sh_approvedvendor.name }}{% endif %}"
+        >
+        <ul
+          id="approvedVendorSearchResults"
+          class="list-group"
+          style="position:absolute; top:100%; left:0; right:0; z-index:9999; display:none; max-height:220px; overflow-y:auto; box-shadow:0 4px 12px rgba(0,0,0,0.15);"
+        ></ul>
+      </div>
+      <input type="hidden" id="approvedVendorIdHidden" value="{{ metadata.sh_approvedvendor.id }}" />
+    </div>
+
+  </div>
+</fieldset>
+
+<script>
+  const countryDDL = document.getElementById("sh_country");
+
+  countryDDL.addEventListener("change", function () {
+    const country = countryDDL.options[countryDDL.selectedIndex]?.text?.trim();
+
+    let categoryConfig = "procurementCategoryKSA"; // fallback
+
+    if (country === "Kingdom of Saudi Arabia") {
+      categoryConfig = "procurementCategoryKSA";
+    } else if (country === "United Arab Emirates") {
+      categoryConfig = "procurementCategoryUAE";
+    }
+
+    populateDropdown("sh_procurementcategory", categoryConfig);
+
+    // reset dependent field
+    sh_procurementcategory.value = "";
+  });
+
+  document.getElementById("sh_findimsubservice").addEventListener("change", function () {
+    const selectedText = this.options[this.selectedIndex]?.text || "";
+    const serviceName = selectedText.includes("|")
+      ? selectedText.split("|")[0].trim()
+      : "";
+
+    if (!serviceName) return;
+
+    const serviceSelect = document.getElementById("sh_findimservice");
+
+    // Find the already-loaded option that matches the service name
+    const matchingOption = Array.from(serviceSelect.options).find(
+      opt => opt.text.trim().toLowerCase() === serviceName.toLowerCase()
+    );
+
+    if (matchingOption) {
+      matchingOption.selected = true;
+      serviceSelect.value = matchingOption.value; // GUID is already on the option
+    }
+  });
+
+    // Function to auto select department based on selected Cost Center
+    document.getElementById("sh_findimcostcentre").addEventListener("change", function () {
+      const selectedText = this.options[this.selectedIndex]?.text || "";
+      
+      if (!selectedText) return;
+
+      // Extract first two digits/characters from the selected Cost Center name
+      const costCenterPrefix = selectedText.trim().substring(0, 2).toLowerCase();
+
+      if (!costCenterPrefix) return;
+
+      const departmentSelect = document.getElementById("sh_department");
+
+      // Find the department option whose name starts with the same two characters
+      const matchingOption = Array.from(departmentSelect.options).find(
+        opt => opt.text.trim().substring(0, 2).toLowerCase() === costCenterPrefix
+      );
+
+      if (matchingOption) {
+        matchingOption.selected = true;
+        departmentSelect.value = matchingOption.value; // GUID is already on the option
+      }
+    });
+</script>
+
+<style>
+.form-check-input:checked {
+  background-color: #006F4A;
+  border-color: #006F4A;
+}
+.form-check-input:focus {
+  border-color: #006F4A;
+  box-shadow: 0 0 0 0.25rem rgba(0, 111, 74, 0.25);
+}
+</style>
+
+
+
+<!-- Approved Vendor Lookup -->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+  const input      = document.getElementById("approvedVendorSearch");
+  const resultsBox = document.getElementById("approvedVendorSearchResults");
+  const hiddenId   = document.getElementById("approvedVendorIdHidden");
+
+  if (!input)      { console.error("❌ approvedVendorSearch input not found");   return; }
+  if (!resultsBox) { console.error("❌ approvedVendorSearchResults ul not found"); return; }
+
+  console.log("✅ Approved Vendor lookup initialized");
+
+  let debounceTimer;
+
+  input.addEventListener("input", function () {
+    clearTimeout(debounceTimer);
+
+    const query = this.value.trim();
+    console.log("🔍 Input changed:", query);
+
+    if (!query) {
+      hiddenId.value = "";
+      resultsBox.style.display = "none";
+      return;
+    }
+
+    if (query.length < 2) return;
+
+    debounceTimer = setTimeout(function () {
+      fetchVendors(query);
+    }, 350);
+  });
+
+  async function fetchVendors(query) {
+    const encoded = encodeURIComponent(query);
+    const legalEntityRaw = document.getElementById("sh_legalentityname").options[document.getElementById("sh_legalentityname").selectedIndex]?.text || "";
+    const dataAreaId = legalEntityRaw.split("|")[0].trim();
+
+    console.log("🏢 dataAreaId filter:", dataAreaId);
+
+    const url = `/_api/sh_vendorses?$select=sh_vendorsid,sh_vendorname,sh_vendornumber&$filter=(contains(sh_vendorname,'${encoded}') or contains(sh_vendornumber,'${encoded}')) and sh_vendortier eq 'Tier 1' and sh_dataareaid eq '${dataAreaId}'&$top=20&$orderby=sh_vendorname asc`;
+
+    console.log("📡 Fetching:", url);
+
+    try {
+      const res  = await fetch(url);
+      console.log("📥 Response status:", res.status);
+
+      const data = await res.json();
+      console.log("📦 Data returned:", data);
+
+      const results = data.value || [];
+      console.log(`✅ ${results.length} vendor(s) found`);
+
+      resultsBox.innerHTML = "";
+
+      if (results.length === 0) {
+        resultsBox.innerHTML = `<li class="list-group-item text-muted">No vendors found</li>`;
+        resultsBox.style.display = "block";
+        return;
+      }
+
+      results.forEach(function (v) {
+        const label = v.sh_vendornumber
+          ? `${v.sh_vendornumber} | ${v.sh_vendorname}`
+          : v.sh_vendorname;
+
+        const li       = document.createElement("li");
+        li.className   = "list-group-item list-group-item-action";
+        li.textContent = label;
+        li.style.cursor = "pointer";
+
+        li.addEventListener("click", function () {
+          input.value    = label;
+          hiddenId.value = v.sh_vendorsid;
+          resultsBox.style.display = "none";
+          console.log("✅ Vendor selected:", v);
+        });
+
+        resultsBox.appendChild(li);
+      });
+
+      resultsBox.style.display = "block";
+
+    } catch (err) {
+      console.error("❌ Fetch error:", err);
+      resultsBox.innerHTML = `<li class="list-group-item text-danger">Error fetching vendors</li>`;
+      resultsBox.style.display = "block";
+    }
+  }
+
+  // Close on outside click
+  document.addEventListener("click", function (e) {
+    if (!input.contains(e.target) && !resultsBox.contains(e.target)) {
+      resultsBox.style.display = "none";
+    }
+  });
+
+});
+</script>

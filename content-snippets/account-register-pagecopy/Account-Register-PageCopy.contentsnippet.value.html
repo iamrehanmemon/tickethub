@@ -1,0 +1,14 @@
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+var parentDiv = document.getElementById("ContentContainer_MainContent_MainContent_SecureRegister");
+if (parentDiv) {
+  var childDivs = parentDiv.querySelectorAll("div");
+  childDivs.forEach(function(child) {
+    if (child.innerHTML.trim() === "") {
+      child.remove();
+    }
+  });
+}
+    });
+    
+</script>

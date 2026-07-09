@@ -1,0 +1,17 @@
+adx_accountrelationship: 
+adx_append: false
+adx_appendto: false
+adx_contactrelationship: 
+adx_create: false
+adx_delete: false
+adx_entitylogicalname: template
+adx_entityname: Email Template Permission
+adx_entitypermission_webrole:
+- a056d286-4322-41f8-82af-46802e0ea645
+- c5ed9554-79a1-4c31-bea9-a940211a85a0
+adx_entitypermissionid: b91aa5c3-fd52-4396-b718-a9ee6dfab7dd
+adx_parententitypermission: 
+adx_parentrelationship: 
+adx_read: true
+adx_scope: 756150000
+adx_write: false

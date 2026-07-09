@@ -1,0 +1,25 @@
+adx_accountrelationship: 
+adx_append: true
+adx_appendto: true
+adx_contactrelationship: 
+adx_create: true
+adx_delete: false
+adx_entitylogicalname: sh_legalmetadata
+adx_entityname: Legal MetaData
+adx_entitypermission_webrole:
+- 289326bb-02ca-f011-8543-6045bd6b3a2c
+- 599d5ae7-02d4-f011-8544-002248cbd80a
+- 706af9e5-60d0-f011-8543-0022480dc2d4
+- 8d11396e-37d4-f011-8543-6045bd69b99d
+- 91803298-02ca-f011-8543-6045bd6b3a2c
+- 9ac337ab-02ca-f011-8543-6045bd6b3a2c
+- a056d286-4322-41f8-82af-46802e0ea645
+- c01fb2b4-02ca-f011-8543-6045bd6b3a2c
+- c5ed9554-79a1-4c31-bea9-a940211a85a0
+- d6727e9e-02ca-f011-8543-6045bd6b3a2c
+adx_entitypermissionid: 1db40340-5fdd-4b12-8d82-529c4f3ae01b
+adx_parententitypermission: 
+adx_parentrelationship: 
+adx_read: true
+adx_scope: 756150000
+adx_write: true

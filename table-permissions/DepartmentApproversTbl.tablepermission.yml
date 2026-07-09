@@ -1,0 +1,27 @@
+adx_accountrelationship: 
+adx_append: false
+adx_appendto: false
+adx_contactrelationship: 
+adx_create: false
+adx_delete: false
+adx_entitylogicalname: sh_departmentticketapprovers
+adx_entityname: DepartmentApproversTbl
+adx_entitypermission_webrole:
+- 289326bb-02ca-f011-8543-6045bd6b3a2c
+- 599d5ae7-02d4-f011-8544-002248cbd80a
+- 706af9e5-60d0-f011-8543-0022480dc2d4
+- 8d11396e-37d4-f011-8543-6045bd69b99d
+- 91803298-02ca-f011-8543-6045bd6b3a2c
+- 9ac337ab-02ca-f011-8543-6045bd6b3a2c
+- a056d286-4322-41f8-82af-46802e0ea645
+- c01fb2b4-02ca-f011-8543-6045bd6b3a2c
+- c5ed9554-79a1-4c31-bea9-a940211a85a0
+- d2d1b496-e3ea-f011-8406-7ced8dacb417
+- d6727e9e-02ca-f011-8543-6045bd6b3a2c
+- dd17533d-2be2-f011-8406-70a8a5224032
+adx_entitypermissionid: 0a9b2494-256a-47a5-88ff-b11e2f83b18f
+adx_parententitypermission: 
+adx_parentrelationship: 
+adx_read: true
+adx_scope: 756150000
+adx_write: false

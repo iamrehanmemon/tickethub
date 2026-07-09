@@ -1,0 +1,345 @@
+ <!-- Finance Note -->
+{% if mode != "view" %}
+<div class="essd-guidance">
+  <div class="d-flex align-items-start">
+    <div class="essd-icon">
+      <!-- Light Bulb SVG -->
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none"
+           xmlns="http://www.w3.org/2000/svg">
+        <path d="M9 21h6M10 18h4"
+              stroke="#FAA633" stroke-width="2" stroke-linecap="round"/>
+        <path d="M12 2a7 7 0 0 0-4 12c.6.6 1 1.5 1 2.4h6c0-.9.4-1.8 1-2.4a7 7 0 0 0-4-12Z"
+              stroke="#FAA633" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <div class="flex-grow-1">
+      <div class="essd-text">
+        Before submitting a Finance request, please ensure it is not already covered under standard finance or ERP self-service processes.
+      </div>
+      <a href="https://one.starlinks.com/"
+         target="_blank"
+         class="essd-link">
+        Open Finance Related App (if any)
+      </a>
+    </div>
+  </div>
+</div>
+<style>
+.essd-guidance {
+  padding: 1.25rem 1.5rem;
+}
+
+.essd-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(250, 166, 51, 0.12); /* light orange */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 1rem;
+  flex-shrink: 0;
+}
+
+.essd-text {
+  color: #6c757d;
+  font-size: .9rem;
+  margin-bottom: .5rem;
+}
+
+.essd-link {
+  font-weight: 600;
+  font-size: .9rem;
+  color: #FAA633;
+  text-decoration: none;
+}
+
+.essd-link:hover {
+  text-decoration: underline;
+}
+
+</style>
+{% endif %}
+
+
+{% if mode != "view" %}
+
+<fieldset class="p-4 mb-3 col-12">
+  <legend>Request Details</legend>
+
+  <!-- Hidden Submit Fields -->
+  <input type="hidden" id="financeSupportArea"/>
+  <input type="hidden" id="financeScope"/>
+  <input type="hidden" id="financeCategory"/>
+  <input type="hidden" id="financeSubCategory"/>  <!-- kept for parity (optional) -->
+  <input type="hidden" id="financeService"/>      <!-- auto = category -->
+
+  <!-- Dynamic Steps -->
+  <div id="step-verticals" class="mb-5">
+    <h4 class="fw-semibold mb-3 form-label">Finance Support *</h4>
+    <div id="verticalTiles" class="row g-3"></div>
+  </div>
+
+  <div id="step-functions" class="mb-5" hidden>
+    <h4 class="fw-semibold mb-3 form-label">Scope / Type *</h4>
+    <div id="functionTiles" class="row g-3"></div>
+  </div>
+
+  <div id="step-categories" class="mb-5" hidden>
+    <h4 class="fw-semibold mb-3 form-label">
+      Category *
+      <span id="selectedFunctionLabel" class="badge bg-light text-dark ms-2"></span>
+    </h4>
+    <div id="categoryTiles" class="row g-3"></div>
+  </div>
+
+  <div class="mb-3">
+    <label for="sh_additionalinformation" class="form-label">Additional Information</label>
+    <textarea class="form-control" id="sh_additionalinformation" {% if mode == "view" %}readonly{% endif %}>{{ metadata.sh_additionalinformation }}</textarea>
+  </div>
+
+</fieldset>
+
+{% endif %}
+
+{% if mode == "view" %}
+
+<fieldset class="p-4 mb-3 col-12">
+  <legend>Request Details</legend>
+  <div class="row">
+
+    <div class="col-12 col-md-4 mb-3">
+      <label class="form-label">Finance Support</label>
+      <input type="text" class="form-control" value="{{ metadata.financeSupportArea }}" readonly>
+    </div>
+
+    <div class="col-12 col-md-4 mb-3">
+      <label class="form-label">Scope / Type</label>
+      <input type="text" class="form-control" value="{{ metadata.financeScope }}" readonly>
+    </div>
+
+    <div class="col-12 col-md-4 mb-3">
+      <label class="form-label">Category</label>
+      <input type="text" class="form-control" value="{{ metadata.financeCategory }}" readonly>
+    </div>
+
+    <div class="col-12 col-md-4 mb-3">
+      <label class="form-label">Service</label>
+      <input type="text" class="form-control" value="{{ metadata.financeService }}" readonly>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Additional Information</label>
+      <textarea class="form-control" readonly>{{ metadata.sh_additionalinformation }}</textarea>
+    </div>
+
+  </div>
+</fieldset>
+
+{% endif %}
+
+{% if mode != "view" %}
+<script>
+/* -------------------------------
+   DATA MODELS (Finance)
+-------------------------------- */
+
+// Step 0 (kept name loadVerticals like HR)
+const verticals = {
+  "Finance Operations": { id: "FINOPS", sub: "Operations Requests" },
+  "ERP Tech Support": { id: "ERPTECH", sub: "ERP incidents/requests" }
+};
+
+// Step 1 (scope/type depends on support area)
+const financeScopes = {
+  "Finance Operations": [
+    "Corporate",
+    "Vertical - Automotive",
+    "Vertical - CPG",
+    "Vertical - Q-Commerce",
+    "Vertical - Lifestyle",
+    "Starlinks Global",
+    "Starlinks UAE",
+    "Starlinks Solutions"
+  ],
+  "ERP Tech Support": [
+    "Incidents",
+    "Requests"
+  ]
+};
+
+// Step 2 (leaf selection)
+const financeLeaf = {
+  "Finance Operations": [
+    "General Ledger (GL)",
+    "Accounts Payable (AP)",
+    "Accounts Receivable (AR)",
+    "Invoicing & Billing",
+    "Travel & Expenses",
+    "Cost Allocation & Accruals",
+    "Budgeting & Forecasting",
+    "Financial Reporting",
+    "Audit / Compliance / Controls",
+    "Master Data (Vendors, Customers, Dimensions)",
+    "Other (Not listed)"
+  ],
+  "ERP Tech Support": {
+    "Incidents": [
+      "Access Issues",
+      "Reporting Issues",
+      "Integration Issues",
+      "Workflow Issues",
+      "Performance Issues"
+    ],
+    "Requests": [
+      "Access (New/Change)",
+      "Reports (New/Change)",
+      "Functional Change - GL",
+      "Functional Change - AP",
+      "Functional Change - AR",
+      "Functional Change - Expenses",
+      "Other (not listed)"
+    ]
+  }
+};
+
+/* -------------------------------
+   STATE (same keys as HR)
+-------------------------------- */
+let state = {
+  vertical: null,     // Finance Support
+  category: null,     // Scope/Type
+  subcategory: null,  // Leaf item
+  service: null       // auto = leaf item (same)
+};
+
+/* -------------------------------
+   HELPERS (same name as HR)
+-------------------------------- */
+function renderTiles(containerId, items, clickHandler) {
+  const container = document.getElementById(containerId);
+  container.innerHTML = "";
+
+  Object.entries(items).forEach(([label, info]) => {
+    const col = document.createElement("div");
+    col.className = "col-md-4";
+
+    col.innerHTML = `
+      <div class="hr-tile">
+        <div class="hr-tile-title form-label">${label}</div>
+        ${info?.sub ? `<div class="hr-tile-sub">${info.sub}</div>` : ""}
+      </div>
+    `;
+
+    col.querySelector(".hr-tile").addEventListener("click", e => {
+      [...container.querySelectorAll(".hr-tile")].forEach(t => t.classList.remove("tile-selected"));
+      e.currentTarget.classList.add("tile-selected");
+      clickHandler(label, info);
+    });
+
+    container.appendChild(col);
+  });
+}
+
+/* -------------------------------
+   STEP 0 — Finance Support
+-------------------------------- */
+function loadVerticals() {
+  const items = {};
+  Object.keys(verticals).forEach(v => items[v] = { sub: verticals[v].sub });
+
+  renderTiles("verticalTiles", items, (label) => {
+    state.vertical = label;
+    $("financeSupportArea").value = label;
+
+    // Reset downstream
+    state.category = null;
+    state.subcategory = null;
+    state.service = null;
+
+    $("financeScope").value = "";
+    $("financeCategory").value = "";
+    $("financeSubCategory").value = "";
+    $("financeService").value = "";
+
+    document.getElementById("step-functions").hidden = false;
+    document.getElementById("step-categories").hidden = true;
+
+    loadCategories(); // next step (scope/type)
+  });
+}
+
+/* -------------------------------
+   STEP 1 — Scope / Type
+-------------------------------- */
+function loadCategories() {
+  if (!state.vertical) return;
+
+  const scopes = financeScopes[state.vertical] || [];
+  const items = {};
+  scopes.forEach(s => items[s] = { sub: "" });
+
+  renderTiles("functionTiles", items, (scope) => {
+    state.category = scope;
+    document.getElementById("financeScope").value = scope;
+
+    document.getElementById("selectedFunctionLabel").innerText = scope;
+    document.getElementById("step-categories").hidden = false;
+
+    loadSubCategories(scope);
+  });
+}
+
+/* -------------------------------
+   STEP 2 — Leaf (Category)
+   (Leaf is final, auto service = leaf)
+-------------------------------- */
+function loadSubCategories(scope) {
+  const items = {};
+
+  if (state.vertical === "Finance Operations") {
+    financeLeaf["Finance Operations"].forEach(x => items[x] = { sub: "" });
+  } else {
+    const list = financeLeaf["ERP Tech Support"][scope] || [];
+    list.forEach(x => items[x] = { sub: "" });
+  }
+
+  renderTiles("categoryTiles", items, (leaf) => {
+    state.subcategory = leaf;
+    state.service = leaf;
+
+    // Save to hidden fields
+    document.getElementById("financeCategory").value = leaf;
+    document.getElementById("financeSubCategory").value = leaf; // optional, for reporting
+    document.getElementById("financeService").value = leaf;     // required, mirrors HR
+
+    // If you want a visual confirmation, keep the badge as selected leaf
+    // (optional) document.getElementById("selectedFunctionLabel").innerText = scope;
+  });
+}
+
+/* -------------------------------
+   INIT
+-------------------------------- */
+document.addEventListener("DOMContentLoaded", () => {
+  loadVerticals();
+});
+</script>
+{% endif %}
+
+<style>
+.hr-tile {
+  border-radius: 1rem; padding: 1.25rem;
+  background: #fff; border: 1px solid rgba(0,0,0,.08);
+  transition: .2s; cursor: pointer;
+  box-shadow: 0 4px 14px rgba(0,0,0,.04);
+}
+.hr-tile:hover { transform: translateY(-3px); border-color:#ced4da; }
+.tile-selected {
+  background:#f8f9fa !important;
+  border-color:#adb5bd !important;
+  box-shadow:0 0 0 2px #dee2e6 inset;
+}
+.hr-tile-title { font-weight:600; }
+.hr-tile-sub { font-size:.85rem; color:#6c757d; }
+</style>

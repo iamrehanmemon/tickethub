@@ -1,0 +1,16 @@
+adx_accountrelationship: 
+adx_append: true
+adx_appendto: true
+adx_contactrelationship: 
+adx_create: true
+adx_delete: false
+adx_entitylogicalname: annotation
+adx_entityname: Notes - Create
+adx_entitypermission_webrole:
+- c5ed9554-79a1-4c31-bea9-a940211a85a0
+adx_entitypermissionid: dc60ca4f-80e5-4f29-98a2-0ae659df10bc
+adx_parententitypermission: 
+adx_parentrelationship: 
+adx_read: false
+adx_scope: 756150000
+adx_write: false

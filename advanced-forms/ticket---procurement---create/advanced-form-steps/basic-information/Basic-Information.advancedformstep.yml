@@ -1,0 +1,24 @@
+adx_attachfilemaxsize: 
+adx_attachfilestoragelocation: 756150000
+adx_containername: cx-portal
+adx_entitypermissionsenabled: true
+adx_formname: Ticket
+adx_geolocation_maptype: 756150000
+adx_hideformonsuccess: true
+adx_maximumnooffiles: 5
+adx_mode: 100000000
+adx_movepreviouspermitted: false
+adx_name: Basic Information
+adx_nextstep: 60cee856-b57b-4564-a1d6-aab4bfb58b7c
+adx_referenceentitylogicalname: sh_procurementmetadata
+adx_referenceentityrelationshipname: sh_procurementmetadata_TicketNumber_sh_ticket
+adx_referenceentitysourcetype: 100000001
+adx_referenceentitystep: cb3c282d-ffbb-402a-a96f-f6b7e7ffbf8a
+adx_referencequerystringisprimarykey: true
+adx_setentityreference: false
+adx_storageaccountname: starlinkspowerplatform
+adx_targetentitylogicalname: sh_ticket
+adx_type: 100000001
+adx_validationsummarylinksenabled: true
+adx_webform: 98b26110-d4b9-4a60-afc0-b7ecea2b96a2
+adx_webformstepid: cb3c282d-ffbb-402a-a96f-f6b7e7ffbf8a

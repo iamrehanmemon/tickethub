@@ -1,0 +1,34 @@
+adx_attachfilelabel: >-
+  [
+    {
+      "LCID": 1033,
+      "Value": ""
+    }
+  ]
+adx_attachfilemaxsize: 
+adx_attachfilestoragelocation: 756150000
+adx_captcharequired: false
+adx_containername: cx-portal
+adx_entityformid: e2f8d744-3e90-4397-91d7-9e04a0026c72
+adx_entityname: sh_ticket
+adx_entitypermissionsenabled: true
+adx_entitysourcetype: 756150001
+adx_formname: Ticket - Read
+adx_geolocation_maptype: 756150000
+adx_hideformonsuccess: true
+adx_maximumnooffiles: 5
+adx_mode: 100000002
+adx_name: Ticket - Portal - Read
+adx_onsuccess: 756150000
+adx_recordidquerystringparametername: id
+adx_redirecturl: 
+adx_redirectwebpage: 
+adx_showcaptchaforauthenticatedusers: false
+adx_storageaccountname: starlinkspowerplatform
+adx_successmessage: >-
+  [
+    {
+      "LCID": 1033,
+      "Value": ""
+    }
+  ]

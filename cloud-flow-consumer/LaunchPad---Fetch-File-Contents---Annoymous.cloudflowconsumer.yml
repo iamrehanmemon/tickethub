@@ -1,0 +1,8 @@
+adx_CloudFlowConsumer_adx_webrole:
+- c5ed9554-79a1-4c31-bea9-a940211a85a0
+adx_cloudflowconsumerid: 99d044ee-ea99-f011-b41c-002248cbd80a
+adx_flowapiurl: /_api/cloudflow/v1.0/trigger/e14cb26f-bb07-f011-bae3-6045bd69e9dc
+adx_flowtriggerurl: ''
+adx_metadata: ''
+adx_name: LaunchPad - Fetch File Contents - Annoymous
+adx_processid: e14cb26f-bb07-f011-bae3-6045bd69e9dc

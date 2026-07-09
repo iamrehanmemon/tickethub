@@ -1,0 +1,447 @@
+<!-- ========================= -->
+<!-- 📋 Notes Log Offcanvas -->
+<!-- ========================= -->
+
+<div class="offcanvas offcanvas-end" tabindex="-1" id="notesLogOffcanvas" aria-labelledby="notesLogLabel">
+  <div class="offcanvas-header border-bottom">
+    <h5 class="offcanvas-title" id="notesLogLabel">
+      <i class="bi bi-journal-text me-2"></i>Internal Notes Log
+    </h5>
+    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+  </div>
+
+  <!-- Scrollable Notes Feed -->
+  <div class="offcanvas-body" id="notesScrollBody">
+    <!-- <div id="notesSection"></div> -->
+     {% entityform name: 'TicketTimelineForm' %}
+  </div>
+
+  <!-- Pinned Footer -->
+  <div class="notes-footer border-top p-3">
+    <div class="d-flex align-items-start gap-2">
+      <img src="https://ui-avatars.com/api/?name={{ user.emailaddress1 }}&background=0d6efd&color=fff"
+           alt="{{ user.emailaddress1 }}" class="rounded-circle flex-shrink-0" width="38" height="38">
+      <div class="flex-grow-1">
+
+        <!-- Notify Users Tag Picker -->
+        <div class="notify-picker mb-2">
+          <div class="notify-tags-input" id="notifyTagsInput">
+            <span class="notify-placeholder" id="notifyPlaceholder">Notify users...</span>
+          </div>
+          <div class="notify-dropdown" id="notifyDropdown">
+            <input type="text" class="notify-search" id="notifySearch" placeholder="Search users...">
+            <ul class="notify-list" id="notifyList"></ul>
+          </div>
+        </div>
+
+        <!-- Note Textarea -->
+        <textarea id="newNote" class="form-control mb-2" rows="2" placeholder="Write a note..." maxlength="2000"></textarea>
+        <div class="d-flex justify-content-end">
+          <button id="addNoteBtn" class="btn btn-sm btn-primary px-4" disabled>Post</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  /* ════════════════════════════════════════════
+     OFFCANVAS LAYOUT — Notes specific only
+     (scroll fix, width, footer pin)
+  ════════════════════════════════════════════ */
+  #notesLogOffcanvas {
+    width: 50vw !important;
+    display: flex !important;
+    flex-direction: column !important;
+    height: 100% !important;
+  }
+
+  #notesLogOffcanvas .offcanvas-header {
+    flex-shrink: 0 !important;
+  }
+
+  #notesLogOffcanvas .offcanvas-body {
+    flex: 1 1 auto !important;
+    overflow-y: auto !important;
+    min-height: 0 !important;
+    height: 0 !important;
+    padding: 1rem 1.25rem;
+  }
+
+  #notesLogOffcanvas .notes-footer {
+    flex-shrink: 0 !important;
+    background: #fff;
+  }
+
+  /* ════════════════════════════════════════════
+     NOTE ENTRY — reuses .comment-entry,
+     .comment-avatar, .comment-body,
+     .comment-meta, .comment-author,
+     .comment-text from Comments CSS.
+     Only additions specific to notes below:
+  ════════════════════════════════════════════ */
+
+  /* Slightly smaller avatar in offcanvas to match footer avatar size */
+  #notesLogOffcanvas .comment-avatar {
+    width: 38px;
+    height: 38px;
+  }
+
+  /* Note body uses same grey bg as .comment-existing */
+  #notesLogOffcanvas .comment-body {
+    background-color: #f8f9fa;
+    border: 1px solid #e9ecef !important;
+    border-radius: 0.6rem;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+  }
+
+  /* Notify badge — notes-only element */
+  .note-notify-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.75rem;
+    color: #0d6efd;
+    background: #e7f0ff;
+    border-radius: 20px;
+    padding: 1px 8px;
+    margin-top: 6px;
+    margin-right: 4px;
+  }
+
+  /* Empty state — reused pattern, scoped to notes */
+  .note-empty {
+    text-align: center;
+    color: #adb5bd;
+    font-size: 0.9rem;
+    padding: 2rem 0;
+  }
+
+  /* ════════════════════════════════════════════
+     NOTIFY TAG PICKER — notes-only component
+  ════════════════════════════════════════════ */
+  .notify-picker {
+    position: relative;
+  }
+
+  .notify-tags-input {
+    min-height: 36px;
+    border: 1px solid #dee2e6;
+    border-radius: 0.375rem;
+    padding: 4px 8px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    align-items: center;
+    cursor: text;
+    background: #fff;
+    font-size: 0.85rem;
+    transition: border-color 0.15s;
+  }
+
+  .notify-tags-input:focus-within {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 0.2rem rgba(13,110,253,.15);
+  }
+
+  .notify-placeholder {
+    color: #adb5bd;
+    font-size: 0.85rem;
+    pointer-events: none;
+  }
+
+  .notify-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: #0d6efd;
+    color: #fff;
+    border-radius: 20px;
+    padding: 2px 10px 2px 8px;
+    font-size: 0.78rem;
+    font-weight: 500;
+  }
+
+  .notify-tag-remove {
+    cursor: pointer;
+    font-size: 0.9rem;
+    line-height: 1;
+    opacity: 0.8;
+  }
+
+  .notify-tag-remove:hover { opacity: 1; }
+
+  .notify-dropdown {
+    display: none;
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0; right: 0;
+    background: #fff;
+    border: 1px solid #dee2e6;
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+    z-index: 9999;
+    overflow: hidden;
+  }
+
+  .notify-dropdown.open { display: block; }
+
+  .notify-search {
+    width: 100%;
+    border: none;
+    border-bottom: 1px solid #f0f0f0;
+    padding: 8px 12px;
+    font-size: 0.85rem;
+    outline: none;
+  }
+
+  .notify-list {
+    list-style: none;
+    margin: 0; padding: 4px 0;
+    max-height: 180px;
+    overflow-y: auto;
+  }
+
+  .notify-list li {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 12px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: background 0.1s;
+  }
+
+  .notify-list li:hover { background: #f0f5ff; }
+
+  .notify-list li.selected {
+    background: #e7f0ff;
+    color: #0d6efd;
+    font-weight: 500;
+  }
+
+  .notify-list li .user-avatar-sm {
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .notify-list li.no-results {
+    color: #adb5bd;
+    cursor: default;
+    justify-content: center;
+  }
+
+  .notify-list li.no-results:hover { background: none; }
+</style>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const notesSection   = document.getElementById("notesSection");
+  const addNoteBtn     = document.getElementById("addNoteBtn");
+  const newNoteBox     = document.getElementById("newNote");
+
+  const currentUserEmail = "{{ user.emailaddress1 }}";
+  const ticketNumber     = "{{ ticket.sh_ticket }}";
+
+  // ── Static User List (replace with API later) ────────
+  const allUsers = [
+    { name: "Rehan Memon",   email: "rehan.memon@starlinks-me.com" },
+    { name: "Nabeel Ahmed",   email: "nabeel.ahmed@starlinks-me.com" }
+  ];
+
+  let selectedUsers = [];
+
+  // ── Tag Picker Logic ──────────────────────────────────
+  const tagsInput   = document.getElementById("notifyTagsInput");
+  const dropdown    = document.getElementById("notifyDropdown");
+  const searchInput = document.getElementById("notifySearch");
+  const notifyList  = document.getElementById("notifyList");
+  const placeholder = document.getElementById("notifyPlaceholder");
+
+  function renderUserList(filter = "") {
+    notifyList.innerHTML = "";
+    const filtered = allUsers.filter(u =>
+      u.name.toLowerCase().includes(filter.toLowerCase()) ||
+      u.email.toLowerCase().includes(filter.toLowerCase())
+    );
+
+    if (!filtered.length) {
+      notifyList.innerHTML = `<li class="no-results">No users found</li>`;
+      return;
+    }
+
+    filtered.forEach(u => {
+      const isSelected = selectedUsers.some(s => s.email === u.email);
+      const li = document.createElement("li");
+      li.className = isSelected ? "selected" : "";
+      li.innerHTML = `
+        <img src="https://ui-avatars.com/api/?name=${encodeURIComponent(u.name)}&background=0d6efd&color=fff"
+             class="user-avatar-sm" alt="${u.name}">
+        <span>${u.name}</span>
+        <small class="text-muted ms-auto">${u.email}</small>
+        ${isSelected ? '<i class="bi bi-check2 ms-1"></i>' : ''}
+      `;
+      li.addEventListener("click", () => toggleUser(u));
+      notifyList.appendChild(li);
+    });
+  }
+
+  function toggleUser(user) {
+    const idx = selectedUsers.findIndex(s => s.email === user.email);
+    if (idx > -1) selectedUsers.splice(idx, 1);
+    else selectedUsers.push(user);
+    renderTags();
+    renderUserList(searchInput.value);
+  }
+
+  function renderTags() {
+    tagsInput.querySelectorAll(".notify-tag").forEach(t => t.remove());
+    placeholder.style.display = selectedUsers.length ? "none" : "inline";
+
+    selectedUsers.forEach(u => {
+      const tag = document.createElement("span");
+      tag.className = "notify-tag";
+      tag.innerHTML = `${u.name} <span class="notify-tag-remove" data-email="${u.email}">×</span>`;
+      tag.querySelector(".notify-tag-remove").addEventListener("click", (e) => {
+        e.stopPropagation();
+        selectedUsers = selectedUsers.filter(s => s.email !== u.email);
+        renderTags();
+        renderUserList(searchInput.value);
+      });
+      tagsInput.insertBefore(tag, placeholder);
+    });
+  }
+
+  tagsInput.addEventListener("click", () => {
+    dropdown.classList.add("open");
+    searchInput.focus();
+    renderUserList();
+  });
+
+  searchInput.addEventListener("input", () => renderUserList(searchInput.value));
+
+  document.addEventListener("click", (e) => {
+    if (!e.target.closest(".notify-picker")) {
+      dropdown.classList.remove("open");
+      searchInput.value = "";
+    }
+  });
+
+  // ── Fetch Notes ───────────────────────────────────────
+  async function fetchNotes() {
+    try {
+      if (!ticketNumber || ticketNumber.trim() === "") {
+        renderNotes([]);
+        return;
+      }
+
+      const response = await fetch(getCommentsUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ method: "GET", ticketNumber })
+      });
+
+      const data = await response.json();
+      renderNotes(data.comments || []);
+
+    } catch (error) {
+      console.error("Error fetching notes:", error);
+      notesSection.innerHTML = `<div class="note-empty">⚠️ Error loading notes.</div>`;
+    }
+  }
+
+  // ── Add Note ──────────────────────────────────────────
+  async function addNote() {
+    const noteText = newNoteBox.value.trim();
+    if (!noteText) return;
+
+    addNoteBtn.disabled = true;
+
+    try {
+      const payload = {
+        commentedByEmail: currentUserEmail,
+        ticketNumber:     ticketNumber,
+        ticketComment:    noteText,
+        notifyUsers:      selectedUsers.map(u => u.email)
+      };
+
+      const response = await fetch(addCommentsUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+
+      await response.json();
+
+      newNoteBox.value = "";
+      selectedUsers    = [];
+      renderTags();
+      addNoteBtn.disabled = true;
+      await fetchNotes();
+
+    } catch (error) {
+      console.error("❌ Error adding note:", error);
+      alert("Failed to add note. Please try again.");
+      addNoteBtn.disabled = false;
+    }
+  }
+
+  // ── Render Notes ──────────────────────────────────────
+  // Reuses .comment-entry, .comment-avatar, .comment-body,
+  // .comment-meta, .comment-author, .comment-text from Comments CSS
+  function renderNotes(notes) {
+    if (!notesSection) return;
+    notesSection.innerHTML = "";
+
+    if (!notes.length) {
+      notesSection.innerHTML = `<div class="note-empty">No notes yet. Be the first to add one.</div>`;
+      return;
+    }
+
+    notes.forEach((n) => {
+      const author    = n.author    || n.sh_commentedbyemail || "Unknown";
+      const text      = n.text      || n.sh_commenttext      || "";
+      const timestamp = n.timestamp || n.createdon           || new Date().toISOString();
+      const avatarURL = `https://ui-avatars.com/api/?name=${encodeURIComponent(author)}&background=0d6efd&color=fff`;
+
+      const wrapper = document.createElement("div");
+      wrapper.className = "comment-entry";   /* ← reuses Comments class */
+
+      wrapper.innerHTML = `
+        <img src="${avatarURL}" alt="${author}" class="comment-avatar">
+        <div class="comment-body">
+          <div class="comment-meta">
+            <span class="comment-author"></span> · <span>${new Date(timestamp).toLocaleString()}</span>
+          </div>
+          <div class="comment-text"></div>
+        </div>
+      `;
+
+      wrapper.querySelector(".comment-author").innerText = author;
+      wrapper.querySelector(".comment-text").innerText   = text;
+      notesSection.appendChild(wrapper);
+    });
+
+    // Auto-scroll to latest
+    const body = document.getElementById("notesScrollBody");
+    if (body) body.scrollTop = body.scrollHeight;
+  }
+
+  // ── Events ────────────────────────────────────────────
+  newNoteBox.addEventListener("input", () => {
+    addNoteBtn.disabled = newNoteBox.value.trim().length === 0;
+  });
+
+  addNoteBtn.addEventListener("click", (e) => {
+    e.preventDefault();
+    addNote();
+  });
+
+  document.getElementById("notesLogOffcanvas")
+    .addEventListener("show.bs.offcanvas", fetchNotes);
+
+  // Init
+  renderUserList();
+});
+</script>

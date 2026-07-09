@@ -1,0 +1,52 @@
+adx_appendquerystring: false
+adx_associatecurrentportaluser: false
+adx_attachfile: true
+adx_attachfileaccept: '*/*'
+adx_attachfileacceptextensions: 
+adx_attachfileallowmultiple: false
+adx_attachfilemaxsize: 80000
+adx_attachfilerequired: true
+adx_attachfilerestrictaccept: false
+adx_attachfilesaveoption: 756150000
+adx_attachfilestoragelocation: 756150000
+adx_autogeneratesteps: false
+adx_captcharequired: false
+adx_containername: cx-portal
+adx_entityformid: 167e992d-2c99-f011-b41b-6045bd6abba3
+adx_entityname: sh_ticketattachment
+adx_entitypermissionsenabled: true
+adx_forceallfieldsrequired: false
+adx_formname: Attachments - Procurement - Portal
+adx_geolocation_displaymap: false
+adx_geolocation_enabled: false
+adx_geolocation_maptype: 756150000
+adx_hideformonsuccess: true
+adx_maximumnooffiles: 5
+adx_mode: 100000000
+adx_name: Attachments - Procurement - Portal
+adx_onsuccess: 756150000
+adx_populatereferenceentitylookupfield: true
+adx_portaluserlookupattributeisactivityparty: false
+adx_recommendedfieldsrequired: false
+adx_recordidquerystringparametername: 
+adx_recordsourceallowcreateonnull: false
+adx_redirecturl: 
+adx_redirecturlappendentityidquerystring: false
+adx_redirectwebpage: 
+adx_referenceentitylogicalname: sh_ticket
+adx_referenceentityrelationshipname: sh_ticketattachment_TicketNumber_sh_ticket
+adx_referenceentityshowreadonlyform: false
+adx_referenceentitysourcetype: 756150000
+adx_referencequeryattributelogicalname: sh_ticket
+adx_referencequerystringisprimarykey: true
+adx_referencequerystringname: id
+adx_referencetargetlookupattributelogicalname: sh_ticketnumber
+adx_renderwebresourcesinline: false
+adx_setentityreference: true
+adx_showcaptchaforauthenticatedusers: false
+adx_showownerfields: false
+adx_showunsupportedfields: false
+adx_storageaccountname: starlinkspowerplatform
+adx_tabname: General
+adx_tooltipenabled: false
+adx_validationsummarylinksenabled: true

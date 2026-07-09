@@ -1,0 +1,811 @@
+<fieldset class="p-4 mb-3 col-12">
+  <legend>Request Information</legend>
+  <div class="row">
+
+    <!-- ====== Disclaimer for File Claim ====== -->
+    <div class="col-12 mb-3 hidden">
+      <label class="form-label" for="legal_disclaimer">Disclaimer</label>
+      <div class="form-control" id="legal_disclaimer" style="height:auto; background-color:#f8f9fa;">
+        <p>
+          The following is the list of information and supporting documentation needed by
+          <strong>Starlinks Legal</strong> to initiate legal proceedings:
+        </p>
+
+        <ol>
+          <li>Brief of the dispute</li>
+          <li>Signed contract by both parties</li>
+          <li>All signed appendices by both parties for any services provided</li>
+          <li>Claimed amount and its detailed break-up</li>
+          <li>
+            Communication: All correspondence between SL and the client, including email
+            attachments
+          </li>
+          <li>
+            Responses from the client regarding non-payment, including claims of breach,
+            loss, or damage (emails, letters, or any provided format)
+          </li>
+          <li>
+            Statements of Account showing the outstanding balance claimed by SL
+          </li>
+          <li>
+            Copies of all invoices issued to the client
+          </li>
+          <li>
+            Correspondence where SL requested payment for invoices (including multiple
+            follow-ups if applicable)
+          </li>
+          <li>
+            Copies of all notices exchanged between parties (suspension, termination,
+            payment requests, etc.) with proof of delivery
+          </li>
+          <li>
+            Additional documents such as Proof of Delivery, payment records, internal
+            memos, client history, third-party notices, compliance records, and insurance
+            documents
+          </li>
+          <li>Corporate documents: CR copy and national address (if available)</li>
+          <li>
+            Contact details of the relevant person to whom the dispute should be served
+          </li>
+        </ol>
+
+        <p>
+          Please note that <strong>all tangible evidence</strong> is required to properly
+          prepare for both the claim and any counterclaim. This includes emails, letters,
+          text messages, recorded calls, and any other relevant materials.
+        </p>
+
+        <p>
+          If the required information is not directly available, please coordinate with
+          the appropriate team members to obtain it.
+        </p>
+
+        <p class="fw-bold text-danger">
+          Starlinks Legal will not proceed until all required information and documents are
+          provided. No follow-ups will be made if the information is not collated in a
+          timely manner.
+        </p>
+      </div>
+    </div>
+
+    <!-- Vertical -->
+    <div class="col-12 col-md-4 mb-3">
+      <label for="sh_vertical" class="form-label">Vertical *</label>
+      <select class="form-select" id="sh_vertical" {% if mode=="view" %} disabled {% endif %} required>
+        {% if metadata.sh_vertical %}
+        <option selected>{{ metadata.sh_vertical.name }}</option>
+        {% endif %}
+      </select>
+    </div>
+    
+    <!-- Request Type -->
+    <div class="col-12 col-md-4 mb-3">
+      <label for="sh_requesttype" class="form-label">Request Type *</label>
+      <select class="form-select" id="sh_requesttype" {% if mode=="view" %} disabled {% endif %} required>
+        {% if metadata.sh_requesttype %}
+        <option selected>{{ metadata.sh_requesttype.name }}</option>
+        {% endif %}
+      </select>
+    </div>
+    
+    <!-- NDA Type -->
+    <div class="col-12 col-md-4 mb-3">
+      <label for="sh_ndatype" class="form-label">NDA Type *</label>
+      <select class="form-select" id="sh_ndatype" {% if mode=="view" %}disabled{% endif %}>
+        {% if metadata.sh_ndatype %}
+        <option selected>{{ metadata.sh_ndatype.name }}</option>
+        {% endif %}
+      </select>
+    </div>
+
+    <!-- Contract Category -->
+    <div class="col-12 col-md-4 mb-3">
+      <label for="sh_contractcategory" class="form-label">Contract Category *</label>
+      <select class="form-select" id="sh_contractcategory" {% if mode=="view" %}disabled{% endif %}>
+        {% if metadata.sh_contractcategory %}
+        <option selected>{{ metadata.sh_contractcategory.name }}</option>
+        {% endif %}
+      </select>
+    </div>
+
+    <!-- Claim Amount -->
+    <div class="col-12 col-md-4 mb-3">
+      <label for="sh_claimamount" class="form-label">Claim Amount *</label>
+      <input type="text" class="form-control" id="sh_claimamount" value="{{ metadata.sh_claimamount }}" {% if mode=="view" %}readonly{% endif %}>
+    </div>
+
+    <!-- Counterparty Name -->
+    <div class="col-12 col-md-4 mb-3">
+      <label for="sh_counterpartyname" class="form-label">Counterparty Name *</label>
+      <input type="text" class="form-control" id="sh_counterpartyname" value="{{ metadata.sh_counterpartyname }}" {% if mode=="view" %}readonly{% endif %}>
+    </div>
+
+    <!-- Termination Type -->
+    <div class="col-12 col-md-4 mb-3">
+      <label for="sh_terminationtype" class="form-label">Termination Type *</label>
+      <select class="form-select" id="sh_terminationtype" {% if mode=="view" %}disabled{% endif %}>
+        {% if metadata.sh_terminationtype %}
+        <option selected>{{ metadata.sh_terminationtype.name }}</option>
+        {% endif %}
+      </select>
+    </div>
+
+    <!-- Dispute explanation -->
+    <div class="col-12 mb-3">
+      <label for="sh_disputeexplanation" class="form-label">Dispute Explanation *</label>
+      <textarea class="form-control" id="sh_disputeexplanation" rows="2" {% if mode=='view' %}readonly{% endif %}>{{ metadata.sh_disputeexplanation }}</textarea>
+    </div>
+
+    <!-- Agreement Type -->
+    <div class="col-12 col-md-4 mb-3">
+      <label for="sh_agreementtype" class="form-label">Agreement Type *</label>
+      <input type="text" class="form-control" id="sh_agreementtype" value="{{ metadata.sh_agreementtype }}" {% if mode=="view" %}readonly{% endif %}>
+    </div>
+
+    <!-- Service Good Type -->
+    <div class="col-12 col-md-4 mb-3">
+      <label for="sh_servicesgoodtype" class="form-label">Service Good Type *</label>
+      <input type="text" class="form-control" id="sh_servicesgoodtype" value="{{ metadata.sh_servicesgoodtype }}" {% if mode=="view" %}readonly{% endif %}>
+    </div>
+
+    <!--  Go live date -->
+    <div class="col-12 col-md-4 mb-3">
+      <label for="sh_golivedate" class="form-label">Go Live Date *</label>
+      <input type="date" class="form-control" id="sh_golivedate" value="{{ metadata.sh_golivedate | date: 'yyyy-MM-dd'}}" {% if mode=='view' %}readonly{% endif %}>
+    </div>
+ 
+    <!-- Expected savings -->
+    <div class="col-12 col-md-4 mb-3">
+      <label for="sh_expectedsavings" class="form-label">Expected Savings </label>
+      <input type="text" class="form-control" id="sh_expectedsavings" value="{{ metadata.sh_expectedsavings}}" {% if mode=="view" %}readonly{% endif %}>
+    </div>
+
+    <!-- Supporting Appendix Included -->
+    <div class="col-12 col-md-4 mb-3">
+      <label for="sh_supportingappendixincluded" class="form-label">Supporting Appendix Included </label>
+      <select class="form-select" id="sh_supportingappendixincluded" {% if mode=="view" %}disabled{% endif %}>
+        {% if metadata.sh_supportingappendixincluded %}
+        <option selected>{{ metadata.sh_supportingappendixincluded.name }}</option>
+        {% endif %}
+      </select>
+    </div>
+
+    <!-- Insurance Status -->
+    <div class="col-12 col-md-4 mb-3">
+      <label for="sh_insurancestatus" class="form-label">Insurance Status </label>
+      <select class="form-select" id="sh_insurancestatus" {% if mode=="view" %}disabled{% endif %}>
+        {% if metadata.sh_insurancestatus %}
+        <option selected>{{ metadata.sh_insurancestatus.name }}</option>
+        {% endif %}
+      </select>
+    </div>
+
+    <!-- Reason for no insurance -->
+    <div class="col-12 mb-3">
+      <label for="sh_reasonfornoinsurance" class="form-label">Reason for No Insurance *</label>
+      <textarea class="form-control" id="sh_reasonfornoinsurance" rows="2" {% if mode=='view' %}readonly{% endif %}>{{ metadata.sh_reasonfornoinsurance }}</textarea>
+    </div>
+    
+    <!-- Starlinks Template Usage -->
+    <div class="col-12 col-md-4 mb-3">
+      <label for="sh_starlinkstemplateusage" class="form-label">Starlinks Template Usage *</label>
+      <select class="form-select" id="sh_starlinkstemplateusage" {% if mode=="view" %}disabled{% endif %}>
+        {% if metadata.sh_starlinkstemplateusage %}
+        <option selected>{{ metadata.sh_starlinkstemplateusage.name }}</option>
+        {% endif %}
+      </select>
+    </div>
+
+    <!-- Reason for not using template -->
+    <div class="col-12 mb-3">
+      <label for="sh_reasonfornotusingtemplate" class="form-label">Please specify reason for not using template *</label>
+      <textarea class="form-control" id="sh_reasonfornotusingtemplate" rows="2" {% if mode=='view' %}readonly{% endif %}>{{ metadata.sh_reasonfornotusingtemplate }}</textarea>
+    </div>
+    
+    <!-- Subitter Department -->
+    <!-- <div class="col-12 col-md-4 mb-3">
+      <label for="sh_submitterdepartment" class="form-label">Submitter Department *</label>
+      <select class="form-select" id="sh_submitterdepartment" { if mode=="view" }disabled{ endif } required>
+        { if metadata.sh_submitterdepartment }
+        <option selected>{{ metadata.sh_submitterdepartment.name }}</option>
+        { endif }
+      </select>
+    </div> -->
+ 
+    <!-- Approver Email -->
+    <!-- <div class="col-12 col-md-8 mb-3">
+          <label for="sh_approveremail" class="form-label">Your request will go for approval to your Department GM </label>
+          <input type="text" class="form-control"
+                 id="sh_approveremail"
+                 value="{{ metadata.sh_approveremail}}"
+                 readonly
+                 >
+        </div> -->
+ 
+    <!-- ====== Comments field ====== -->
+    <div class="col-12 mb-3">
+      <label for="sh_comment" class="form-label">Please insert comments and information relevant to your request</label>
+      <textarea class="form-control" id="sh_comment" rows="3" {% if mode=='view' %}readonly{% endif %}>{{ metadata.sh_comment }}</textarea>
+    </div>
+
+  </div>
+</fieldset>
+
+
+<script>
+  //Hide and show fields in legal-request form
+  document.addEventListener("DOMContentLoaded", function () {
+
+    // console.log("✅ Legal request script file loaded");
+
+    // ✅ Get form name safely
+    //   const formName = document.getElementById("EntityFormName")?.value;
+    console.log("FormName:", formName);
+
+    if (!formName || formName !== "legal-request") return;
+
+    const alwaysVisibleFields = ["sh_requesttype", "sh_department", "sh_request", "sh_tickettype", "sh_requestorname", "sh_requestoremail"];
+    // 🔁 Fields & dropdowns to reset when Request Type changes
+    const resetConfigOnRequestTypeChange = {
+      dropdowns: [
+        "sh_contractcategory",
+        "sh_insurancestatus",
+        "sh_starlinkstemplateusage",
+        // "sh_submitterdepartment",
+        "sh_terminationtype"
+      ],
+      fields: [
+        "sh_counterpartyname",
+        "sh_golivedate",
+        "sh_comment",
+        "sh_claimamount",
+        "sh_disputeexplanation",
+        "sh_reasonfornoinsurance",
+        "sh_reasonfornotusingtemplate"
+      ]
+    };
+    
+    // 👇 Fields that should be hidden by default
+    const defaultHiddenFields = ["sh_contractcategory", "sh_counterpartyname", "sh_golivedate", "sh_comment",
+      "sh_claimamount", "sh_disputeexplanation", "sh_ndatype", "sh_starlinkstemplateusage", "sh_reasonfornoinsurance", "sh_reasonfornotusingtemplate",
+      "sh_agreementtype", "sh_servicesgoodtype", "sh_supportingappendixincluded", "sh_expectedsavings", "sh_insurancestatus", "sh_approveremail", "sh_terminationtype", "legal_disclaimer"
+    ];
+
+    const rules = [
+      {
+        dropdownId: "sh_requesttype",
+        cases: {
+          "Contract Review": [
+            "sh_contractcategory",
+            "sh_servicesgoodtype",
+            "sh_supportingappendixincluded",
+            "sh_starlinkstemplateusage",
+            "sh_counterpartyname",
+            "sh_golivedate",
+            // "sh_submitterdepartment",
+            "sh_comment"
+          ],
+          "New Template Draft": [
+            "sh_contractcategory",
+            // "sh_submitterdepartment",
+            "sh_comment"
+          ],
+          "Termination": [
+            "sh_terminationtype",
+            "sh_counterpartyname",
+            // "sh_submitterdepartment",
+            "sh_comment"
+          ],
+          "NDA": [
+            "sh_ndatype",
+            "sh_counterpartyname",
+            "sh_starlinkstemplateusage",
+            // "sh_submitterdepartment",
+            "sh_comment"
+          ],
+          "Existing Template Amendment": [
+            "sh_counterpartyname",
+            // "sh_submitterdepartment",
+            "sh_comment"
+          ],
+          "Legal Notice": [
+            "sh_counterpartyname",
+            // "sh_submitterdepartment",
+            "sh_comment"
+          ],
+          "Legal Advice": [
+            // "sh_submitterdepartment",
+            "sh_comment"
+          ],
+          "File Claim": [
+            "legal_disclaimer",
+            "sh_claimamount",
+            "sh_counterpartyname",
+            "sh_disputeexplanation",
+            // "sh_submitterdepartment",
+            "sh_comment"
+          ]
+        }
+      },
+      {
+        dropdownId: "sh_contractcategory",
+        cases: {
+          "Supplier Contract": ["sh_agreementtype"],
+          "Customer Contract": ["sh_agreementtype"],
+          "Others": ["sh_agreementtype"]
+        }
+      },
+      {
+        dropdownId: "sh_insurancestatus",
+        cases: {
+          "No": ["sh_reasonfornoinsurance"]
+        }
+      },
+      {
+        dropdownId: "sh_starlinkstemplateusage",
+        cases: {
+          "No": ["sh_reasonfornotusingtemplate"]
+        }
+      },
+
+      // ✅ AND condition rule supported now
+      {
+        conditions: [
+          { dropdownId: "sh_requesttype", value: "Contract Review" },
+          { dropdownId: "sh_contractcategory", value: "Supplier Contract" }
+        ],
+        showFields: [
+          "sh_servicesgoodtype",
+          "sh_supportingappendixincluded",
+          "sh_expectedsavings",
+          "sh_insurancestatus"
+        ]
+      }
+      // ,
+      // {
+      //   dropdownId: "sh_submitterdepartment",
+      //   cases: {
+      //     "Admin": ["sh_approveremail"],
+      //     "B2B": ["sh_approveremail"],
+      //     "B2C": ["sh_approveremail"],
+      //     "Finance": ["sh_approveremail"],
+      //     "F&T": ["sh_approveremail"],
+      //     "IT": ["sh_approveremail"],
+      //     "HR": ["sh_approveremail"],
+      //     "Solutions": ["sh_approveremail"],
+      //     "Procurements": ["sh_approveremail"],
+      //     "Others": ["sh_approveremail"],
+      //     "Marketing": ["sh_approveremail"],
+      //     "Leadership Team": ["sh_approveremail"]
+      //   }
+      // }
+    ];
+
+    // ===============================
+    // RULES ARRAY (VISIBILITY + REQUIRED)
+    // ===============================
+
+    const visibilityRequiredRules = [
+
+      {
+        when: [
+          { dropdownId: "sh_requesttype", value: "Contract Review" }
+        ],
+        fields: [
+          { id: "sh_contractcategory", required: true },
+          { id: "sh_counterpartyname", required: true },
+          { id: "sh_golivedate", required: true },
+          // { id: "sh_submitterdepartment", required: true },
+          { id: "sh_comment", required: true }
+        ]
+      },
+
+      {
+        when: [
+          { dropdownId: "sh_requesttype", value: "NDA" }
+        ],
+        fields: [
+          { id: "sh_ndatype", required: true },
+          { id: "sh_counterpartyname", required: true },
+          { id: "sh_starlinkstemplateusage", required: false },
+          // { id: "sh_submitterdepartment", required: true },
+          { id: "sh_comment", required: true }
+        ]
+      },
+
+      {
+        when: [
+          { dropdownId: "sh_requesttype", value: "New Template Draft" }
+        ],
+        fields: [
+          { id: "sh_contractcategory", required: true },
+          // { id: "sh_submitterdepartment", required: true },
+          { id: "sh_comment", required: true }
+        ]
+      },
+      {
+        when: [
+          { dropdownId: "sh_requesttype", value: "Termination" }
+        ],
+        fields: [
+          { id: "sh_counterpartyname", required: true },
+          { id: "sh_terminationtype", required: true },
+          // { id: "sh_submitterdepartment", required: true },
+          { id: "sh_comment", required: true }
+        ]
+      },
+      {
+        when: [
+          { dropdownId: "sh_requesttype", value: "Existing Template Amendment" }
+        ],
+        fields: [
+          { id: "sh_counterpartyname", required: true },
+          // { id: "sh_submitterdepartment", required: true },
+          { id: "sh_comment", required: true }
+        ]
+      },
+      {
+        when: [
+          { dropdownId: "sh_requesttype", value: "Legal Notice" }
+        ],
+        fields: [
+          { id: "sh_counterpartyname", required: true },
+          // { id: "sh_submitterdepartment", required: true },
+          { id: "sh_comment", required: true }
+        ]
+      },
+      ,
+      {
+        when: [
+          { dropdownId: "sh_requesttype", value: "Legal Advice" }
+        ],
+        fields: [
+          // { id: "sh_submitterdepartment", required: true },
+          { id: "sh_comment", required: true }
+        ]
+      },
+      ,
+      {
+        when: [
+          { dropdownId: "sh_requesttype", value: "File Claim" }
+        ],
+        fields: [
+          { id: "sh_counterpartyname", required: true },
+          { id: "sh_claimamount", required: true },
+          // { id: "sh_submitterdepartment", required: true },
+          { id: "sh_comment", required: true }
+        ]
+      },
+      {
+        when: [
+          { dropdownId: "sh_requesttype", value: "Contract Review" },
+          { dropdownId: "sh_contractcategory", value: "Customer Contract" }
+        ],
+        fields: [
+
+          { id: "sh_starlinkstemplateusage", required: true }
+
+        ]
+      },
+
+      {
+        when: [
+          { dropdownId: "sh_insurancestatus", value: "No" }
+        ],
+        fields: [
+          { id: "sh_reasonfornoinsurance", required: true }
+        ]
+      },
+
+      {
+        when: [
+          { dropdownId: "sh_starlinkstemplateusage", value: "No" }
+        ],
+        fields: [
+          { id: "sh_reasonfornotusingtemplate", required: true }
+        ]
+      }
+
+    ];
+
+
+    function getSelectedText(dropdownId) {
+      const ddl = document.getElementById(dropdownId);
+      if (!ddl) return null;
+      return ddl.options[ddl.selectedIndex]?.text ?? null;
+    }
+
+    function ruleConditionsMatch(conditions) {
+      return conditions.every(c => {
+        return getSelectedText(c.dropdownId) === c.value;
+      });
+    }
+
+    // ✅ Find the container row reliably
+    function getFieldContainer(fieldId) {
+      const field = document.getElementById(fieldId);
+      if (!field) return null;
+
+      // default basic forms table layout
+      return (
+        field.closest("tr") ||
+        // common div-based layouts
+        field.closest(".form-group") ||
+        field.closest(".control") ||
+        field.closest(".field") ||
+        field.parentElement
+      );
+    }
+
+    function showField(fieldId) {
+      const container = getFieldContainer(fieldId);
+      if (!container) return;
+      container.style.removeProperty("display");
+    }
+
+    function hideField(fieldId) {
+      const field = document.getElementById(fieldId);
+      if (!field) return;
+
+      // 🔑 CRITICAL: remove required BEFORE hiding
+      field.removeAttribute("required");
+
+      const label = document.querySelector(`label[for="${fieldId}"]`);
+      if (label) {
+        label.textContent = label.textContent.replace(/\s*\*$/, "");
+      }
+
+      const container = getFieldContainer(fieldId);
+      if (container) {
+        container.style.setProperty("display", "none");
+      }
+    }
+
+
+    function hideDefaultFields() {
+      defaultHiddenFields.forEach(fieldId => {
+        hideField(fieldId);
+      });
+    }
+
+    function setFieldRequired(fieldId, isRequired) {
+      const field = document.getElementById(fieldId);
+      if (!field) return;
+
+      if (isRequired) {
+        field.setAttribute("required", "required");
+      } else {
+        field.removeAttribute("required");
+      }
+
+      const label = document.querySelector(`label[for="${fieldId}"]`);
+      if (!label) return;
+
+      const hasStar = label.textContent.trim().endsWith("*");
+
+      if (isRequired && !hasStar) label.textContent += " *";
+      if (!isRequired && hasStar)
+        label.textContent = label.textContent.replace(/\s*\*$/, "");
+    }
+
+    function matchesConditions(conditions) {
+      return conditions.every(c => getSelectedText(c.dropdownId) === c.value);
+    }
+
+    // function debugRequiredFields() {
+    //   console.group("🛑 Required Field Debug");
+
+    //   const requiredFields = document.querySelectorAll(
+    //     "input[required], select[required], textarea[required]"
+    //   );
+
+    //   if (requiredFields.length === 0) {
+    //     console.log("✅ No required fields found");
+    //     console.groupEnd();
+    //     return;
+    //   }
+
+    //   requiredFields.forEach(field => {
+    //     const container = getFieldContainer(field.id);
+    //     const isHidden =
+    //       !container ||
+    //       container.style.display === "none" ||
+    //       window.getComputedStyle(container).display === "none";
+
+    //     console.log({
+    //       fieldId: field.id,
+    //       hidden: isHidden,
+    //       value: field.value
+    //     });
+
+    //     if (isHidden) {
+    //       console.warn(
+    //         `⚠️ Required field is hidden: ${field.id}`
+    //       );
+    //     }
+    //   });
+
+    //   console.groupEnd();
+    // }
+
+
+    // ===============================
+    // ✅ NEW: Fetch approver emails based on selected submitter department
+    // ===============================
+    //   async function updateApproverEmailsFromDepartment() {
+    //   const DEPT_DROPDOWN_ID = "sh_submitterdepartment";
+    //   const TARGET_FIELD_ID = "sh_approveremail";
+
+    //   const departmentField = document.getElementById(DEPT_DROPDOWN_ID);
+    //   const target = document.getElementById(TARGET_FIELD_ID);
+
+    //   if (!departmentField) return;
+
+    //   // ✅ Use selected TEXT (since dropdown value is a GUID lookup)
+    //   const selectedDepartment =
+    //     departmentField.options[departmentField.selectedIndex]?.text?.trim();
+
+
+    //   if (!selectedDepartment) {
+    //     if (target) {
+    //       target.value = "";
+    //       target.dispatchEvent(new Event("change"));
+    //     }
+    //     return;
+    //   }
+
+    //   const query = `/_api/sh_departmentticketapproverses?$select=sh_department,sh_approveremail,sh_signoffpersonemail`;
+
+    //   try {
+    //     const res = await fetch(query, {
+    //       method: "GET",
+    //       headers: {
+    //         "Accept": "application/json",
+    //         "Content-Type": "application/json"
+    //       }
+    //     });
+
+    //     if (!res.ok) throw new Error("Failed to retrieve sh_departmentticketapprovers records");
+
+    //     const json = await res.json();
+    //     const rows = Array.isArray(json.value) ? json.value : [];
+
+    //     const matched = rows.filter(r =>
+    //       String(r.sh_department ?? "").trim().toLowerCase() ===
+    //       String(selectedDepartment ?? "").trim().toLowerCase()
+    //     );
+
+    //     const emails = [];
+    //     matched.forEach(r => {
+    //       if (r.sh_approveremail) emails.push(String(r.sh_approveremail).trim());
+    //       if (r.sh_signoffpersonemail) emails.push(String(r.sh_signoffpersonemail).trim());
+    //     });
+
+    //     const unique = [...new Set(emails.filter(Boolean))];
+    //     const result = unique.join(",");
+
+    //     if (target) {
+    //       target.value = result;
+    //       target.dispatchEvent(new Event("change"));
+    //     }
+
+    //     // console.log("✅ Approver emails updated:", result);
+    //   } catch (e) {
+    //     console.error("❌ updateApproverEmailsFromDepartment error:", e);
+    //   }
+    // }
+
+
+
+    function applyRules() {
+
+      // 🔑 STEP 1: remove required from ALL managed fields
+      defaultHiddenFields.forEach(id => setFieldRequired(id, false));
+      hideDefaultFields();
+
+      // 2) apply simple dropdown->cases rules
+      rules.forEach(rule => {
+        if (!rule.dropdownId || !rule.cases) return;
+
+        const selectedText = getSelectedText(rule.dropdownId);
+        const fieldsToShow = rule.cases[selectedText] || [];
+        fieldsToShow.forEach(showField);
+      });
+
+      // 3) apply AND condition rules
+      rules.forEach(rule => {
+        if (!rule.conditions || !rule.showFields) return;
+
+        if (matchesConditions(rule.conditions)) {
+          rule.showFields.forEach(showField);
+        }
+      });
+
+      // 🔹 apply visibility + required rules (NEW)
+      visibilityRequiredRules.forEach(rule => {
+        if (!ruleConditionsMatch(rule.when)) return;
+
+        rule.fields.forEach(f => {
+          showField(f.id);
+          setFieldRequired(f.id, !!f.required);
+        });
+      });
+      // debugRequiredFields();
+    }
+
+    function resetFieldsOnRequestTypeChange() {
+
+      // 🔑 Clear required before resetting
+      defaultHiddenFields.forEach(id => setFieldRequired(id, false));
+
+
+      // reset dropdowns
+      resetConfigOnRequestTypeChange.dropdowns.forEach(id => {
+        const ddl = document.getElementById(id);
+        if (!ddl) return;
+        ddl.selectedIndex = 0;
+        ddl.dispatchEvent(new Event("change"));
+      });
+
+      // reset other field types
+      resetConfigOnRequestTypeChange.fields.forEach(id => {
+        const field = document.getElementById(id);
+        if (!field) return;
+
+        if (field.type === "checkbox" || field.type === "radio") {
+          field.checked = false;
+        } else {
+          field.value = "";
+        }
+
+        field.dispatchEvent(new Event("change"));
+      });
+    }
+
+
+
+    // ✅ Bind change events for ALL dropdowns referenced in any rule
+    const watchedDropdowns = new Set();
+
+    rules.forEach(rule => {
+      if (rule.dropdownId) watchedDropdowns.add(rule.dropdownId);
+      if (rule.conditions) rule.conditions.forEach(c => watchedDropdowns.add(c.dropdownId));
+    });
+    visibilityRequiredRules.forEach(rule =>
+      rule.when.forEach(c => watchedDropdowns.add(c.dropdownId))
+    );
+
+
+    watchedDropdowns.forEach(id => {
+      const ddl = document.getElementById(id);
+      if (!ddl) {
+        console.log("⚠️ Dropdown not found:", id);
+        return;
+      }
+
+      ddl.addEventListener("change", function () {
+
+        if (ddl.id === "sh_requesttype") {
+          resetFieldsOnRequestTypeChange();
+        }
+
+        // ✅ NEW: run every time submitter department changes
+        // if (ddl.id === "sh_submitterdepartment") {
+        //   updateApproverEmailsFromDepartment();
+        // }
+
+        applyRules();
+
+      });
+
+    });
+
+    applyRules();
+
+    // ✅ Optional: populate approver emails on load (if submitterdepartment already selected)
+    // updateApproverEmailsFromDepartment();
+
+    console.log("✅ Hiding fields script ran");
+
+  });
+</script>

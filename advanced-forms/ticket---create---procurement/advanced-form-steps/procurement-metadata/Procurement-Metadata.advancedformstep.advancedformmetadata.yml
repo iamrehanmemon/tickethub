@@ -1,0 +1,37 @@
+- adx_adddescription: true
+  adx_attributelogicalname: sh_location
+  adx_description: >-
+    [
+      {
+        "LCID": 1033,
+        "Value": "City/Warehouse (e.g., Riyadh/WH14)"
+      }
+    ]
+  adx_descriptionposition: 100000000
+  adx_fieldisrequired: true
+  adx_label: >-
+    [
+      {
+        "LCID": 1033,
+        "Value": "Location"
+      }
+    ]
+  adx_requiredfieldvalidationerrormessage: >-
+    [
+      {
+        "LCID": 1033,
+        "Value": ""
+      }
+    ]
+  adx_type: 100000000
+  adx_useattributedescriptionproperty: false
+  adx_validationregularexpression: ''
+  adx_validationregularexpressionerrormessage: >-
+    [
+      {
+        "LCID": 1033,
+        "Value": ""
+      }
+    ]
+  adx_webformmetadataid: ebb1ad37-5705-42cd-b80d-9934bbdc6758
+  adx_webformstep: 34f5360c-aa9f-4aeb-9bb2-2a41c7d01cd7

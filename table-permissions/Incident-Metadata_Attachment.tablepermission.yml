@@ -1,0 +1,15 @@
+adx_accountrelationship: 
+adx_append: true
+adx_appendto: false
+adx_contactrelationship: 
+adx_create: true
+adx_delete: false
+adx_entitylogicalname: annotation
+adx_entityname: Incident Metadata_Attachment
+adx_entitypermission_webrole: []
+adx_entitypermissionid: ee041f3b-c0a7-402c-a3c2-3736cec03131
+adx_parententitypermission: 270b9ff2-b7a9-4566-a2db-76cadc18eebd
+adx_parentrelationship: sh_incidentmetadata_Annotations
+adx_read: false
+adx_scope: 756150003
+adx_write: false

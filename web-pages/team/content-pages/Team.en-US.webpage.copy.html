@@ -1,0 +1,227 @@
+<div class="row sectionBlockLayout text-start" style="display: flex; flex-wrap: wrap; margin: 0px; min-height: auto; padding: 8px;">
+  <div class="container" style="padding: 0px; display: flex; flex-wrap: wrap;"><div class="col-lg-12 columnBlockLayout" style="flex-grow: 1; display: flex; flex-direction: column; min-width: 250px;"></div></div>
+</div>
+<div class="container"><img src="/procurement-banner-01.jpg" alt="procurement-banner-01 id=" banner"="" name="procurement-banner-01.jpg" style="width: 100%; position: static; display: inline-block; border-radius: 35px 35px 35px 35px;"></div>
+<section class="position-relative py-5" style="font-family: 'Gotham', Arial, sans-serif;">
+  <div class="container px-4">
+    <div class="row align-items-center g-5">
+      <div class="col-lg-6">
+        <h1 class="display-4 fw-bold lh-tight" style="color: #006F4A; font-size: 3rem;">Meet Our Teams</h1>
+        <p class="text-body-secondary lh-relaxed mb-0">Connect with our specialist teams for help, collaboration or business enquiries.</p>
+        <div class="mb-4 pt-3">
+          <label for="teamDropdown" class="form-label"><strong>Select Team:</strong></label
+          ><select id="teamDropdown" class="form-select">
+            <option value="procurement">Procurement Team</option>
+            <option value="support">Customer Support Team</option>
+            <option value="cx">CX Team</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- Org Chart Container -->
+<div class="container py-5"><div id="teamOrgChart" style="min-height: 350px; background-image: initial; background-position-x: initial; background-position-y: initial; background-size: initial; background-repeat: initial; background-attachment: initial; background-origin: initial; background-clip: initial; background-color: rgb(255, 255, 255); border-top-left-radius: 1rem; border-top-right-radius: 1rem; border-bottom-right-radius: 1rem; border-bottom-left-radius: 1rem; padding-top: 1.5rem; padding-right: 1rem; padding-bottom: 1.5rem; padding-left: 1rem; margin-bottom: 2rem; overflow-x: hidden;"></div></div>
+<!-- Team Cards Container --><!-- <div class="container py-4">
+  <div id="teamCards" class="row row-cols-1 row-cols-md-3 g-4 justify-content-center"></div>
+</div> --><!-- Modal Container -->
+<div id="modalsContainer"></div>
+<!-- Bootstrap Icons --><link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.9.1/font/bootstrap-icons.css" rel="stylesheet" /><!-- Add FontAwesome for fas icons, e.g. tasks --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" /><!-- D3.js and Org Chart dependencies - MUST BE LOADED FIRST -->
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/d3-org-chart@3.0.1"></script>
+<script src="https://cdn.jsdelivr.net/npm/d3-flextree@2.1.2/build/d3-flextree.js"></script>
+<script>
+    const orgData = {
+    procurement: [
+      {
+        id: 1,
+        name: "Olga Morozova",
+        position: "Procurement Director (KSA & UAE)",
+        email: "Olga.Morozova@starlinks-me.com",
+        parentId: null,
+        image: "https://ui-avatars.com/api/?name=Olga+Morozova",
+        responsibilities: [
+          "Strategic Leadership",
+          "Process Optimization & Compliance",
+          "Team & Stakeholder Management"
+        ]
+      },
+      {
+        id: 2,
+        name: "Abdulbari Sadak",
+        position: "Procurement Manager (KSA)",
+        email: "abdulbari.sadak@starlinks-me.com",
+        parentId: 1,
+        image: "https://ui-avatars.com/api/?name=Abdulbari+Sadak",
+        responsibilities: [
+          "Indirect Services (Consumables, IT, Professional Services)",
+          "Network 2PL/3PL",
+          "Facilities Management"
+        ]
+      },
+      {
+        id: 3,
+        name: "Mohammed Razim",
+        position: "Procurement Manager (KSA & UAE)",
+        email: "Mohammed.Razim@starlinks-me.com",
+        parentId: 1,
+        image: "https://ui-avatars.com/api/?name=Mohammed+Razim",
+        responsibilities: [
+          "Labor Category",
+          "Transportation B2C"
+        ]
+      },
+      {
+        id: 4,
+        name: "Mostafa S. Mohsen",
+        position: "Procurement Manager (KSA)",
+        email: "mohsen.m@starlinks-me.com",
+        parentId: 1,
+        image: "https://ui-avatars.com/api/?name=Mostafa+Mohsen",
+        responsibilities: [
+          "Infrastructure & Capex",
+          "Transportation B2B"
+        ]
+      },
+      {
+        id: 5,
+        name: "Sumair Ali",
+        position: "Procurement Coordinator (UAE)",
+        email: "Sumair.Ali@starlinks-me.com",
+        parentId: 2,
+        image: "https://ui-avatars.com/api/?name=Sumair+Ali",
+        responsibilities: [
+          "Transactional support"
+        ]
+      }
+    ],
+    support: [
+      {
+        id: 1,
+        name: "Jubran Alhaddad",
+        position: "Customer Service Manager",
+        email: "Jubran.Alhaddad@starlinks-me.com",
+        parentId: null,
+        image: "https://ui-avatars.com/api/?name=Jubran+Alhaddad",
+        responsibilities: [
+          "Lead support team operations.",
+          "Handle escalated customer complaints.",
+          "Monitor service quality KPIs.",
+          "Train new support agents."
+        ]
+      }
+    ],
+    cx: [
+      {
+        id: 1,
+        name: "Daren AbuGhoush",
+        position: "CX Lead",
+        email: "Daren.AbuGhoush@starlinks-me.com",
+        parentId: null,
+        image: "https://ui-avatars.com/api/?name=Daren+AbuGhoush",
+        responsibilities: [
+          "Develop CX strategies.",
+          "Design customer journey maps.",
+          "Coordinate feedback programs.",
+          "Measure customer satisfaction."
+        ]
+      }
+    ]
+  };
+
+    function getResponsibilities(teamKey, name) {
+      const team = orgData[teamKey];
+      const member = team.find(u => u.name === name);
+      return member ? member.responsibilities : [];
+    }
+
+    function renderOrgChart(teamKey) {
+      const team = orgData[teamKey];
+      const modalsContainer = document.getElementById('modalsContainer');
+      document.getElementById('teamOrgChart').innerHTML = "";
+
+      if (!team || team.length === 0) return;
+
+      team.forEach((member, idx) => {
+        const modalId = `orgResponsibilitiesModal${teamKey}${idx}`;
+        if (!document.getElementById(modalId)) {
+          modalsContainer.innerHTML += `
+          <div class="modal fade" id="${modalId}" tabindex="-1" aria-labelledby="${modalId}Label" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+              <div class="modal-content">
+                <div class="modal-header justify-content-between">
+                  <h5 class="modal-title" id="${modalId}Label">${member.name}'s Responsibilities</h5>
+                  <button type="button" class="btn btn-secondary btn-icons" data-bs-dismiss="modal" aria-label="Close">
+                    <i class="bi bi-x-lg"></i>
+                  </button>
+                </div>
+                <div class="modal-body">
+                  <ul>${getResponsibilities(teamKey, member.name).map(r => `<li>${r}</li>`).join('')}</ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+        }
+      });
+
+      // D3 Org Chart Instance
+      const chart = new d3.OrgChart()
+        .container('#teamOrgChart')
+        .data(team)
+        .initialZoom(1.00)
+        .nodeHeight(() => 200)
+        .nodeWidth(() => 320)
+        .childrenMargin(() => 150)
+        .compactMarginBetween(() => 120) // more horizontal spacing!
+        .neighbourMargin(() => 100)
+        .onNodeClick(d => {
+          // Optionally, recenters on node click
+          chart.setCentered(d.id);
+        })
+        .nodeContent((d, i) => {
+          const modalId = `orgResponsibilitiesModal${teamKey}${i}`;
+          return `
+          <div class="card h-100 custom-team-card p-0" style="width:${d.width - 8}px;">
+            <div class="card-body d-flex flex-column align-items-center justify-content-center text-center p-3">
+              <img src="${d.data.image}" alt="Profile" class="rounded-circle mb-2" style="width:52px;height:52px;">
+              <h4 class="card-title mb-1" style="font-size:1.1rem;">${d.data.name}</h4>
+              <h6 class="card-subtitle mb-2 text-muted">${d.data.position}</h6>
+              <div class="d-flex gap-2 mt-2 justify-content-center">
+                <a href="mailto:${d.data.email}" class="btn btn-secondary btn-icons btn-sm" title="Email">
+                  <i class="bi bi-envelope"></i>
+                </a>
+                <a href="https://teams.microsoft.com/l/chat/0/0?users=${d.data.email}" class="btn btn-secondary btn-icons btn-sm" title="Teams Chat">
+                  <i class="bi bi-microsoft-teams"></i>
+                </a>
+                <button class="btn btn-secondary btn-icons btn-sm" data-bs-toggle="modal" data-bs-target="#${modalId}" title="Responsibilities">
+                  <i class="fas fa-tasks"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+        })
+        .render();
+
+      // auto-center on first render as well (after layout/expand)
+      //chart.setCentered();
+      setTimeout(() => chart.expandAll(), 5);
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+      const dropdown = document.getElementById('teamDropdown');
+      const banner = document.getElementById('banner');
+
+       // Initial render
+      renderOrgChart(dropdown.value);
+      document.querySelector('.svg-chart-container').style.height = '1000px';
+      banner.style.display = dropdown.value === 'procurement' ? 'block' : 'none';
+
+      dropdown.addEventListener('change', function () {
+        renderOrgChart(this.value);
+        document.querySelector('.svg-chart-container').style.height = '1000px';
+        banner.style.display = this.value === 'procurement' ? 'block' : 'none';
+      });
+    });
+</script>

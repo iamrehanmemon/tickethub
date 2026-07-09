@@ -1,0 +1,45 @@
+#WebFormPanel {
+    border: none;
+}
+
+.sl-section {
+    padding:24px 28px;
+    background:#FFF;
+    border-radius:18px;
+    border:1px solid #E6E9EC;
+    box-shadow:0 4px 16px rgba(0,0,0,0.04);
+}
+
+fieldset {
+    border: none !important;
+    padding: 0 !important;
+}
+
+.sl-section legend {
+    font-size:1.4rem !important;
+    font-weight:700;
+    color:#006F4A;
+    margin-bottom:1.3rem;
+}
+
+.chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 10px;
+    border-radius: 999px;
+    border: 1px solid rgba(0, 0, 0, .08);
+    background: #fff;
+    font-size: 12px;
+    font-weight: 800;
+    color: #344054;
+    white-space: nowrap;
+}
+
+.chip .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 999px;
+    background: rgba(16, 24, 40, .25);
+    display: inline-block;
+}

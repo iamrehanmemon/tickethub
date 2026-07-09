@@ -1,0 +1,174 @@
+<!-- Below Attachment is being Used for Submission and 
+ For Viewing the Attachments it is added in Basic Information Web Template 
+ as If you move that code in this - on click event handler runs multiple times -->
+{% if mode != 'view' %}
+<fieldset class="p-4 mb-3">
+    <legend>Attachments</legend>
+    <div id="attachmentFields"></div>
+    <button type="button" class="btn btn-secondary" onclick="addAttachmentField(currentAttachmentType)">Add Attachment</button>
+    <button type="button" class="btn btn-outline-secondary" onclick="document.getElementById('multiFileInput').click()">Add Multiple Files</button>
+    <!-- Hidden multi-select input. User picks N files in one go; each file becomes its own row -->
+    <input type="file" id="multiFileInput" multiple style="display:none" onchange="handleMultipleFiles(event, currentAttachmentType)">
+</fieldset>
+{% endif %}
+
+<!-- ATTACHMENTS (VIEW MODE) -->
+{% if mode == 'view' %}
+<div class="container border p-4 mt-3">
+  <fieldset class="p-4 mb-3 col-12">
+  <legend class="d-flex justify-content-between align-items-center w-100">
+    <span>Attachments</span>
+    <!-- Add Attachment Icon Button -->
+    {% assign canAddAttachment = false %}
+
+    {% if requestType == "HR Request" and user.roles contains "Starlinks HR Team" %}
+      {% assign canAddAttachment = true %}
+    {% elsif requestType == "IT Request" and user.roles contains "Starlinks Technology Team" %}
+      {% assign canAddAttachment = true %}
+    {% endif %}
+
+    {% if canAddAttachment %}
+    <button 
+      type="button" 
+      class="btn btn-outline-secondary btn-sm d-flex align-items-center"
+      data-bs-toggle="modal" 
+      data-bs-target="#addAttachmentModal"
+      title="Add Attachment"
+      style="gap:6px;">
+
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor"
+        class="bi bi-paperclip" viewBox="0 0 16 16">
+        <path d="M4.5 3a2.5 2.5 0 0 1 5 0v9a1.5 1.5 0 0 1-3 0V5a.5.5 0 0 1 1 0v7a.5.5 0 0 0 1 0V3a1.5 1.5 0 1 0-3 0v9a2.5 2.5 0 0 0 5 0V5a.5.5 0 0 1 1 0v7a3.5 3.5 0 1 1-7 0z"/>
+      </svg>
+      Add
+    </button>
+    {% endif %}
+  </legend>
+  <table class="table align-middle">
+    <thead>
+      <tr>
+        <th>Attachment Type</th>
+        <th>Actions</th>
+        <th>Uploaded By</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      {% for attachment in attachments_result.results.entities %}
+      {% assign filePath = attachment.sh_attachmentpath | default: '' %}
+      {% assign extension = filePath | split:'?' | first | split:'.' | last | downcase %}
+      <tr>
+        <td>{{ attachment.sh_attachmenttype.name }}</td>
+
+        <td>
+          {% if filePath %}
+          <div class="dropdown" data-filepath="{{ filePath }}">
+
+            <button 
+              class="btn btn-primary btn-sm dropdown-toggle"
+              type="button"
+              data-bs-toggle="dropdown">
+              Select
+            </button>
+
+            <ul class="dropdown-menu">
+
+              {% if extension == 'pdf' %}
+                <li><a class="dropdown-item doc-action-item" href="{{ filePath }}" data-action="view">View</a></li>
+                <li><a class="dropdown-item doc-action-item" href="{{ filePath }}" data-action="download">Download</a></li>
+              {% else %}
+                <li><a class="dropdown-item doc-action-item" href="{{ filePath }}" data-action="download">Download</a></li>
+              {% endif %}
+
+            </ul>
+          </div>
+          {% else %}
+          —
+          {% endif %}
+        </td>
+
+        <td>
+          {{ attachment.sh_uploadedbyusername }}
+          (<span class="local-date" data-utc="{{ attachment.createdon }}"></span>)
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#addAttachmentModal">Add Additional Attachments</button>
+  </fieldset>
+</div>
+{% endif %}
+
+<style>
+  fieldset {
+  overflow: visible !important;
+}
+</style>
+
+<script>
+  // Attachment Fields
+  function addAttachmentField(attachmentType) {
+    const container = document.getElementById('attachmentFields');
+    const newSelectId = `attachmentType_${attachmentIndex}`;
+
+    const html = `
+    <div class="row mb-2" id="file-row-${attachmentIndex}">
+      <div class="col-md-5">
+        <select class="form-select pp-always-visible" id="${newSelectId}" name="${newSelectId}" required>
+          <option value="">Select</option>
+        </select>
+      </div>
+      <div class="col-md-6">
+        <input class="form-control" type="file" name="attachmentFile_${attachmentIndex}" required>
+      </div>
+      <div class="col-md-1">
+        <button type="button" class="btn btn-danger" onclick="removeAttachmentField(${attachmentIndex})">&times;</button>
+      </div>
+    </div>
+  `;
+
+    container.insertAdjacentHTML('beforeend', html);
+
+    // Populate dropdown from cache (no new fetch)
+    //populateDropdown(newSelectId, "attachmentsTypeProcurementRequest");
+    populateDropdown(newSelectId, attachmentType);
+
+    attachmentIndex++;
+  }
+
+  function removeAttachmentField(idx) {
+    document.getElementById(`file-row-${idx}`).remove();
+  }
+
+
+
+  // Handles a multi-file selection: creates one standard row per file
+  // (same markup/IDs/names addAttachmentField already produces) and
+  // assigns one file from the picker into each row's file input.
+  // Field naming stays attachmentType_N / attachmentFile_N in sequence,
+  // so the Power Automate flow that parses these fields is unaffected.
+  function handleMultipleFiles(event, attachmentType) {
+    const files = event.target.files;
+    if (!files || files.length === 0) return;
+
+    Array.from(files).forEach(file => {
+      // Capture the index this row will use BEFORE addAttachmentField increments it
+      const rowIndex = attachmentIndex;
+
+      addAttachmentField(attachmentType);
+
+      const fileInput = document.querySelector(`input[name="attachmentFile_${rowIndex}"]`);
+      if (fileInput) {
+        const dt = new DataTransfer();
+        dt.items.add(file);
+        fileInput.files = dt.files;
+      }
+    });
+
+    // Reset so the same file(s) can be re-picked later if needed
+    event.target.value = '';
+  }
+</script>
+
+

@@ -1,0 +1,17 @@
+adx_accountrelationship: 
+adx_append: true
+adx_appendto: true
+adx_contactrelationship: 
+adx_create: true
+adx_delete: true
+adx_entitylogicalname: new_emailtemplates
+adx_entityname: EmailTemplates
+adx_entitypermission_webrole:
+- a056d286-4322-41f8-82af-46802e0ea645
+- c5ed9554-79a1-4c31-bea9-a940211a85a0
+adx_entitypermissionid: 6e406f69-224f-4a04-b185-d0949658097c
+adx_parententitypermission: 
+adx_parentrelationship: 
+adx_read: true
+adx_scope: 756150000
+adx_write: true

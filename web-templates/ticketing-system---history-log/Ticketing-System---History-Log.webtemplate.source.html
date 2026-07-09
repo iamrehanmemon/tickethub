@@ -1,0 +1,153 @@
+<!-- ========================= -->
+<!-- 🕓 Ticket History Log Modal -->
+<!-- ========================= -->
+<div class="modal fade" id="historyModal" tabindex="-1" aria-labelledby="historyModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="historyModalLabel">Ticket History Log</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <div class="modal-body bg-white">
+        <div id="historyList" class="list-group" style="border: none !important;">
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+.history-item {
+  border: 1px solid #dee2e6;
+  border-radius: 0.5rem;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+  background-color: #f8f9fa;
+}
+
+.history-meta {
+  font-size: 0.85rem;
+  color: #6c757d;
+  margin-bottom: 0.25rem;
+}
+
+.history-author {
+  font-weight: 600;
+  color: #0d6efd;
+}
+
+.history-field {
+  font-weight: 500;
+  color: #212529;
+}
+
+.history-old {
+  color: #dc3545;
+  font-weight: 500;
+}
+
+.history-new {
+  color: #198754;
+  font-weight: 500;
+}
+/* to fix Scroll */
+  #historyModal .modal-body{
+    max-height: 70vh;
+    overflow-y: auto !important;
+  }
+</style>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const historyList = document.getElementById("historyList");
+  const ticketNumber = "{{ ticket.sh_ticket }}";
+
+  // ==============================
+  // FETCH HISTORY LOG FROM FLOW
+  // ==============================
+  async function fetchHistoryLogs() {
+    showLoader("Loading ticket history…");
+    try {
+      const payload = { method: "GET", ticketNumber: ticketNumber };
+
+      const response = await fetch(getHistoryUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+
+      const data = await response.json();
+      console.log("✔ History logs fetched:", data);
+
+      renderHistory(data.history || []);
+    } catch (error) {
+      console.error("❌ Error fetching History logs:", error);
+      historyList.innerHTML = `<div class="text-danger">Error loading history logs.</div>`;
+    }
+    hideLoader();
+  }
+
+  // ==============================
+  // RENDER HISTORY LOG ITEMS
+  // ==============================
+  function renderHistory(logs) {
+    historyList.innerHTML = "";
+
+    if (!logs.length) {
+      historyList.innerHTML = `<div class="text-muted text-center py-3">No history log entries found.</div>`;
+      return;
+    }
+
+    logs.forEach(log => {
+      const author = log.modifiedBy || "System";
+      const field = log.fieldName || "Unknown Field";
+      const oldValue = log.previousValue || "-";
+      const newValue = log.currentValue || "-";
+
+      // Convert modifiedOn into a proper Date
+      const formattedDate = formatDateValue(log.modifiedOn);
+
+      const itemHTML = `
+        <div class="history-item">
+          <div class="history-meta">
+            <span class="history-author">${author}</span> · ${formattedDate}
+          </div>
+          <div>
+            <span class="history-field">${field}</span> changed from 
+            <span class="history-old">${oldValue}</span> →
+            <span class="history-new">${newValue}</span>
+          </div>
+        </div>
+      `;
+
+      historyList.insertAdjacentHTML("beforeend", itemHTML);
+    });
+  }
+
+  // ==============================
+  // FIX DATE LOGIC (WORKS FOR ANY FORMAT)
+  // ==============================
+  function formatDateValue(dateString) {
+    if (!dateString) return "Unknown Date";
+
+    // If Flow sends 11/12/2025 02:15 PM
+    const parsedDate = new Date(dateString);
+
+    // If parsing fails (Invalid Date)
+    if (isNaN(parsedDate.getTime())) {
+      return dateString; // show raw value
+    }
+
+    return parsedDate.toLocaleString();
+  }
+
+  // Open modal → fetch logs
+  const historyModal = document.getElementById("historyModal");
+  historyModal.addEventListener("show.bs.modal", fetchHistoryLogs);
+});
+</script>

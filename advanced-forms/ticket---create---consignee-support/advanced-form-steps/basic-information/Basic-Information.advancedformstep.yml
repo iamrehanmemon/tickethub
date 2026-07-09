@@ -1,0 +1,28 @@
+adx_attachfilemaxsize: 
+adx_attachfilestoragelocation: 756150000
+adx_captcharequired: false
+adx_containername: cx-portal
+adx_entitypermissionsenabled: true
+adx_formname: Ticket - Create
+adx_geolocation_maptype: 756150000
+adx_hideformonsuccess: true
+adx_maximumnooffiles: 5
+adx_mode: 100000000
+adx_movepreviouspermitted: false
+adx_name: Basic Information
+adx_nextbuttoncssclass: btn btn-primary button next submit-btn next-ticket
+adx_nextstep: 0b8ddb78-aa54-49f7-a30b-c271d9707bd3
+adx_referenceentitylogicalname: sh_ticket
+adx_referenceentitysourcetype: 100000000
+adx_referencequeryattributelogicalname: sh_ticketid
+adx_referencequerystringisprimarykey: true
+adx_referencequerystringname: ticketID
+adx_setentityreference: true
+adx_showcaptchaforauthenticatedusers: false
+adx_storageaccountname: starlinkspowerplatform
+adx_tabname: General
+adx_targetentitylogicalname: sh_ticket
+adx_type: 100000001
+adx_validationsummarylinksenabled: true
+adx_webform: 6d906001-f77c-4b0a-91ce-ed3882dd9ea1
+adx_webformstepid: 2a869259-69d7-4d0b-94fe-ad334f648492

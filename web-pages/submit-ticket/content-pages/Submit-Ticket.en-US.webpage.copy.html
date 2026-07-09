@@ -1,0 +1,230 @@
+{% assign form_selector = request.params['formname'] | default: 'customer-onboarding' %}
+{% assign submitTicketEndPoint = settings["submitTicketUrl"] %}
+{% assign fetchShipmentEndPoint = settings["fetchShipmenUrl"] %}
+{% assign fetchTicketsEndPoint = settings["fetchTicketsEndPoint"] %}
+<script>
+  const formName = "{{ form_selector | escape }}".toLowerCase().trim();
+  const flowUrl = "{{ submitTicketEndPoint }}";
+  const fetchShipmentUrl = "{{ fetchShipmentEndPoint }}";
+  const fetchTicketsUrl = "{{ fetchTicketsEndPoint }}";
+</script>
+{% comment %}
+{% if form_selector == 'procurement-request' %}
+<div class="container">
+  <img src="/procurement-banner-02.jpg" alt="procurement-banner-01 id="banner" name="procurement-banner-01.jpg" style="width: 100%; position: static; display: inline-block; border-radius: 35px 35px 35px 35px;" />
+</div>
+{% endif %}
+{% endcomment %}
+
+<!-- Page Header -->
+<div class="container mt-3">
+  <a href="/" class="btn btn-secondary d-flex align-items-center"> Back to Home </a>
+  <div class="d-flex align-items-center mt-3">
+    <span class="d-flex align-items-center justify-content-center rounded-circle me-3" style="background: #FAEDED; width: 48px; height: 48px;"
+      ><!-- Chat/Complaint SVG Icon --><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-help w-6 h-6 text-accent">
+        <circle cx="12" cy="12" r="10"></circle>
+        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+        <path d="M12 17h.01"></path></svg></span>
+    <div>
+      <h2 class="fw-bold mb-1" style="font-size: 2rem;">Submit Ticket</h2>
+      <div class="text-muted" style="font-size: 1rem;">Please include as much detailed information as possible.</div>
+    </div>
+  </div>
+</div>
+
+<!-- Fallback Message -->
+<div class="container mt-3">
+  <div id="fallbackMessage" role="alert" class="alert alert-warning d-none mt-4">
+    <div class="d-flex align-items-center">
+      <span class="d-flex align-items-center justify-content-center rounded-circle me-3" style="background: #FAEDED; width: 48px; height: 48px;"
+        ><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-help w-6 h-6 text-accent">
+          <circle cx="12" cy="12" r="10"></circle>
+          <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+          <path d="M12 17h.01"></path></svg></span>
+      <div>
+        <h4 class="fw-bold mb-1">Navigate to Home Page</h4>
+        <div class="text-muted">To submit a ticket, please return to the home page and select a request type.</div>
+        <a href="/" class="btn btn-secondary mt-3">Back to Home</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% comment %}
+<!-- Form will be injected here -->
+<div id="ticketFormContainer" class="container mt-4">
+  {% if form_selector == 'system-outage' %} 
+  {% webform name: 'Ticket - Create - Incident' %}
+  {% elsif form_selector == 'consignee-support' or form_selector == 'procurement-request' or form_selector == 'customer-onboarding' or form_selector == 'legal-request' %}
+    <div class="sl-card sl-form-wrapper mt-4">
+    <form id="create-ticket-form"  enctype="multipart/form-data">
+      <div class="row">
+      <!-- Metadata Section -->
+      {% if form_selector == 'procurement-request' %} {% include "Ticketing System - Procurement Metadata" %}
+      {% elsif form_selector == 'consignee-support' %} {% include "Ticketing System - Customer Support Metadata" %}
+      {% elsif form_selector == 'customer-onboarding' %} {% include "Ticketing System - eCom Customer Onboarding" %}
+      {% elsif form_selector == 'legal-request' %} {% include "Ticketing System - Legal Case" %}
+
+  
+      {% else %}
+      <div class="alert alert-warning">No Metadata Form configured. Please navigate to the correct section.</div>
+      {% endif %}
+      <!-- Basic Information -->
+      {% include "Ticketing System - Basic Information" %}
+      <!-- Attachments Section -->
+      {% if form_selector == 'customer-onboarding' %} 
+        {% include "Ticketing System - Customer Onboarding - Departments Sections" %}
+      {% endif %}
+      {% include "Ticketing System - Attachments" %}
+      </div>
+      <button type="submit" class="btn btn-success">Submit</button>
+    </form>
+  </div>
+  {% else %}
+  <div class="alert alert-warning">Form not found. Please navigate to the correct section.</div>
+  {% endif %}
+</div>
+{% endcomment %}
+
+{% if form_selector == 'system-outage' %} 
+  {% webform name: 'Ticket - Create - Incident' %}
+{% elsif form_selector == 'consignee-support' or form_selector == 'procurement-request' or form_selector == 'customer-onboarding' or form_selector == 'legal-request' or form_selector == 'hr-request' or form_selector == 'finance-request' or form_selector == 'it-request' %}
+<div class="sl-card sl-form-wrapper mt-4 container">
+    <form id="create-ticket-form" enctype="multipart/form-data">
+        {% if form_selector == 'consignee-support' %} 
+        <div class="sl-section mb-4">
+          {% include "Ticketing System - Search Shipments" %} 
+        </div>
+        {% endif %}  
+
+        <div class="sl-section mb-4">
+            <!-- Metadata Section -->
+            {% if form_selector == 'procurement-request' %} {% include "Ticketing System - Procurement Metadata" %}
+            {% elsif form_selector == 'hr-request' %} {% include "Ticketing System - HR Metadata" %}
+            {% elsif form_selector == 'finance-request' %} {% include "Ticketing System - Finance Metadata" %}
+            {% elsif form_selector == 'it-request' %} {% include "Ticket System - IT Generic Metadata" %}
+            {% elsif form_selector == 'consignee-support' %} {% include "Ticketing System - Customer Support Metadata" %}
+            {% elsif form_selector == 'customer-onboarding' %} {% include "Ticketing System - eCom Customer Onboarding" %}
+            {% elsif form_selector == 'legal-request' %} {% include "Ticketing System - Legal Case" %}
+            {% else %}
+            <div class="alert alert-warning">No Metadata Form configured. Please navigate to the correct section.</div>
+            {% endif %}
+        </div>
+
+        {% if form_selector == 'customer-onboarding' %} 
+        <div class="sl-section mb-4">
+          {% include "Ticketing System - Customer Onboarding - Departments Sections" %} 
+        </div>
+        {% endif %}
+
+        <div class="sl-section mb-4">
+            {% include "Ticketing System - Basic Information" %}
+        </div>
+
+        <div class="sl-section mb-4">
+            {% include "Ticketing System - Attachments" %}
+        </div>
+
+        <button type="submit" class="btn btn-success mt-3">Submit</button>
+
+    </form>
+</div>
+{% else %}
+  <div class="alert alert-warning">Form not found. Please navigate to the correct section.</div>
+{% endif %}
+
+<!-- Loader Overlay and Confirmation-->
+
+{% include "Ticketing System - Loader" %}
+{% include "Ticketing System - Confirmation Modal" %}
+{% include "Ticketing System - Canned Responses PreSubmission" %}
+
+
+<div class="row sectionBlockLayout text-start" style="display: flex; flex-wrap: wrap; margin: 0px; min-height: auto; padding: 8px;">
+  <div class="container" style="padding: 0px; display: flex; flex-wrap: wrap;">
+    <div class="col-lg-12 columnBlockLayout" style="flex-grow: 1; display: flex; flex-direction: column; min-width: 250px;">
+    </div>
+  </div>
+</div>
+
+<!-- Toast Container -->
+<div class="position-fixed top-0 end-0 p-3" style="z-index: 9999">
+  <div id="globalToast" class="toast align-items-center" role="alert" aria-live="assertive" aria-atomic="true">
+    <div class="d-flex">
+      <div id="globalToastBody" class="toast-body">
+        <!-- Toast message injected via JS -->
+      </div>
+      <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+    </div>
+  </div>
+</div>
+
+<!-- Scripts -->
+<script type="text/javascript" src="~/global.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.14.0-beta3/dist/js/bootstrap-select.min.js"></script>
+
+<!-- This Script is Required for MultiStep Form / Low Code Approach -->
+<!-- <script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const flowBaseURL = "{{ baseurl }}";
+    const flowTicketStatusUpdate = `${flowBaseURL}/_api/cloudflow/v1.0/trigger/9c15eda0-499c-f011-bbd3-002248cbd80a`;
+
+    const submitButton = document.querySelector('.submit-ticket');
+
+    if (submitButton) {
+      submitButton.addEventListener('click', function () {
+
+        console.log('Submit ticket button clicked');
+        const ticketNumberInput = document.getElementById("sh_ticket").value;
+
+        if (!ticketNumberInput) {
+          console.log("Ticket number input not found!");
+          return;
+        } else {
+          console.log('Ticket number:', ticketNumberInput);
+        }
+
+        const payload = {
+          eventData: JSON.stringify({
+            ticketGUID: ticketNumberInput
+          })
+        };
+
+        shell.ajaxSafePost({
+          type: "POST",
+          contentType: "application/json",
+          url: flowTicketStatusUpdate,
+          data: JSON.stringify(payload),
+          processData: false
+        })
+          .done(response => console.log("Flow triggered successfully:", response))
+          .fail(error => console.log("Flow trigger failed", error));
+      });
+    } else {
+      console.log('Submit ticket button not found');
+    }
+  });
+</script> -->
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const dropdown = document.getElementById("sh_vertical");
+
+    if (!dropdown) {
+      console.error("Dropdown #sh_vertical not found in DOM");
+      return;
+    }
+
+    dropdown.addEventListener("change", function () {
+      const selectedText = this.options[this.selectedIndex].text;
+      const selectedValue = this.value;
+
+      console.log("Selected Text:", selectedText);
+      console.log("Selected Value:", selectedValue);
+    });
+
+    console.log("Dropdown listener attached successfully");
+  });
+</script>

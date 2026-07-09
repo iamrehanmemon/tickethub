@@ -1,0 +1,18 @@
+adx_accountrelationship: 
+adx_append: false
+adx_appendto: false
+adx_contactrelationship: 
+adx_create: false
+adx_delete: false
+adx_entitylogicalname: sh_itmetadata
+adx_entityname: IT Metadata Table
+adx_entitypermission_webrole:
+- 706af9e5-60d0-f011-8543-0022480dc2d4
+- 91803298-02ca-f011-8543-6045bd6b3a2c
+- a056d286-4322-41f8-82af-46802e0ea645
+adx_entitypermissionid: ad6bc7de-ba5e-4186-9803-2125b97804cb
+adx_parententitypermission: 
+adx_parentrelationship: 
+adx_read: true
+adx_scope: 756150000
+adx_write: false

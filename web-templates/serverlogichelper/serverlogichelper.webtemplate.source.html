@@ -1,0 +1,40 @@
+ {% comment %}Helper for server {% endcomment %}
+<div id="processingMsg">Processing...</div>
+https://code.jquery.com/jquery-3.6.0.min.js
+<script>
+$(function() {
+    
+    console.log("Loading helper");
+    // --- safeAjax wrapper ---
+    (function(webapi, $) {
+    function safeAjax(ajaxOptions) {
+        var dfd = $.Deferred();
+        shell.getTokenDeferred().done(function(token) {
+            ajaxOptions.headers = ajaxOptions.headers || {};
+            ajaxOptions.headers["__RequestVerificationToken"] = token;
+            $.ajax(ajaxOptions)
+                .done((data, ts, jq) => validateLoginSession(data, ts, jq, dfd.resolve))
+                .fail(dfd.reject);
+        }).fail(() => dfd.rejectWith(this, arguments));
+        return dfd.promise();
+    }
+    webapi.safeAjax = safeAjax;
+    })(window.webapi = window.webapi || {}, jQuery);
+    // --- notification banner ---
+    const notify = (function() {
+    const $m = $('#processingMsg'); let s = 0, t;
+    return {
+        show: (msg = 'Processing...') => { $m.text(msg); if (!s) clearTimeout(t), $m.show(); s++; },
+        hide: () => { s = Math.max(0, s - 1); if (!s) clearTimeout(t), t = setTimeout(() => $m.hide(), 300); }
+    };
+    })();
+    function ajaxCall(msg, opts) {
+        notify.show(msg);
+        return webapi.safeAjax(opts)
+            .fail(r => alert(r.responseJSON?.error?.message || 'Server logic not available'))
+            .always(notify.hide);
+    }
+    // Expose ajaxCall globally
+    window.ajaxCall = ajaxCall;
+});
+</script>

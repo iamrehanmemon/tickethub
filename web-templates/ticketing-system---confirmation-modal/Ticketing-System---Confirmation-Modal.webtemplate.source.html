@@ -1,0 +1,59 @@
+<!-- <div class="modal fade" id="ticketStatusModal" tabindex="-1" aria-labelledby="ticketStatusLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow text-center p-4">
+      <div class="modal-body">
+        <i id="ticketStatusIcon" class="bi bi-check-circle-fill text-success" style="font-size: 3rem;"></i>
+        <h5 id="ticketStatusHeading" class="mt-3 fw-semibold"></h5>
+      </div>
+    </div>
+  </div>
+</div> -->
+
+<!-- <div class="modal fade" id="ticketStatusModal" tabindex="-1" aria-labelledby="ticketStatusLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow text-center p-4">
+      <div class="modal-body">
+        <i id="ticketStatusIcon" class="bi bi-check-circle-fill text-success" style="font-size: 3rem;"></i>
+        
+        <h5 id="ticketStatusHeading" class="mt-3 fw-semibold"></h5>
+
+        <p id="ticketStatusMessage" class="mt-2 text-muted" style="font-size: 0.95rem;"></p>
+      </div>
+    </div>
+  </div>
+</div> -->
+
+<div class="modal fade" id="ticketStatusModal" tabindex="-1" aria-labelledby="ticketStatusLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow text-center p-4">
+      
+      <div class="modal-body">
+        <i id="ticketStatusIcon" class="bi bi-check-circle-fill text-success" style="font-size: 3rem;"></i>
+
+        <h5 id="ticketStatusHeading" class="mt-3 fw-semibold"></h5>
+
+        <p id="ticketStatusMessage" class="mt-2 text-muted" style="font-size: 0.95rem;"></p>
+      </div>
+
+      <div class="modal-footer border-0 justify-content-center">
+        <button type="button" id="modalCloseBtn" class="btn btn-primary px-4 w-75" data-bs-dismiss="modal">
+          Close
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  document.getElementById("modalCloseBtn").addEventListener("click", function () {
+    const modalEl = document.getElementById('ticketStatusModal');
+
+    modalEl.addEventListener('hidden.bs.modal', () => {
+      window.location.href = "/Track-Ticket/";
+    }, { once: true });
+  });
+</script>
+
+
+

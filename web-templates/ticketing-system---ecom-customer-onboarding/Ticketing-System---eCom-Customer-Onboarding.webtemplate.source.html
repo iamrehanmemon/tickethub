@@ -1,0 +1,393 @@
+{% comment %}
+<fieldset class="p-4 mb-3 col-md">
+  <legend>Company Information</legend>
+
+  <!-- <div class="mb-3">
+    <label for="sh_customername " class="form-label">Customer *</label>
+    <input type="text" class="form-control" id="sh_customername" value="{{ metadata.sh_customername }}" {% if mode == "view" %}readonly{% endif %} required>
+  </div> -->
+
+    <div class="mb-3 position-relative">
+        <label for="customerSearch" class="form-label">Customer Name *</label>
+        <input type="text" class="form-control" id="customerSearch" autocomplete="off" />
+        <ul id="customerSearchResults" class="list-group position-absolute w-100 mt-1 shadow-sm"
+            style="z-index: 2000; display:none; max-height:220px; overflow-y:auto"></ul>
+        <input type="hidden" id="customerIdHidden" />
+    </div>
+
+
+  <div class="mb-3">
+    <label for="sh_crnumber" class="form-label">CR Number</label>
+    <input type="text" class="form-control" id="sh_crnumber" value="{{ metadata.sh_crnumber }}" {% if mode == "view" %}readonly{% endif %}>
+  </div>
+
+  <div class="mb-3">
+    <label for="sh_requiredservice" class="form-label">Required Service *</label>
+    <select class="form-select" id="sh_requiredservice" required>
+      {% if metadata.new_requiredservices %}
+        <option selected>{{ metadata.sh_requiredservice.name }}</option>
+      {% endif %}
+    </select>
+  </div>
+
+  <div class="mb-3">
+    <label for="sh_brandname" class="form-label">Brand Name *</label>
+    <input type="text" class="form-control" id="sh_brandname" value="{{ metadata.sh_brandname }}" {% if mode == "view" %}readonly{% endif %} required>
+  </div>
+
+  <div class="mb-3">
+    <label for="sh_storeurl" class="form-label">Store URL *</label>
+    <input type="url" class="form-control" id="sh_storeurl" value="{{ metadata.sh_storeurl }}" {% if mode == "view" %}readonly{% endif %} required>
+  </div>
+
+    <!-- Account Manager Lookup -->
+    <div class="mb-3 position-relative">
+        <label for="userSearch" class="form-label">Account Manager *</label>
+
+        <input 
+            type="text"
+            class="form-control"
+            id="userSearch"
+            placeholder="Search user by name or email..."
+            autocomplete="off"
+            required
+        />
+
+        <!-- Dropdown for search results -->
+        <ul 
+            id="userSearchResults"
+            class="list-group position-absolute w-100 mt-1 shadow-sm"
+            style="z-index: 2000; display:none; max-height: 220px; overflow-y: auto;"
+        ></ul>
+
+        <!-- Hidden field to store User ID (GUID) -->
+        <input type="hidden" id="userIdHidden" />
+    </div>
+</fieldset>
+{% endcomment %}
+<!-- <script>
+
+// Debounce to avoid API spam
+function debounce(fn, delay = 300) {
+    let timer;
+    return (...args) => {
+        clearTimeout(timer);
+        timer = setTimeout(() => fn(...args), delay);
+    };
+}
+
+async function searchCustomers(query) {
+    const resultsBox = document.getElementById("customerSearchResults");
+
+    // hide if empty
+    if (!query || query.length < 2) {
+        resultsBox.style.display = "none";
+        return;
+    }
+
+    try {
+        const encoded = encodeURIComponent(query);
+
+        const url =
+            `/_api/accounts?$select=accountid,name&$filter=contains(name,'${encoded}')&$top=10&$orderby=name asc`;
+
+        const res = await fetch(url);
+        const data = await res.json();
+
+        resultsBox.innerHTML = "";
+
+        if (data.value?.length) {
+            data.value.forEach(acc => {
+                const item = document.createElement("li");
+                item.className = "list-group-item list-group-item-action";
+                item.textContent = acc.name;
+                item.dataset.id = acc.accountid;
+
+                // On click → select item + hide dropdown
+                item.onclick = () => {
+                    document.getElementById("customerSearch").value = acc.name;
+                    resultsBox.style.display = "none";
+
+                    // store selected account id (useful for submission)
+                    selectedCustomerId = acc.accountid;
+
+                    console.log("Selected customer:", acc);
+                };
+
+                resultsBox.appendChild(item);
+            });
+
+            resultsBox.style.display = "block";
+        } else {
+            resultsBox.innerHTML = `
+                <li class="list-group-item text-muted">No results found</li>`;
+            resultsBox.style.display = "block";
+        }
+
+    } catch (err) {
+        console.error("Search Error:", err);
+    }
+}
+
+// Attach search listener
+document.addEventListener("DOMContentLoaded", () => {
+    const input = document.getElementById("customerSearch");
+    input.addEventListener("input", debounce((e) => {
+        searchCustomers(e.target.value);
+    }, 350));
+});
+
+// Global variable to store selected account id
+let selectedCustomerId = null;
+</script> -->
+
+
+<fieldset class="p-4 mb-3 col-12">
+  <legend>Company Information</legend>
+
+  <div class="row">
+
+    <!-- Customer (text version) -->
+    <div class="col-12 col-md-4 mb-3">
+      <label for="sh_customername" class="form-label">Customer *</label>
+      <input type="text" class="form-control"
+             id="sh_customername"
+             value="{{ metadata.sh_customername }}"
+             {% if mode == "view" %}readonly{% endif %}
+             required>
+    </div>
+
+    <!-- Add Dropdown here for Customer Type i.e B2B, eCom Hard Coded similar to Ticket Status -->
+    <div class="col-12 col-md-4 mb-3">
+      <label for="sh_customertype" class="form-label">Customer Type *</label>
+      <select class="form-select" id="sh_customertype" required>
+        {% if metadata.sh_customertype %}
+          <option selected>{{ metadata.sh_customertype.name }}</option>
+        {% endif %}
+      </select>
+    </div>
+
+    <!-- Customer Search (lookup autocomplete) -->
+    <div class="col-12 col-md-4 mb-3 position-relative">
+      <label for="customerSearch" class="form-label">Customer Name *</label>
+      <input type="text" class="form-control"
+             id="customerSearch"
+             autocomplete="off"
+             value="{{ metadata.sh_customerid.name }}"
+             {% if mode == 'view' %}readonly{% endif %}
+             required>
+
+      <ul id="customerSearchResults"
+          class="list-group position-absolute w-100 mt-1 shadow-sm"
+          style="z-index:2000; display:none; max-height:220px; overflow-y:auto;"></ul>
+
+      <input type="hidden" id="customerIdHidden" />
+    </div>
+
+    <!-- CR Number -->
+    <div class="col-12 col-md-4 mb-3">
+      <label for="sh_crnumber" class="form-label">CR Number</label>
+      <input type="text" class="form-control"
+             id="sh_crnumber"
+             value="{{ metadata.sh_crnumber }}"
+             {% if mode == "view" %}readonly{% endif %}>
+    </div>
+
+    <!-- Required Service -->
+    <div class="col-12 col-md-4 mb-3">
+      <label for="sh_requiredservice" class="form-label">Required Service *</label>
+      <select class="form-select"
+              id="sh_requiredservice"
+              {% if mode == "view" %}disabled{% endif %}
+              required>
+        {% if metadata.sh_requiredservice %}
+          <option selected>{{ metadata.sh_requiredservice.name }}</option>
+        {% endif %}
+      </select>
+    </div>
+
+    <!-- Brand Name -->
+    <div class="col-12 col-md-4 mb-3">
+      <label for="sh_brandname" class="form-label">Brand Name *</label>
+      <input type="text" class="form-control"
+             id="sh_brandname"
+             value="{{ metadata.sh_brandname }}"
+             {% if mode == "view" %}readonly{% endif %}
+             required>
+    </div>
+
+    <!-- Store URL -->
+    <div class="col-12 col-md-4 mb-3">
+      <label for="sh_storeurl" class="form-label">Store URL *</label>
+      <input type="url" class="form-control"
+             id="sh_storeurl"
+             value="{{ metadata.sh_storeurl }}"
+             {% if mode == "view" %}readonly{% endif %}
+             required>
+    </div>
+
+    <!-- Account Manager Search (lookup autocomplete) -->
+    <!-- <div class="col-12 col-md-4 mb-3 position-relative">
+      <label for="userSearch" class="form-label">Account Manager *</label>
+
+      <input type="text"
+             id="userSearch"
+             class="form-control"
+             placeholder="Search user by name or email..."
+             autocomplete="off"
+             value="{{ metadata.sh_accountmanager.name }}"
+             {% if mode == "view" %}readonly{% endif %}
+             required>
+
+      <ul id="userSearchResults"
+          class="list-group position-absolute w-100 mt-1 shadow-sm"
+          style="z-index:2000; display:none; max-height:220px; overflow-y:auto;"></ul>
+
+      <input type="hidden" id="userIdHidden">
+    </div> -->
+
+  </div>
+</fieldset>
+
+<script>
+// Global selected IDs stored here
+let selectedLookupValues = {};
+
+// Universal debounce
+function debounce(fn, delay = 300) {
+    let timer;
+    return (...args) => {
+        clearTimeout(timer);
+        timer = setTimeout(() => fn(...args), delay);
+    };
+}
+
+// Universal Dataverse Lookup Builder
+function createLookup(config) {
+    const {
+        inputId,
+        resultsBoxId,
+        entity,
+        selectFields,
+        idField,
+        labelField,
+        filterFields,
+        labelFormatter,
+        hiddenIdField
+    } = config;
+
+    const input = document.getElementById(inputId);
+    const resultsBox = document.getElementById(resultsBoxId);
+
+    async function fetchResults(query) {
+        if (!query || query.length < 2) {
+            resultsBox.style.display = "none";
+            return;
+        }
+
+        showLoader("Searching…");
+
+        const encoded = encodeURIComponent(query);
+
+        // Build dynamic $filter (OR conditions)
+        const filterQuery = filterFields
+            .map(f => `contains(${f},'${encoded}')`)
+            .join(" or ");
+
+        const url = `/_api/${entity}?$select=${selectFields}&$filter=${filterQuery}&$top=10&$orderby=${labelField} asc`;
+
+        try {
+            const res = await fetch(url);
+            const data = await res.json();
+
+            resultsBox.innerHTML = "";
+
+            if (data.value?.length) {
+                data.value.forEach(item => {
+                    const listItem = document.createElement("li");
+                    listItem.className = "list-group-item list-group-item-action";
+
+                    const text = labelFormatter
+                        ? labelFormatter(item)
+                        : item[labelField];
+
+                    listItem.textContent = text;
+                    listItem.dataset.id = item[idField];
+
+                    listItem.onclick = () => {
+                        input.value = text;
+                        selectedLookupValues[inputId] = item[idField];
+
+                        if (hiddenIdField) {
+                            document.getElementById(hiddenIdField).value = item[idField];
+                        }
+
+                        resultsBox.style.display = "none";
+                        console.log("Selected:", item);
+                    };
+
+                    resultsBox.appendChild(listItem);
+                });
+
+                resultsBox.style.display = "block";
+            } else {
+                resultsBox.innerHTML =
+                    `<li class="list-group-item text-muted">No results found</li>`;
+                resultsBox.style.display = "block";
+            }
+
+        } catch (err) {
+            console.error(`Lookup Error for ${inputId}:`, err);
+        }
+
+        hideLoader();
+    }
+
+    // Attach event listener
+    input.addEventListener("input", debounce(e => {
+        fetchResults(e.target.value);
+    }, 350));
+}
+
+// Initialize lookups on DOM load
+document.addEventListener("DOMContentLoaded", () => {
+    // Customer Lookup
+    createLookup({
+        inputId: "customerSearch",
+        resultsBoxId: "customerSearchResults",
+        entity: "accounts",
+        selectFields: "accountid,name",
+        idField: "accountid",
+        labelField: "name",
+        filterFields: ["name"],
+        hiddenIdField: "customerIdHidden"
+    });
+
+    // User Lookup (search by name + email)
+    createLookup({
+        inputId: "userSearch",
+        resultsBoxId: "userSearchResults",
+        entity: "systemusers",
+        selectFields: "systemuserid,fullname,internalemailaddress",
+        idField: "systemuserid",
+        labelField: "fullname",
+        filterFields: ["fullname", "internalemailaddress"],
+        labelFormatter: (u) => `${u.fullname} (${u.internalemailaddress || "no-email"})`,
+        hiddenIdField: "userIdHidden"
+    });
+
+    createLookup({
+        inputId: "assignedToSearch",
+        resultsBoxId: "assignedToResults",
+        entity: "systemusers",
+        selectFields: "systemuserid,fullname,internalemailaddress",
+        idField: "systemuserid",
+        labelField: "fullname",
+        filterFields: ["fullname", "internalemailaddress"],
+        labelFormatter: (u) => `${u.fullname} (${u.internalemailaddress || "no-email"})`,
+        hiddenIdField: "assignedToHidden"
+    });
+});
+
+</script>
+

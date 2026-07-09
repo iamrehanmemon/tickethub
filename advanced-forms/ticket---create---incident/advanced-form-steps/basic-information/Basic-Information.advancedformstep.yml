@@ -1,0 +1,20 @@
+adx_attachfilelabel: ''
+adx_attachfilemaxsize: 
+adx_attachfilestoragelocation: 756150000
+adx_containername: cx-portal
+adx_entitypermissionsenabled: true
+adx_formname: Ticket - Create
+adx_hideformonsuccess: true
+adx_maximumnooffiles: 5
+adx_mode: 100000000
+adx_movepreviouspermitted: false
+adx_name: Basic Information
+adx_nextstep: 33ab1ae1-984b-4e6a-b87f-228ed9a66a87
+adx_referencequerystringisprimarykey: true
+adx_storageaccountname: starlinkspowerplatform
+adx_successmessage: ''
+adx_targetentitylogicalname: sh_ticket
+adx_type: 100000001
+adx_validationsummarylinksenabled: true
+adx_webform: 336db71d-95bc-4330-9cb9-9b69f36cfae8
+adx_webformstepid: 6c41ffc4-1aba-4947-a84b-1aeeaf12359f

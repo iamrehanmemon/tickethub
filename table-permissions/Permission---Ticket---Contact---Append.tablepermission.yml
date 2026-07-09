@@ -1,0 +1,16 @@
+adx_accountrelationship: 
+adx_append: true
+adx_appendto: true
+adx_contactrelationship: 
+adx_create: false
+adx_delete: false
+adx_entitylogicalname: contact
+adx_entityname: Permission - Ticket - Contact - Append
+adx_entitypermission_webrole:
+- c5ed9554-79a1-4c31-bea9-a940211a85a0
+adx_entitypermissionid: 1fcfedc2-6f49-4aa4-b711-fb06d0f35643
+adx_parententitypermission: 2dfeab65-b3d6-4295-8c37-ee6a71d51293
+adx_parentrelationship: sh_ticket_RequestorPerson_contact
+adx_read: true
+adx_scope: 756150003
+adx_write: false

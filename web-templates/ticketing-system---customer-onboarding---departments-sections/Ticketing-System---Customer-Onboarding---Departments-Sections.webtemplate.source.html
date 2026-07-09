@@ -1,0 +1,576 @@
+<fieldset class="p-4 mb-3">
+  <legend>Finance Information</legend>
+  <div class="row">
+    <!-- Payment Terms -->
+    <div class="col-12 col-md-4 mb-3">
+      <label for="sh_paymentterms" class="form-label">Payment Terms *</label>
+      <select class="form-select" id="sh_paymentterms" required>
+        {% if metadata.sh_paymentterms %}
+          <option selected>{{ metadata.sh_paymentterms.name }}</option>
+        {% endif %}
+      </select>
+    </div>
+
+    <!-- Credit Limit -->
+    <div class="col-12 col-md-4 mb-3">
+      <label for="sh_creditlimit" class="form-label">Credit Limit *</label>
+      <input type="number" class="form-control" id="sh_creditlimit"
+             value="{{ metadata.sh_creditlimit }}"
+             {% if mode == "view" %}readonly{% endif %}
+             required>
+    </div>
+
+    <!-- Cash on Delivery -->
+    <div class="col-12 col-md-4 mb-3">
+      <label for="sh_cashondelivery" class="form-label">Cash on Delivery *</label>
+      <select class="form-select" id="sh_cashondelivery" required>
+        {% if metadata.sh_cashondelivery %}
+          <option selected>{{ metadata.sh_cashondelivery.name }}</option>
+        {% endif %}
+      </select>
+    </div>
+
+  </div>
+</fieldset>
+
+<fieldset class="p-4 mb-3">
+  <legend>Technical Information</legend>
+  <div class="row">
+
+    {% if mode ==  "view" %}
+      {% assign pt = metadata.sh_producttypes %}
+      {% assign ptValues = "" %}
+
+      {% if pt %}
+        {% if pt.label %}
+          {% assign ptValues = pt.label %}
+        {% else %}
+          {% for o in pt %}
+            {% if forloop.first %}
+              {% assign ptValues = o.label %}
+            {% else %}
+              {% assign ptValues = ptValues | append: "; " | append: o.label %}
+            {% endif %}
+          {% endfor %}
+        {% endif %}
+      {% endif %}
+
+      {% assign pod = metadata.sh_proofofdelivery %}
+      {% assign podValues = "" %}
+
+      {% if pod %}
+        {% if pod.label %}
+          {% assign podValues = pod.label %}
+        {% else %}
+          {% for o in pod %}
+            {% if forloop.first %}
+              {% assign podValues = o.label %}
+            {% else %}
+              {% assign podValues = podValues | append: "; " | append: o.label %}
+            {% endif %}
+          {% endfor %}
+        {% endif %}
+      {% endif %}
+
+      {% assign bsValues = "" %}
+      {% assign bs = metadata.sh_businessscope %}
+      {% if bs %}
+        {% if bs.label %}
+          {% assign bsValues = bs.label %}
+        {% else %}
+          {% for o in bs %}
+            {% if forloop.first %}
+              {% assign bsValues = o.label %}
+            {% else %}
+              {% assign bsValues = bsValues | append: "; " | append: o.label %}
+            {% endif %}
+          {% endfor %}
+        {% endif %}
+      {% endif %}
+
+      {% assign waValues = "" %}
+      {% assign wa = metadata.sh_warehouseallocations %}
+      {% if wa %}
+        {% if wa.label %}
+          {% assign waValues = wa.label %}
+        {% else %}
+          {% for o in wa %}
+            {% if forloop.first %}
+              {% assign waValues = o.label %}
+            {% else %}
+              {% assign waValues = waValues | append: "; " | append: o.label %}
+            {% endif %}
+          {% endfor %}
+        {% endif %}
+      {% endif %}
+
+      {% assign isValues = "" %}
+      {% assign is = metadata.sh_integrationscope %}
+      {% if is %}
+        {% if is.label %}
+          {% assign isValues = is.label %}
+        {% else %}
+          {% for o in is %}
+            {% if forloop.first %}
+              {% assign isValues = o.label %}
+            {% else %}
+              {% assign isValues = isValues | append: "; " | append: o.label %}
+            {% endif %}
+          {% endfor %}
+        {% endif %}
+      {% endif %}
+
+      <input type="hidden" id="pt_labels" value="{{ ptValues }}">
+      <input type="hidden" id="pod_labels" value="{{ podValues }}">
+      <input type="hidden" id="bs_labels" value="{{ bsValues }}">
+      <input type="hidden" id="wa_labels" value="{{ waValues }}">
+      <input type="hidden" id="is_labels" value="{{ isValues }}">
+    {% endif %}
+
+
+
+    <!-- Product Types -->
+    <div class="col-12 col-md-4 mb-3">
+      <label class="form-label">Product Types *</label>
+      <div class="dropdown w-100">
+        <button class="btn btn-light border w-100 text-start dropdown-toggle"
+                type="button" data-bs-toggle="dropdown" id="productTypesBtn">
+          Select Product Types
+        </button>
+        <ul class="dropdown-menu w-100 p-2"
+            style="max-height: 250px; overflow-y: auto;"
+            id="productTypesList"></ul>
+      </div>
+    </div>
+
+    <!-- Business Scope -->
+    <div class="col-12 col-md-4 mb-3">
+      <label class="form-label">Business Scope *</label>
+      <div class="dropdown w-100">
+        <button class="btn btn-light border w-100 text-start dropdown-toggle"
+                type="button" data-bs-toggle="dropdown" id="businessScopeBtn">
+          Select Business Scope
+        </button>
+        <ul class="dropdown-menu w-100 p-2"
+            style="max-height: 250px; overflow-y: auto;"
+            id="businessScopeList"></ul>
+      </div>
+    </div>
+
+    <!-- Warehouse Allocations -->
+    <div class="col-12 col-md-4 mb-3">
+      <label class="form-label">Warehouse Allocations *</label>
+      <div class="dropdown w-100">
+        <button class="btn btn-light border w-100 text-start dropdown-toggle"
+                type="button" data-bs-toggle="dropdown" id="warehouseAllocationBtn">
+          Select Warehouse Allocations
+        </button>
+        <ul class="dropdown-menu w-100 p-2"
+            style="max-height: 250px; overflow-y: auto;"
+            id="warehouseAllocationList"></ul>
+      </div>
+    </div>
+
+    <!-- Integration Scope -->
+    <div class="col-12 col-md-4 mb-3">
+      <label class="form-label">Integration Scope *</label>
+      <div class="dropdown w-100">
+        <button class="btn btn-light border w-100 text-start dropdown-toggle"
+                type="button" data-bs-toggle="dropdown" id="integrationScopeBtn">
+          Select Integration Scope
+        </button>
+        <ul class="dropdown-menu w-100 p-2"
+            style="max-height: 250px; overflow-y: auto;"
+            id="integrationScopeList"></ul>
+      </div>
+    </div>
+
+    <!-- Proof of Delivery -->
+    <div class="col-12 col-md-4 mb-3">
+      <label class="form-label">Proof of Delivery *</label>
+      <div class="dropdown w-100">
+        <button class="btn btn-light border w-100 text-start dropdown-toggle"
+                type="button" data-bs-toggle="dropdown" id="proofDeliveryBtn">
+          Select POD Options
+        </button>
+        <ul class="dropdown-menu w-100 p-2"
+            style="max-height: 250px; overflow-y: auto;"
+            id="proofDeliveryList"></ul>
+      </div>
+    </div>
+
+    <!-- ====== SMALL FIELDS (3 PER ROW) ====== -->
+
+    <!-- Row 1 -->
+    <!-- <div class="col-12 col-md-4 mb-3">
+      <label for="sh_accountmanager" class="form-label">Account Manager *</label>
+      <input type="text" class="form-control" id="sh_accountmanager"
+            value="{{ metadata.sh_accountmanager }}"
+            {% if mode ==  "view" %}readonly{% endif %} required>
+    </div> -->
+
+    <div class="col-12 col-md-4 mb-3">
+      <label for="sh_expectedgolivedate" class="form-label">Expected Go Live Date *</label>
+      <input type="date" class="form-control" id="sh_expectedgolivedate"
+            value="{{ metadata.sh_expectedgolivedate | date: 'yyyy-MM-dd' }}"
+            {% if mode ==  "view" %}readonly{% endif %} required>
+    </div>
+
+    <div class="col-12 col-md-4 mb-3">
+      <label for="sh_wms" class="form-label">WMS *</label>
+      <select class="form-select" id="sh_wms" required>
+        {% if metadata.sh_wms %}
+        <option selected>{{ metadata.sh_wms.name }}</option>
+        {% endif %}
+      </select>
+    </div>
+
+    <!-- Row 2 -->
+    <div class="col-12 col-md-4 mb-3">
+      <label for="sh_multiplewarehouseallocations" class="form-label">Multiple Warehouse Allocations *</label>
+      <select class="form-select" id="sh_multiplewarehouseallocations" required>
+        {% if metadata.sh_multiplewarehouseallocations %}
+        <option selected>{{ metadata.sh_multiplewarehouseallocations.name }}</option>
+        {% endif %}
+      </select>
+    </div>
+
+    <div class="col-12 col-md-4 mb-3">
+      <label for="sh_integrationchannel" class="form-label">Integration Channel *</label>
+      <select class="form-select" id="sh_integrationchannel" required>
+        {% if metadata.sh_integrationchannel %}
+        <option selected>{{ metadata.sh_integrationchannel.name }}</option>
+        {% endif %}
+      </select>
+    </div>
+
+    <div class="col-12 col-md-4 mb-3">
+      <label for="sh_trainingrequired" class="form-label">Training Required *</label>
+      <select class="form-select" id="sh_trainingrequired" required>
+        {% if metadata.sh_trainingrequired %}
+        <option selected>{{ metadata.sh_trainingrequired.name }}</option>
+        {% endif %}
+      </select>
+    </div>
+
+
+    <!-- Row 3 -->
+    <div class="col-12 col-md-4 mb-3">
+      <label for="sh_stocksync" class="form-label">Stock Sync *</label>
+      <select class="form-select" id="sh_stocksync" required>
+        {% if metadata.new_stocksync %}
+        <option selected>{{ metadata.new_stocksync.name }}</option>
+        {% endif %}
+      </select>
+    </div>
+
+    <div class="col-12 col-md-4 mb-3">
+      <label for="sh_autofulfillment" class="form-label">Auto Fulfillment *</label>
+      <select class="form-select" id="sh_autofulfillment" required>
+        {% if metadata.sh_autofulfillment %}
+        <option selected>{{ metadata.sh_autofulfillment.name }}</option>
+        {% endif %}
+      </select>
+    </div>
+
+    <div class="col-12 col-md-4 mb-3">
+      <label for="sh_consigneenotification" class="form-label">Consignee Notification *</label>
+      <select class="form-select" id="sh_consigneenotification" required>
+        {% if metadata.sh_consigneenotification %}
+        <option selected>{{ metadata.sh_consigneenotification.name }}</option>
+        {% endif %}
+      </select>
+    </div>
+
+
+    <!-- Row 4 -->
+    <div class="col-12 col-md-4 mb-3">
+      <label for="sh_expecteddailyvolumninpeaks" class="form-label">Expected Daily Volume in Peaks *</label>
+      <input type="number" class="form-control" id="sh_expecteddailyvolumninpeaks"
+             value="{{ metadata.sh_expecteddailyvolumninpeaks }}"
+             {% if mode ==  "view" %}readonly{% endif %} required>
+    </div>
+
+    <div class="col-12 col-md-4 mb-3">
+      <label for="sh_trainingemails" class="form-label">Training Emails</label>
+      <input type="text" class="form-control" id="sh_trainingemails"
+             placeholder="abc@xyz.com; xyz@abc.com"
+             value="{{ metadata.sh_trainingemails }}"
+             {% if mode ==  "view" %}readonly{% endif %}>
+    </div>
+
+    <div class="col-12 col-md-4 mb-3">
+      <label for="sh_consigneenotificationtext" class="form-label">Consignee Notification (Text)</label>
+      <input type="text" class="form-control" id="sh_consigneenotificationtext"
+             value="{{ metadata.sh_consigneenotificationtext }}"
+             {% if mode ==  "view" %}readonly{% endif %}>
+    </div>
+
+
+    <!-- ====== FULL WIDTH FIELD ====== -->
+    <div class="col-12 mb-3">
+      <label for="sh_additionalrequirements" class="form-label">Additional Requirements</label>
+      <textarea class="form-control" id="sh_additionalrequirements" rows="3"
+        {% if mode ==  "view" %} readonly {% endif %}>{{ metadata.sh_additionalrequirements }}</textarea>
+    </div>
+
+  </div>
+</fieldset>
+
+<!-- <div class="row">
+  <div class="col-12 mb-3">
+      <label class="form-label">Product Types *</label>
+
+      <div class="dropdown w-100">
+          <button 
+              class="btn btn-light border w-100 text-start dropdown-toggle"
+              type="button"
+              data-bs-toggle="dropdown"
+              id="productTypesBtn">
+              Select Product Types
+          </button>
+
+          <ul class="dropdown-menu w-100 p-2"
+              style="max-height: 250px; overflow-y: auto;"
+              id="productTypesList"></ul>
+      </div>
+  </div>
+
+
+  <div class="col-12 mb-3">
+      <label class="form-label">Business Scope *</label>
+
+      <div class="dropdown w-100">
+          <button class="btn btn-light border w-100 text-start dropdown-toggle"
+                  type="button"
+                  data-bs-toggle="dropdown"
+                  id="businessScopeBtn">
+              Select Business Scope
+          </button>
+
+          <ul class="dropdown-menu w-100 p-2"
+              style="max-height: 250px; overflow-y: auto;"
+              id="businessScopeList"></ul>
+      </div>
+  </div>
+
+
+  <div class="col-12 mb-3">
+      <label class="form-label">Warehouse Allocations *</label>
+
+      <div class="dropdown w-100">
+          <button class="btn btn-light border w-100 text-start dropdown-toggle"
+                  type="button"
+                  data-bs-toggle="dropdown"
+                  id="warehouseAllocationBtn">
+              Select Warehouse Allocations
+          </button>
+
+          <ul class="dropdown-menu w-100 p-2"
+              style="max-height: 250px; overflow-y: auto;"
+              id="warehouseAllocationList"></ul>
+      </div>
+  </div>
+
+  <div class="col-12 mb-3">
+      <label class="form-label">Integration Scope *</label>
+
+      <div class="dropdown w-100">
+          <button class="btn btn-light border w-100 text-start dropdown-toggle"
+                  type="button"
+                  data-bs-toggle="dropdown"
+                  id="integrationScopeBtn">
+              Select Integration Scope
+          </button>
+
+          <ul class="dropdown-menu w-100 p-2"
+              style="max-height: 250px; overflow-y: auto;"
+              id="integrationScopeList"></ul>
+      </div>
+  </div>
+  <div class="col-12 mb-3">
+      <label class="form-label">Proof of Delivery *</label>
+
+      <div class="dropdown w-100">
+          <button class="btn btn-light border w-100 text-start dropdown-toggle"
+                  type="button"
+                  data-bs-toggle="dropdown"
+                  id="proofDeliveryBtn">
+              Select POD Options
+          </button>
+
+          <ul class="dropdown-menu w-100 p-2"
+              style="max-height: 250px; overflow-y: auto;"
+              id="proofDeliveryList"></ul>
+      </div>
+  </div>
+</div> -->
+
+<!-- Customer Point of Contact -->
+<fieldset class="p-4 mb-3">
+  <legend class="w-100">Customer Point of Contact</legend>
+
+  <!-- HEADER: Only visible on desktop -->
+  <div class="row fw-bold mb-2 d-none d-md-flex">
+    <div class="col-md-2">Role</div>
+    <div class="col-md-3">Name *</div>
+    <div class="col-md-3">Email *</div>
+    <div class="col-md-3">Phone *</div>
+  </div>
+
+  <!-- MAIN USER -->
+  <div class="row mb-3">
+    <div class="col-12 col-md-2 fw-semibold mb-1 d-flex align-items-center">
+      Main User
+    </div>
+    <div class="col-12 col-sm-6 col-md-3 mb-2">
+      <input type="text" class="form-control" id="main_name"
+             value="{{ metadata.sh_main_contact_name }}" {% if mode== "view" %}readonly{% endif %}
+             placeholder="Name" required>
+    </div>
+
+    <div class="col-12 col-sm-6 col-md-3 mb-2">
+      <input type="email" class="form-control" id="main_email"
+             value="{{ metadata.sh_main_contact_email }}" {% if mode== "view" %}readonly{% endif %}
+             placeholder="Email" required>
+    </div>
+
+    <div class="col-12 col-sm-6 col-md-3 mb-2">
+      <input type="text" class="form-control" id="main_phone"
+             value="{{ metadata.sh_main_contact_phone }}" {% if mode== "view" %}readonly{% endif %}
+             placeholder="Phone" required>
+    </div>
+  </div>
+
+  <!-- IT -->
+  <div class="row mb-3">
+    <div class="col-12 col-md-2 fw-semibold mb-1 d-flex align-items-center">
+      IT
+    </div>
+    <div class="col-12 col-sm-6 col-md-3 mb-2">
+      <input type="text" class="form-control" id="it_name"
+             value="{{ metadata.sh_it_contact_name }}" {% if mode== "view" %}readonly{% endif %}
+             placeholder="Name" required>
+    </div>
+
+    <div class="col-12 col-sm-6 col-md-3 mb-2">
+      <input type="email" class="form-control" id="it_email"
+             value="{{ metadata.sh_it_contact_email }}" {% if mode== "view" %}readonly{% endif %}
+             placeholder="Email" required>
+    </div>
+
+    <div class="col-12 col-sm-6 col-md-3 mb-2">
+      <input type="text" class="form-control" id="it_phone"
+             value="{{ metadata.sh_it_contact_phone }}" {% if mode== "view" %}readonly{% endif %}
+             placeholder="Phone" required>
+    </div>
+  </div>
+
+  <!-- FINANCE -->
+  <div class="row mb-3">
+    <div class="col-12 col-md-2 fw-semibold mb-1 d-flex align-items-center">
+      Finance
+    </div>
+    <div class="col-12 col-sm-6 col-md-3 mb-2">
+      <input type="text" class="form-control" id="fin_name"
+             value="{{ metadata.sh_finance_contact_name }}" {% if mode== "view" %}readonly{% endif %}
+             placeholder="Name" required>
+    </div>
+
+    <div class="col-12 col-sm-6 col-md-3 mb-2">
+      <input type="email" class="form-control" id="fin_email"
+             value="{{ metadata.sh_finance_contact_email }}" {% if mode== "view" %}readonly{% endif %}
+             placeholder="Email" required>
+    </div>
+
+    <div class="col-12 col-sm-6 col-md-3 mb-2">
+      <input type="text" class="form-control" id="fin_phone"
+             value="{{ metadata.sh_finance_contact_phone }}" {% if mode== "view" %}readonly{% endif %}
+             placeholder="Phone" required>
+    </div>
+  </div>
+
+  <!-- OPERATIONS -->
+  <div class="row mb-3">
+    <div class="col-12 col-md-2 fw-semibold mb-1 d-flex align-items-center">
+      Operations
+    </div>
+    <div class="col-12 col-sm-6 col-md-3 mb-2">
+      <input type="text" class="form-control" id="ops_name"
+             value="{{ metadata.sh_operation_contact_name }}" {% if mode== "view" %}readonly{% endif %}
+             placeholder="Name" required>
+    </div>
+
+    <div class="col-12 col-sm-6 col-md-3 mb-2">
+      <input type="email" class="form-control" id="ops_email"
+             value="{{ metadata.sh_operation_contact_email }}" {% if mode== "view" %}readonly{% endif %}
+             placeholder="Email" required>
+    </div>
+
+    <div class="col-12 col-sm-6 col-md-3 mb-2">
+      <input type="text" class="form-control" id="ops_phone"
+             value="{{ metadata.sh_operation_contact_phone }}" {% if mode== "view" %}readonly{% endif %}
+             placeholder="Phone" required>
+    </div>
+  </div>
+</fieldset>
+
+<fieldset class="p-4 mb-3">
+<legend>Pickup Address</legend>
+  <div class="mb-3">
+    <label for="sh_pickupaddress" class="form-label">Pickup Address</label>
+    <textarea class="form-control" id="sh_pickupaddress" {% if mode == "view" %}readonly{% endif %}>{{ metadata.sh_pickupaddress }}</textarea>
+  </div>
+</fieldset>
+
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+document.addEventListener("change", function (e) {
+    if (!e.target.classList.contains("dd-check")) return;
+
+    const menu = e.target.closest(".dropdown-menu");
+    const btnId = menu.id.replace("List", "Btn");
+    const btn = document.getElementById(btnId);
+
+    const selected = [...menu.querySelectorAll(".dd-check:checked")]
+        .map(x => x.value);
+
+    btn.textContent = selected.length ? selected.join(", ") : "Select Options";
+});
+</script>
+
+<div class="d-none">
+<div class="col-12 mb-3">
+      <label class="form-label">Product Types *</label>
+      <div id="productTypesContainer" class="border rounded p-2"
+           style="max-height: 200px; overflow-y: auto;"></div>
+    </div>
+
+    <div class="col-12 mb-3">
+      <label class="form-label">Business Scope *</label>
+      <div id="businessScopeContainer" class="border rounded p-2"
+           style="max-height: 200px; overflow-y: auto;"></div>
+    </div>
+
+    <div class="col-12 mb-3">
+      <label class="form-label">Warehouse Allocations *</label>
+      <div id="warehouseAllocationContainer" class="border rounded p-2"
+           style="max-height: 200px; overflow-y: auto;"></div>
+    </div>
+
+    <div class="col-12 mb-3">
+      <label class="form-label">Integration Scope *</label>
+      <div id="integrationScopeContainer" class="border rounded p-2"
+           style="max-height: 200px; overflow-y: auto;"></div>
+    </div>
+
+    <div class="col-12 mb-3">
+      <label class="form-label">Proof of Delivery *</label>
+      <div id="proofOfDeliveryContainer" class="border rounded p-2"
+           style="max-height: 200px; overflow-y: auto;"></div>
+    </div>
+</div>
+    
+

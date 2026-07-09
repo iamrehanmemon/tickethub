@@ -1,0 +1,57 @@
+#EntityFormPanel {
+  border: none !important;
+}
+
+/* .textarea {
+    border: 2px solid black !important;
+} */
+
+
+/* Allow dropdowns to escape table boundaries */
+table {
+  overflow: visible !important;
+}
+
+tbody {
+  overflow: visible !important;
+}
+
+tr {
+  overflow: visible !important;
+}
+
+/* Fix for Power Pages container overflow clipping */
+div,
+section,
+fieldset {
+  overflow: visible !important;
+}
+
+/* ensures dropdown menu is not cut */
+.dropdown-menu {
+  transform: translate3d(0, 0, 10px) !important;
+  position: absolute !important;
+  z-index: 9999 !important;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(0, 0, 0, .08);
+  background: #fff;
+  font-size: 12px;
+  font-weight: 800;
+  color: #344054;
+  white-space: nowrap;
+}
+
+.chip .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 999px;
+    background: rgba(16, 24, 40, .25);
+    display: inline-block;
+}

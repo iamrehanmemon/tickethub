@@ -1,0 +1,1443 @@
+<!-- ESSD Note -->
+{% if mode != "view" %}
+<div class="essd-guidance">
+  <div class="d-flex align-items-start">
+    <div class="essd-icon">
+      <!-- Light Bulb SVG -->
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none"
+           xmlns="http://www.w3.org/2000/svg">
+        <path d="M9 21h6M10 18h4"
+              stroke="#FAA633" stroke-width="2" stroke-linecap="round"/>
+        <path d="M12 2a7 7 0 0 0-4 12c.6.6 1 1.5 1 2.4h6c0-.9.4-1.8 1-2.4a7 7 0 0 0-4-12Z"
+              stroke="#FAA633" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <div class="flex-grow-1">
+      <div class="essd-text">
+        Before submitting an HR request, please remember you can use the ESSD app to view your leave balance, apply for leave and manage other HR self-service tasks.
+      </div>
+      <a href="https://hc-ess.alquraishi.com/"
+         target="_blank"
+         class="essd-link">
+        Open ESSD App
+      </a>
+    </div>
+  </div>
+</div>
+<style>
+.essd-guidance {
+  padding: 1.25rem 1.5rem;
+}
+
+.essd-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(250, 166, 51, 0.12); /* light orange */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 1rem;
+  flex-shrink: 0;
+}
+
+.essd-text {
+  color: #6c757d;
+  font-size: .9rem;
+  margin-bottom: .5rem;
+}
+
+.essd-link {
+  font-weight: 600;
+  font-size: .9rem;
+  color: #FAA633;
+  text-decoration: none;
+}
+
+.essd-link:hover {
+  text-decoration: underline;
+}
+
+</style>
+{% endif %}
+
+{% if mode != "view" %}
+
+<fieldset class="p-4 mb-3 col-12">
+  <legend>Request Details</legend>
+  <!-- Hidden Submit Fields -->
+  <input type="hidden" id="hrVertical"/>
+  <input type="hidden" id="hrVerticalHRName"/>
+  <input type="hidden" id="hrVerticalID"/>
+  <!-- <input type="hidden" id="hrFunction"/>
+  <input type="hidden" id="hrCategory"/>
+  <input type="hidden" id="hrService"/> -->
+
+  <input type="hidden" id="hrCategory"/>        <!-- top-level category -->
+  <input type="hidden" id="hrSubCategory"/>     <!-- sub category -->
+  <input type="hidden" id="hrService"/>         <!-- service -->
+
+
+  <!-- Dynamic Steps -->
+  <div id="step-verticals" class="mb-5">
+    <h4 class="fw-semibold mb-3 form-label">Select Vertical *</h4>
+    <div id="verticalTiles" class="row g-3"></div>
+  </div>
+
+  <div id="step-functions" class="mb-5">
+    <h4 class="fw-semibold mb-3 form-label">Category *</h4>
+    <div id="functionTiles" class="row g-3"></div>
+  </div>
+
+  <div id="step-categories" class="mb-5" hidden>
+    <h4 class="fw-semibold mb-3 form-label">Sub Category *<span id="selectedFunctionLabel" class="badge bg-light text-dark ms-2"></span></h4>
+    <div id="categoryTiles" class="row g-3"></div>
+  </div>
+
+  <div id="step-services" class="mb-5" hidden>
+    <h4 class="fw-semibold mb-3">Service *<span id="selectedCategoryLabel" class="badge bg-light text-dark ms-2"></span></h4>
+    <div id="serviceTiles" class="row g-3"></div>
+  </div>
+
+  <div class="mb-3">
+    <label for="sh_additionalinformation" class="form-label">Additional Information *</label>
+    <textarea class="form-control" id="sh_additionalinformation" rows="8" {% if mode == "view" %}readonly{% endif %}>{{ metadata.sh_additionalinformation }}</textarea>
+  </div>
+
+  <div id="step-summary" {% if mode != "view" %}hidden{% endif %}>
+    <div class="p-4 border rounded bg-light">
+      <h4 class="fw-semibold">Summary</h4>
+      <dl class="row mt-3">
+        <dt class="col-sm-3">Vertical</dt><dd class="col-sm-9 fw-semibold" id="sumVertical"></dd>
+        <dt class="col-sm-3">HRBP</dt><dd class="col-sm-9 fw-semibold" id="sumHRBP"></dd>
+        <dt class="col-sm-3">Category</dt><dd class="col-sm-9 fw-semibold" id="sumFunction"></dd>
+        <dt class="col-sm-3">Sub Category</dt><dd class="col-sm-9 fw-semibold" id="sumCategory"></dd>
+        <dt class="col-sm-3">Service</dt><dd class="col-sm-9 fw-semibold" id="sumService"></dd>
+      </dl>
+    </div>
+  </div>
+</fieldset>
+
+{% endif %}
+
+{% if mode == "view" %}
+
+<fieldset class="p-4 mb-3 col-12">
+  <legend>Request Details</legend>
+  <div class="row">
+      <div class="col-12 col-md-4 mb-3">
+        <label for="sh_vertical" class="form-label">Vertical</label>
+        <input type="text" class="form-control"
+          id="sh_vertical"
+          value="{{ metadata.sh_vertical }}"
+          {% if mode == "view" %}readonly{% endif %}>
+      </div>
+      <div class="col-12 col-md-4 mb-3">
+        <label for="sh_hrcategory" class="form-label">Category</label>
+        <input type="text" class="form-control"
+          id="sh_hrcategory"
+          value="{{ metadata.sh_hrcategory }}"
+          {% if mode == "view" %}readonly{% endif %}>
+      </div>
+      <div class="col-12 col-md-4 mb-3">
+        <label for="sh_hrsubcategory" class="form-label">Sub Category</label>
+        <input type="text" class="form-control"
+          id="sh_hrsubcategory"
+          value="{{ metadata.sh_hrsubcategory }}"
+          {% if mode == "view" %}readonly{% endif %}>
+      </div>
+      <div class="col-12 col-md-4 mb-3">
+        <label for="sh_hrservices" class="form-label">Service</label>
+        <input type="text" class="form-control"
+          id="sh_hrservices"
+          value="{{ metadata.sh_hrservices }}"
+          {% if mode == "view" %}readonly{% endif %}>
+      </div>
+      <div class="mb-3">
+        <label for="sh_additionalinformation" class="form-label">Additional Information</label>
+        <textarea class="form-control" id="sh_additionalinformation" {% if mode == "view" %}readonly{% endif %}>{{ metadata.sh_additionalinformation }}</textarea>
+      </div>
+  </div>
+</fieldset>
+
+{% endif %}
+
+{% if mode != "view" %}
+<script>
+/* -------------------------------
+   DATA MODELS
+-------------------------------- */
+// const verticals = {
+//   "Automotive": { id:"103170", hr:"Hanan Somar" },
+//   "CPG": { id:"102359", hr:"Hassan Abdrabalameer Shaaban" },
+//   "Shared": { id:"103113", hr:"Zainab Majed" },
+//   "Lifestyle": { id:"102673", hr:"Shahad Mohammed Kabli" },
+//   "Q-Commerce": { id:"102197", hr:"Hassan Abdrabalameer Shaaban" },
+//   "Solutions": { id:"102490", hr:"Rose Youakim" },
+//   "Dubai": { id:"102632", hr:"Arun Iyer" }
+// };
+
+const verticals = {
+  "Automotive": { 
+    id: "103170", 
+    hr: "Hanan Somar",
+    email: "Hanan.Sumar@starlinks-me.com"
+  },
+  "CPG": { 
+    id: "102359", 
+    hr: "Hassan Abdrabalameer Shaaban",
+    email: "hassan.shaaban@starlinks-me.com"
+  },
+  "Shared": { 
+    id: "103113", 
+    hr: "Haila AlMoajil",
+    email: "Haila.almoajil@starlinks-me.com"
+  },
+  "Lifestyle": { 
+    id: "102673", 
+    hr: "Shahad Mohammed Kabli",
+    email: "shahad.kabli@starlinks-me.com"
+  },
+  "Q-Commerce": { 
+    id: "102197", 
+    hr: "Hassan Abdrabalameer Shaaban",
+    email: "hassan.shaaban@starlinks-me.com"
+  },
+  "Solutions": { 
+    id: "102490", 
+    hr: "Rose Youakim",
+    email: "rose.youakim@starlinks-me.com"
+  },
+  "Dubai": { 
+    id: "102632", 
+    hr: "Arun Iyer",
+    email: "arun.iyer@starlinks-me.com"
+  }
+};
+
+// const hrData = {
+//   "HRBP": {
+//     "Reward & Recognition": [
+//       "Value Embodiment",
+//       "Employee of the month",
+//       "Special Effort / Project",
+//       "New baby",
+//       "Personal Event",
+//       "Employee of the Quarter",
+//       "Farewell",
+//       "Team Building Activity"
+//     ],
+//     "Investigation & Complaint": [
+//       "Open an investigation for fraud case",
+//       "Employees Conflicts issues",
+//       "Line Manager behavior",
+//       "Employees attitude or absenteeism",
+//       "Employee Performance Issue"
+//     ],
+//     "Onboarding": [
+//       "New Visa Saudi",
+//       "New Visa Bahrain",
+//       "First 2 weeks Onboarding",
+//       "Welcome Gift"
+//     ],
+//     "Offboarding": [
+//       "Complete Clerance",
+//       "Pending Clerance",
+//       "Handover list and tasks",
+//       "Company Equipment related issues"
+//     ],
+//     "GOV Related": [
+//       "Business Visit Visa for Saudi Arabia",
+//       "RE-ENTRY Visa",
+//       "Final Exit",
+//       "Chamber of commerce attestation",
+//       "Issuing IQAMA"
+//     ],
+//     "Hiring and Recruitment": [
+//       "New Hiring Request",
+//       "Replacement request"
+//     ]
+//   },
+
+//   "Compensation and Salary": {
+//     "Wrong deduction": [
+//       "Wrong Deduction",
+//       "Overtime Calculation"
+//     ],
+//     "Pending EOS request": [
+//       "Resignation EOS payment",
+//       "Contract ending EOS Payment"
+//     ],
+//     "Salary Letter": [
+//       "Normal Salary Certificate",
+//       "Salary Pay slip with company stamp"
+//     ],
+//     "Missing allowance": [
+//       "Missing Allowance to be paid",
+//       "Missing Allowance to be Deduct"
+//     ]
+//   },
+
+//   "System and Data": {
+//     "Adjusting Job title or position": ["Adjusting Job title or position"],
+//     "Adjusting department": ["Adjusting department"],
+//     "Adjusting Line Manager": ["Adjusting Line Manager"],
+//     "Adjusting City or location": ["Adjusting City or location"]
+//   },
+
+//   "Vacation": {
+//     "Adjusting Vacation Balance": ["Adjusting Vacation Balance"],
+//     "Adjusting Vacation start date": ["Adjusting Vacation start date"],
+//     "Adjusting Vacation End date": ["Adjusting Vacation End date"]
+//   },
+
+//   "Training": {
+//     "Request soft skills": ["Request soft skills"],
+//     "Request Technical or Certificates": ["Request Technical or Certificates"],
+//     "Intern 'TAMHEER'": ["Intern 'TAMHEER'"]
+//   },
+
+//   "Performance": {
+//     "Personal Improvement Plan": ["Personal Improvement Plan"],
+//     "Personal Development plan": ["Personal Development plan"],
+//     "Appraisal Grievances": ["Appraisal Grievances"],
+//     "Adjusting OKRs": ["Adjusting OKRs"]
+//   },
+//   "Others (Not Listed)": {}
+// };
+
+const hrData = {
+  "HRBP": {
+    "Reward & Recognition": [
+      "Value Embodiment",
+      "Employee of the Month",
+      "Special Effort / Project",
+      "New Baby",
+      "Personal Event",
+      "Employee of the Quarter",
+      "Farewell",
+      "Team Building Activity"
+    ],
+    "Investigation & Complaint": [
+      "Open an Investigation for Fraud Case",
+      "Employee Conflict Issues",
+      "Line Manager Behavior",
+      "Employee Attitude or Absenteeism",
+      "Employee Performance Issue"
+    ],
+    "Onboarding": [
+      "User Creation",
+      "New Visa Saudi",
+      "New Visa Bahrain",
+      "First 2 Weeks Onboarding",
+      "Welcome Gift",
+      "Request for Employee ID Card"
+    ],
+    "Offboarding": [
+      "Complete Clearance",
+      "Pending Clearance",
+      "Handover List and Tasks",
+      "Company Equipment Related Issues",
+      "Resignation EOS Request",
+      "Pending Resignation EOS Payment"
+    ],
+    "GOV Related": [
+      "QIWA Contract",
+      "Exit Re-Entry Visa - Single",
+      "Exit Re-Entry Visa - Multiple",
+      "Business Visit Visa for Saudi Arabia",
+      "Final Exit",
+      "Chamber of Commerce Attestation",
+      "Issuing IQAMA",
+      "IQAMA Renewal",
+      "IQAMA Issues",
+      "IQAMA Profession"
+    ],
+    "Letters": [
+      "Bank Loan Letter (Arabic / English)",
+      "Employment Letter",
+      "Employment Letter With Salary",
+      "Letter for Visa",
+      "Normal Salary Certificate",
+      "Salary Payslip with Company Stamp"
+    ],
+    "Outsourced Employee Issues": [
+      "Salary issues",
+      "IQAMA issues"
+    ],
+    "Cost Plus Employee Issues": [
+      "IQAMA Renewal",
+      "Salary and Overtime",
+      "Medical Issues",
+      "Exit Re-Entry"
+    ]
+  },
+
+  "Compensation and Benefits": {
+    "Salary": [
+      "Salary Issues",
+      "Salary Adjustment"
+    ],
+    "Loan Request": [
+      "Car Loan",
+      "Salary in Advance",
+      "Housing Advance - 3 Months",
+      "Housing Advance - 6 Months"
+    ],
+    // "Pending EOS Request": [
+    //   "Resignation EOS Payment",
+    //   "Contract Ending EOS Payment"
+    // ],
+    
+    "Allowance": [
+      "School Allowance (M1 and Above)",
+      "Missing Allowance to be Paid",
+      "Missing Allowance to be Deducted"
+    ],
+    "Increment Request": [],
+    "Bonus / Incentive Inquiry": [],
+    
+    "Wrong Deduction": [
+    ],
+    
+    "Insurance": [
+      "Addition to Medical Insurance",
+      "Removal from Medical Insurance"
+    ],
+    "Overtime": [
+      "Overtime Calculation",
+      "Overtime Request"
+    ],
+    "Yearly Bonus Inquiry": [
+    ]
+  },
+
+  "System and Data": {
+    "Adjusting Job Title": [
+      //"Adjusting Job Title or Position"
+    ],
+    "Adjusting Department": [
+      //"Adjusting Department"
+    ],
+    "Adjusting Line Manager": [
+      //"Adjusting Line Manager"
+    ],
+    "Adjusting Vertical": [
+      //"Adjusting Line Manager"
+    ],
+    "Adjusting City or Location": [
+      //"Adjusting City or Location"
+    ],
+    "Payroll Bank Account Update": [
+    ]
+  },
+
+  "Vacation": {
+    "Leave Requests": [
+      "Annual Leave",
+      "Bereavement - Family",
+      "Bereavement - InLaw",
+      "Bereavement - Muslim Female",
+      "Bereavement - Non Muslim Female",
+      "Exam Leave",
+      "Hajj Leave",
+      "Marriage Leave",
+      "Maternity Leave",
+      "Paternity Leave",
+      "Professional - Cert. Exam Leave",
+      "Sick Leave",
+      "Sick / Special Needs Childbirth",
+      "Stillbirth",
+      "Unauthorized Absence",
+      "Unpaid Leave",
+      "Work From Home"
+    ],
+    "Annual Flight Ticket": [
+      "Annual Flight Ticket (Employee)",
+      "Annual Flight Ticket (Family)",
+      "Annual Flight Tickets Reimbursement"
+    ],
+    "Adjusting Vacation Balance": [
+      //"Adjusting Vacation Balance"
+    ],
+    "Adjusting Vacation Start Date": [
+      //"Adjusting Vacation Start Date"
+    ],
+    "Vacation Balance by Vertical": [
+      //"Adjusting Vacation Start Date"
+    ],
+    "Adjusting Vacation End Date": [
+      //"Adjusting Vacation End Date"
+    ]
+  },
+  "Training": {
+    "Request Soft Skills": [
+      //"Request Soft Skills"
+    ],
+    "Request Technical or Certificates": [
+      //"Request Technical or Certificates"
+    ],
+    "Intern TAMHEER": [
+      //"Intern TAMHEER"
+    ]
+  },
+
+  "Performance": {
+    "Personal Improvement Plan": [
+      //"Personal Improvement Plan"
+    ],
+    "Personal Development Plan": [
+      //"Personal Development Plan"
+    ],
+    "Appraisal Grievances": [
+      //"Appraisal Grievances"
+    ],
+    "Adjusting OKRs": [
+      //"Adjusting OKRs"
+    ]
+  },
+  "Business Trip": {
+    "Request for Flight & Hotel": [],
+    "Request for Car Rentals": [],
+    "Bussiness Expenses Claim": [],
+    "Complaints": [
+      "Business Travel Complaints"
+      //"Business Expenses Complaint",
+    ]
+  },
+  "Org Chart - Employee Reports" : {
+    "Information Inquiry" : [
+      "Request Org Chart",
+      "Request Employees Information"
+    ]
+  },
+  "Hiring and Recruitment": {
+    "New Hiring Request" : [],
+    "Replacement Request" : [],
+    "Cost Plus / Trainee & TAMHEER" : [],
+    "Outsource Manpower Request":[]
+  },
+  "Internal Communications": {
+    "Initiatives" : [],
+    "Memos" : [],
+    "Training Programs" : [],
+    "Employee Recognitions" : [],
+    "Others" : []
+  }
+  
+  //,"Others (Not Listed)": {}
+};
+
+const applications = {
+  ESS: {
+    type: "url",
+    url: "https://hc-ess.alquraishi.com/",
+    text: "This service is available in ESS — no ticket required.",
+    linkText: "Open ESS"
+  },
+  WEGO: {
+    type: "url",
+    url: "https://starlinks-company.wegopro.com/",
+    text: "Please submit this request via WEGO — no ticket required.",
+    linkText: "Open WEGO"
+  },
+  RYDOO: {
+    type: "url",
+    url: "https://app.rydoo.com/",
+    text: "Please submit this request via RYDOO — no ticket required.",
+    linkText: "Open RYDOO"
+  },
+  EMAIL_CAR_RENTAL: {
+  type: "mailto",
+  to: "starlinks.prioritydesk@wegopro.com", // change if different
+  subject: "Car Rental Request - Starlinks Business",
+  body:
+`Dear Team,
+
+I would like to request a Car Rental for business purposes.
+
+Please find attached my confirmed Air ticket booking, Driving license, and ID.
+
+Employee Name:
+Employee ID:
+Pickup Location:
+Drop-off Location:
+Rental Start Date: As per my Air ticket
+Rental End Date: As per my Air ticket
+Exit Re-Entry Visa : Single / Multiple
+
+Thank you.`,
+  text: "This request is handled via email — no ticket required.",
+  linkText: "Send Email"
+},
+
+  EMAIL_TRAVEL: {
+    type: "mailto",
+    to: "starlinks.prioritydesk@wegopro.com",
+    subject: "Annual Flight Ticket Request - Family",
+    body:
+`Dear Team,
+
+I would like to request an Annual Flight Ticket for my family.
+
+Employee Name:
+Employee ID:
+Family Members Included:
+
+Please find attached LTR from.
+
+Thank you.`,
+    text: "This request is handled via email — no ticket required.",
+    linkText: "Send Email",
+    templateUrl: "/DocumentsAutomation/Automation Templates/Leave Travel Request.xlsx",
+    templateName: "Annual Flight Ticket Request Form"
+  },
+
+  DOWNLOAD_OUTSOURCE_TEMPLATE: {
+  type: "download_only",  // ← new type, no mailto needed
+  text: "Please download the template, fill in the required information, and attach it when raising your request.",
+  templateUrl: "/DocumentsAutomation/Automation Templates/Starlinks Labour Request Form Template.xlsx",
+  templateName: "Download Excel Template"
+},
+
+
+  EMAIL_EXPENSES: {
+    type: "mailto",
+    to: "starlinks.prioritydesk@wegopro.com", // change if different
+    subject: "Business Expenses Claim",
+    body:
+`Dear Team,
+
+I would like to submit a Business Expenses Claim.
+
+Employee Name:
+Employee ID:
+Trip / Reference (if any):
+Expense Details:
+Amount:
+(Please attach receipts)
+
+Thank you.`,
+    text: "This request is handled via email — no ticket required.",
+    linkText: "Send Email"
+  }
+};
+
+const serviceToApp = {
+  // ESS
+  "Request for Employee ID": "ESS",
+  "Resignation and EOS Request": "ESS",
+  "Bank Loan Letter (Arabic / English)": "ESS",
+  "Employment Letter": "ESS",
+  "Employment Letter With Salary": "ESS",
+  "Letter for Visa": "ESS",
+  "Salary Payslip with Company Stamp" : "ESS",
+  //"Addition to Medical Insurance": "ESS",
+  //"Removal from Medical Insurance": "ESS",
+  "Car Loan": "ESS",
+  "Salary in Advance": "ESS",
+  "Housing Advance - 3 Months": "ESS",
+  "Housing Advance - 6 Months": "ESS",
+  "School Allowance (M1 and Above)": "ESS",
+  "Overtime Request": "ESS",
+
+  // Leaves (ESS)
+  "Annual Leave": "ESS",
+  "Bereavement - Family": "ESS",
+  "Bereavement - InLaw": "ESS",
+  "Bereavement - Muslim Female": "ESS",
+  "Bereavement - Non Muslim Female": "ESS",
+  "Exam Leave": "ESS",
+  "Hajj Leave": "ESS",
+  "Marriage Leave": "ESS",
+  "Maternity Leave": "ESS",
+  "Paternity Leave": "ESS",
+  "Professional - Cert. Exam Leave": "ESS",
+  "Sick Leave": "ESS",
+  "Sick / Special Needs Childbirth": "ESS",
+  "Stillbirth": "ESS",
+  "Unauthorized Absence": "ESS",
+  "Unpaid Leave": "ESS",
+  "Work From Home": "ESS",
+
+  "Business Expenses Claim": "RYDOO",
+
+  // WEGO
+  "Annual Flight Ticket (Employee)": "WEGO",
+  "Request for Flight & Hotel": "WEGO",
+  "Request for Hotel (Business Purpose Only)": "WEGO",
+
+  // EMAIL
+  "Annual Flight Ticket (Family)": "EMAIL_TRAVEL",
+  "Request for Car Rentals": "EMAIL_CAR_RENTALS",
+  "Business Expenses Claims": "EMAIL_EXPENSES"
+  
+};
+
+const subCategoryToApp = {
+  "Request for Flight & Hotel": "WEGO",
+  "Request for Car Rentals": "EMAIL_CAR_RENTAL",
+  "Bussiness Expenses Claim": "RYDOO",
+   "Outsource Manpower Request": "DOWNLOAD_OUTSOURCE_TEMPLATE"
+};
+
+const TILE_SUBTITLE_OVERRIDES = {
+  function: {
+    "Others (Not Listed)": "General Requests"
+    
+  },
+
+  subcategory: {
+    "Request for Flight & Hotel": "Terms and conditions apply.",
+    "Request for Car Rentals": "Terms and conditions apply.",
+    "Bussiness Expenses Claim": "Business Trips and General Expenses"
+   }
+
+  // service: {
+  //   "Exit Re-Entry Visa - Multiple": "Approval request will be sent to your Line Manager"//,
+  //   //"Annual Flight Ticket (Family)": "Handled via email - ticket not required."
+  // }
+};
+
+// const serviceRedirectMap = {
+
+//   /* =========================
+//      ESSD – Leave Requests
+//      ========================= */
+//   "Marriage Leave": {
+//     type: "url",
+//     url: "https://hc-ess.alquraishi.com/",
+//     text: "This leave request must be submitted via ESSD — no ticket required.",
+//     linkText: "Open ESSD"
+//   },
+
+//   "Marriage Leave": {
+//     type: "url",
+//     url: "https://hc-ess.alquraishi.com/",
+//     text: "This leave request must be submitted via ESSD — no ticket required.",
+//     linkText: "Open ESSD"
+//   },
+
+//   "Maternity Leave": {
+//     type: "url",
+//     url: "https://hc-ess.alquraishi.com/",
+//     text: "This leave request must be submitted via ESSD — no ticket required.",
+//     linkText: "Open ESSD"
+//   },
+
+//   "Paternity Leave": {
+//     type: "url",
+//     url: "https://hc-ess.alquraishi.com/",
+//     text: "This leave request must be submitted via ESSD — no ticket required.",
+//     linkText: "Open ESSD"
+//   },
+
+//   "Professional - Cert. Exam Leave": {
+//     type: "url",
+//     url: "https://hc-ess.alquraishi.com/",
+//     text: "This leave request must be submitted via ESSD — no ticket required.",
+//     linkText: "Open ESSD"
+//   },
+
+//   "Sick Leave": {
+//     type: "url",
+//     url: "https://hc-ess.alquraishi.com/",
+//     text: "This leave request must be submitted via ESSD — no ticket required.",
+//     linkText: "Open ESSD"
+//   },
+
+//   "Sick / Special Needs Childbirth": {
+//     type: "url",
+//     url: "https://hc-ess.alquraishi.com/",
+//     text: "This leave request must be submitted via ESSD — no ticket required.",
+//     linkText: "Open ESSD"
+//   },
+
+//   "Stillbirth": {
+//     type: "url",
+//     url: "https://hc-ess.alquraishi.com/",
+//     text: "This leave request must be submitted via ESSD — no ticket required.",
+//     linkText: "Open ESSD"
+//   },
+
+//   "Unauthorized Absence": {
+//     type: "url",
+//     url: "https://hc-ess.alquraishi.com/",
+//     text: "This leave request must be submitted via ESSD — no ticket required.",
+//     linkText: "Open ESSD"
+//   },
+
+//   "Unpaid Leave": {
+//     type: "url",
+//     url: "https://hc-ess.alquraishi.com/",
+//     text: "This leave request must be submitted via ESSD — no ticket required.",
+//     linkText: "Open ESSD"
+//   },
+
+//   "Work From Home": {
+//     type: "url",
+//     url: "https://hc-ess.alquraishi.com/",
+//     text: "This request must be submitted via ESSD — no ticket required.",
+//     linkText: "Open ESSD"
+//   },
+
+//   /* =========================
+//      WEGO – Annual Flight Ticket (Employee)
+//      ========================= */
+//   "Annual Flight Ticket (Employee)": {
+//     type: "url",
+//     url: "https://starlinks-company.wegopro.com/",
+//     text: "Please submit this request via WEGO — no ticket required.",
+//     linkText: "Open WEGO"
+//   },
+
+//   /* =========================
+//      EMAIL – Annual Flight Ticket (Family)
+//      ========================= */
+//   "Annual Flight Ticket (Family)": {
+//     type: "mailto",
+//     to: "starlinks.prioritydesk@wegopro.com",
+//     subject: "Annual Flight Ticket Request - Family",
+//     body:
+// `Dear Team,
+
+// I would like to request an Annual Flight Ticket for my family.
+
+// Employee Name:
+// Employee ID:
+// Destination:
+// Preferred Travel Date:
+// Family Members Included:
+
+// Thank you.`,
+//     text: "This request is handled via email — no ticket required.",
+//     linkText: "Send Email"
+//   }
+
+// };
+
+//In case of Overriding Description for any of the service
+// serviceRedirectMap["Overtime Request"] = {
+//   ...applications.ESS,
+//   text: "Overtime requests must be submitted in ESS — no ticket required."
+// };
+
+const serviceRedirectMap = Object.fromEntries(
+  Object.entries(serviceToApp).map(([service, appKey]) => [service, applications[appKey]])
+);
+
+const subCategoryRedirectMap = Object.fromEntries(
+  Object.entries(subCategoryToApp).map(([subcat, appKey]) => [subcat, applications[appKey]])
+);
+
+const subCategoryVerticalFilter = {
+  "Cost Plus Employee Issues": ["Automotive"]
+};
+
+/* -------------------------------
+   STATE
+-------------------------------- */
+let state = {
+  vertical: null,
+  subcategory: null,
+  category: null,
+  service: null,
+  additionalInformation : null
+};
+
+const OTHER_DEFAULT = "Others (Not Listed)";
+
+/* -------------------------------
+   HELPERS
+-------------------------------- */
+// const $ = id => document.getElementById(id);
+
+// function validateHRRequest() {
+//     let errors = [];
+
+//     if (!state.vertical) errors.push("Please select a Vertical.");
+//     if (!state.category) errors.push("Please select a Category.");
+//     if (!state.subcategory) errors.push("Please select a Sub Category.");
+//     if (!state.service) errors.push("Please select a Service.");
+
+//     if (errors.length > 0) {
+//         alert(errors.join("\n"));
+//         return false;
+//     }
+
+//     return true;
+// }
+
+function validateHRRequest() {
+    if (!state.vertical) {
+        showToast("Please select a Vertical.", "danger");
+        return false;
+    }
+    if (!state.category) {
+        showToast("Please select a Category.", "danger");
+        return false;
+    }
+    if (!state.subcategory) {
+        showToast("Please select a Sub Category.", "danger");
+        return false;
+    }
+
+    if (!state.service) {
+        showToast("Please select a Service.", "danger");
+        return false;
+    }
+
+    if (serviceRedirectMap[state.service]) {
+      showToast("This service is handled via an existing tool — no ticket required.", "warning");
+      return false;
+    }
+
+    const additionalInfo = document.getElementById("sh_additionalinformation") ?.value ?.trim();
+
+    if (!additionalInfo) {
+      showToast("Please provide Additional Information.", "danger");
+      document.getElementById("sh_additionalinformation")?.focus();
+      return false;
+    }
+
+    return true;
+}
+
+function resetDownstreamFromCategory() {
+  state.subcategory = null;
+  state.service = null;
+
+  $("hrSubCategory").value = "";
+  $("hrService").value = "";
+
+  $("step-services").hidden = true;
+  $("serviceTiles").innerHTML = "";
+  $("selectedCategoryLabel").innerText = "";
+}
+
+function resetDownstreamFromSubCategory() {
+  state.service = null;
+
+  $("hrService").value = "";
+
+  $("step-services").hidden = true;
+  $("serviceTiles").innerHTML = "";
+  $("selectedCategoryLabel").innerText = "";
+}
+
+function renderTiles(containerId, items, clickHandler) {
+  const container = $(containerId);
+  container.innerHTML = "";
+
+  Object.entries(items).forEach(([label, info]) => {
+    const col = document.createElement("div");
+    col.className = "col-md-4";
+
+    col.innerHTML = `
+      <div class="hr-tile">
+        <div class="hr-tile-title form-label">${label}</div>
+        ${info?.sub ? `<div class="hr-tile-sub">${info.sub}</div>` : ""}
+      </div>
+    `;
+
+    col.querySelector(".hr-tile").addEventListener("click", e => {
+      [...container.querySelectorAll(".hr-tile")].forEach(t => t.classList.remove("tile-selected"));
+      e.currentTarget.classList.add("tile-selected");
+      clickHandler(label, info);
+    });
+
+    container.appendChild(col);
+  });
+}
+
+function getOverride(level, key) {
+  return TILE_SUBTITLE_OVERRIDES?.[level]?.[key] || "";
+}
+
+
+/* -------------------------------
+   STEP 0 — Vertical
+-------------------------------- */
+function loadVerticals() {
+  const items = {};
+  Object.keys(verticals).forEach(v => items[v] = { sub:`HRBP: ${verticals[v].hr}` });
+
+  renderTiles("verticalTiles", items, (label) => {
+    state.vertical = label;
+    $("hrVertical").value = label;
+    $("hrVerticalHRName").value = verticals[label].hr;
+    $("hrVerticalID").value = verticals[label].id;
+
+
+    // If a category is already selected, re-render subcategories for the new vertical
+    if (state.category && hrData[state.category]) {
+      resetDownstreamFromCategory();
+      loadSubCategories(state.category);
+      $("step-categories").hidden = false;
+    }
+  });
+}
+
+/* -------------------------------
+   STEP 1 — Functions
+-------------------------------- */
+
+// function loadCategories() {
+//   const functionItems = Object.fromEntries(
+//     Object.entries(hrData).map(([fn, categories]) => [
+//       fn,
+//       //{ sub: `${Object.keys(categories).length} Categories` }
+//       { sub: fn === "Others (Not Listed)"
+//         ? "General requests"
+//         : `${Object.keys(categories).length} Categories`
+//       }
+//     ])
+//   );
+
+//   renderTiles("functionTiles", functionItems, (fn) => {
+
+//     resetDownstreamFromCategory();
+
+//     state.category = fn;
+//     $("hrCategory").value = fn;
+
+//     $("selectedFunctionLabel").innerText = fn;
+
+//     if (fn === "Others (Not Listed)") {
+//       state.subcategory = OTHER_DEFAULT;
+//       state.service = OTHER_DEFAULT;
+
+//       $("hrSubCategory").value = OTHER_DEFAULT;
+//       $("hrService").value = OTHER_DEFAULT;
+
+//       $("step-categories").hidden = true;
+//       $("step-services").hidden = true;
+
+//       return; // stop here
+//     }
+
+//     $("step-categories").hidden = false;
+//     $("step-services").hidden = true;
+//     $("step-summary").hidden = true;
+
+//     loadSubCategories(fn);
+//   });
+// }
+
+function loadCategories() {
+  const functionItems = Object.fromEntries(
+    Object.entries(hrData).map(([fn, categories]) => {
+      const override = getOverride("function", fn);
+      const defaultSub = `${Object.keys(categories).length} Categories`;
+
+      return [fn, { sub: override || defaultSub }];
+    })
+  );
+
+  renderTiles("functionTiles", functionItems, (fn) => {
+    resetDownstreamFromCategory();
+
+    state.category = fn;
+    $("hrCategory").value = fn;
+
+    $("selectedFunctionLabel").innerText = fn;
+
+    if (fn === "Others (Not Listed)") {
+      state.subcategory = OTHER_DEFAULT;
+      state.service = OTHER_DEFAULT;
+
+      $("hrSubCategory").value = OTHER_DEFAULT;
+      $("hrService").value = OTHER_DEFAULT;
+
+      $("step-categories").hidden = true;
+      $("step-services").hidden = true;
+      return;
+    }
+
+    $("step-categories").hidden = false;
+    $("step-services").hidden = true;
+    $("step-summary").hidden = true;
+
+    loadSubCategories(fn);
+  });
+}
+
+
+/* -------------------------------
+   STEP 2 — Categories
+-------------------------------- */
+function loadSubCategories(func) {
+  $("selectedFunctionLabel").innerText = func;
+
+  const categories = {};
+
+  Object.keys(hrData[func]).forEach(cat => {
+
+    const allowedVerticals = subCategoryVerticalFilter[cat];
+    if (allowedVerticals && !allowedVerticals.includes(state.vertical)) return;
+  
+    const override = getOverride("subcategory", cat);
+    const defaultSub = hrData[func][cat].length === 0 ? '' : `${hrData[func][cat].length} items`;
+    categories[cat] = { sub: override || defaultSub };
+  });
+  
+  renderTiles("categoryTiles", categories, (cat) => {
+    resetDownstreamFromSubCategory();
+    
+    state.subcategory = cat;
+    $("hrSubCategory").value = cat;
+
+    // ✅ Set default service FIRST, before any redirect check
+    if (!hrData[func][cat] || hrData[func][cat].length === 0) {
+      state.service = cat;
+      $("hrService").value = state.service;
+    }
+
+    const redirected = applySubCategoryRedirect(cat);
+    if (redirected) {
+      $("step-services").hidden = true;
+      $("serviceTiles").innerHTML = "";
+      $("selectedCategoryLabel").innerText = cat;
+      return; // stop here
+    }
+
+    //In case no service under SubCategory
+    if (!hrData[func][cat] || hrData[func][cat].length === 0) {
+      // Set default service value to be the same as subcategory
+      state.service = cat;
+      $("hrService").value = state.service;
+
+      $("step-services").hidden = true;
+      $("serviceTiles").innerHTML = "";
+      $("selectedCategoryLabel").innerText = cat;
+      return;
+    }
+
+
+    loadServices(func, cat);
+    $("step-services").hidden = false;
+  });
+}
+
+/* -------------------------------
+   STEP 3 — Services
+-------------------------------- */
+function loadServices(func, cat) {
+  $("selectedCategoryLabel").innerText = cat;
+
+  const services = {};
+  hrData[func][cat].forEach(s => {
+    const override = getOverride("service", s);
+    services[s] = override ? { sub: override } : {};
+  });
+
+  renderTiles("serviceTiles", services, (service) => {
+    state.service = service;
+    $("hrService").value = service;
+
+
+    applyServiceRedirect(service); 
+
+    // Fill Summary
+    // $("sumVertical").innerText = state.vertical;
+    // $("sumHRBP").innerText = verticals[state.vertical]?.hr || "";
+    // $("sumFunction").innerText = state.function;
+    // $("sumCategory").innerText = state.category;
+    // $("sumService").innerText = service;
+
+    // $("step-summary").hidden = false;
+  });
+}
+
+/* -------------------------------
+  STEP 4 — SubCategory & Service Redirect
+-------------------------------- */
+
+function openRedirectModal(rule) {
+  const modal = document.getElementById("serviceRedirectModal");
+  const msg = document.getElementById("redirectModalMsg");
+  const link = document.getElementById("redirectModalLink");
+  const downloadBtn = document.getElementById("redirectModalDownload");
+  
+  link.style.display = "";  // ✅ reset to visible for all types first
+
+  if (!modal || !msg || !link) return;
+
+  msg.innerText = rule?.text || "This service is available in an existing tool — no ticket required.";
+
+  // Download button
+  if (rule?.templateUrl && downloadBtn) {
+    downloadBtn.href = rule.templateUrl;
+    downloadBtn.innerText = `Download ${rule.templateName || "Form"}`;
+    downloadBtn.style.display = "inline-block";
+  } else if (downloadBtn) {
+    downloadBtn.style.display = "none";
+  }
+
+  // URL vs MAILTO
+  if (rule?.type === "mailto") {
+
+    const hrEmail = verticals[state.vertical]?.email || "";
+
+    const mailto =
+      `mailto:${rule.to}` +
+      `?cc=${encodeURIComponent(hrEmail)}` +
+      `?subject=${encodeURIComponent(rule.subject || "")}` +
+      `&body=${encodeURIComponent(rule.body || "")}`;
+
+    link.href = mailto;
+    link.innerText = rule.linkText || "Send Email";
+    link.removeAttribute("target"); // optional: mailto doesn't need target
+    document.querySelector(".sr-modal-title").innerText = "Use existing tool";
+  } else if (rule?.type === "download_only") {
+        link.style.display = "none";  // hide the Continue/Send Email button
+        document.querySelector(".sr-modal-title").innerText = rule.templateName || "Download";
+      } 
+  
+  else {
+    link.href = rule?.url || "#";
+    link.innerText = rule?.linkText || "Open Application";
+    link.setAttribute("target", "_blank");
+    document.querySelector(".sr-modal-title").innerText = "Use existing tool";
+  }
+
+  modal.style.display = "block";
+}
+
+function closeRedirectModal() {
+  const modal = document.getElementById("serviceRedirectModal");
+  if (modal) modal.style.display = "none";
+}
+
+function getSubmitButton() {
+  return document.querySelector('button[type="submit"], input[type="submit"]');
+}
+
+function applyServiceRedirect(service) {
+  const rule = serviceRedirectMap[service];
+  const submitBtn = getSubmitButton();
+
+  if (rule) {
+    if (submitBtn) submitBtn.disabled = true;  // block submit
+    openRedirectModal(rule);                   // show modal + link
+  } else {
+    if (submitBtn) submitBtn.disabled = false; // allow submit
+    closeRedirectModal();
+  }
+}
+
+function applySubCategoryRedirect(subcat) {
+  const rule = subCategoryRedirectMap[subcat];
+  const submitBtn = getSubmitButton();
+
+    if (rule) {
+    if (rule.type === "download_only") {
+      if (submitBtn) submitBtn.disabled = false;  // ← allow submit
+    } else {
+      if (submitBtn) submitBtn.disabled = true;   // ← block submit for others
+    }
+    openRedirectModal(rule);
+    return true;
+  } else {
+    if (submitBtn) submitBtn.disabled = false;
+    closeRedirectModal();
+    return false;
+  }
+
+  // if (rule) {
+  //   if (submitBtn) submitBtn.disabled = true;
+  //   openRedirectModal(rule);
+  //   return true; // redirected
+  // } else {
+  //   if (submitBtn) submitBtn.disabled = false;
+  //   closeRedirectModal();
+  //   return false;
+  // }
+}
+
+/* -------------------------------
+   INIT
+-------------------------------- */
+document.addEventListener("DOMContentLoaded", () => {
+  loadVerticals();
+  loadCategories();
+
+  document.getElementById("redirectModalClose")?.addEventListener("click", closeRedirectModal);
+
+  document.querySelector("#serviceRedirectModal .redirect-modal-backdrop") ?.addEventListener("click", closeRedirectModal);
+
+});
+</script>
+{% endif %}
+
+<style>
+  
+  .hr-tile {
+    border-radius: 1rem; padding: 1.25rem;
+    background: #fff; border: 1px solid rgba(0,0,0,.08);
+    transition: .2s; cursor: pointer;
+    box-shadow: 0 4px 14px rgba(0,0,0,.04);
+  }
+  .hr-tile:hover { transform: translateY(-3px); border-color:#0d6efd; }
+  .tile-selected { background:#f0f6ff !important; border-color:#0d6efd !important; }
+  .hr-tile-title { font-weight:600; }
+  .hr-tile-sub { font-size:.85rem; color:#6c757d; }
+  .tile-selected {
+    background:#f8f9fa !important;     /* soft light gray */
+    border-color:#adb5bd !important;    /* muted border */
+    box-shadow:0 0 0 2px #dee2e6 inset;  /* soft inset highlight */
+  }
+  .hr-tile:hover { 
+    transform: translateY(-3px); 
+    border-color:#ced4da;     /* very light gray */
+  }
+
+</style>
+
+<!-- Redirect Modal For Applications -->
+<!-- <div id="serviceRedirectModal" class="redirect-modal" style="display:none;">
+  <div class="redirect-modal-backdrop"></div>
+
+  <div class="redirect-modal-card">
+    <div class="redirect-modal-title">Use existing tool</div>
+
+    <div id="redirectModalMsg" class="redirect-modal-msg">
+      This service is available in an existing tool — no ticket required.
+    </div>
+
+    <div class="redirect-modal-actions">
+      <a id="redirectModalLink" class="btn btn-warning" target="_blank" href="#">
+        Open Application
+      </a>
+      <button type="button" id="redirectModalClose" class="btn btn-outline-secondary">
+        Close
+      </button>
+      <a id="redirectModalDownload"
+        class="btn btn-outline-primary"
+        href="#"
+        download
+        style="display:none;">
+        Download Excel Form
+      </a>
+    </div>
+  </div>
+</div>
+
+<style>
+.redirect-modal-backdrop{ position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:9998; }
+.redirect-modal-card{
+  position:fixed; left:50%; top:50%; transform:translate(-50%,-50%);
+  background:#fff; border-radius:14px; padding:20px; width:min(520px,92vw);
+  z-index:9999; box-shadow:0 12px 40px rgba(0,0,0,.25);
+}
+.redirect-modal-title{ font-weight:700; font-size:1.05rem; margin-bottom:8px; }
+.redirect-modal-msg{ color:#6c757d; margin-bottom:16px; }
+.redirect-modal-actions{ display:flex; gap:10px; justify-content:flex-end; flex-wrap:wrap; }
+</style> -->
+
+<!-- Redirect Modal -->
+<div id="serviceRedirectModal" class="sr-modal" style="display:none;">
+  <div class="sr-modal-backdrop"></div>
+
+  <div class="sr-modal-card">
+    <div class="sr-modal-header">
+      <div class="sr-modal-title">Use existing tool</div>
+      <div id="redirectModalMsg" class="sr-modal-description">
+        This service is available in an existing tool — no ticket required.
+      </div>
+    </div>
+
+    <div class="sr-modal-footer">
+      <button type="button" id="redirectModalClose" class="sr-btn sr-btn-secondary">
+        Cancel
+      </button>
+
+      <a id="redirectModalDownload"
+         class="sr-btn sr-btn-outline doc-action-item"
+         href="#"
+         data-action="download"
+         style="display:none;">
+        Download Form
+      </a>
+
+      <a id="redirectModalLink"
+         class="sr-btn sr-btn-primary"
+         target="_blank"
+         href="#">
+        Continue
+      </a>
+    </div>
+  </div>
+</div>
+
+<style>
+/* Backdrop */
+.sr-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.35);
+  z-index: 9998;
+}
+
+/* Card styled like hr-tile */
+.sr-modal-card {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: min(600px, 92vw);
+  z-index: 9999;
+
+  border-radius: 1rem;
+  padding: 1.75rem;
+  background: #fff;
+  border: 1px solid rgba(0,0,0,.08);
+  box-shadow: 0 4px 14px rgba(0,0,0,.04);
+
+  transition: .2s;
+}
+
+/* Header */
+.sr-modal-header {
+  margin-bottom: 1.5rem;
+}
+
+.sr-modal-title {
+  font-weight: 600;
+  font-size: 1.15rem;
+  margin-bottom: .5rem;
+}
+
+.sr-modal-description {
+  font-size: .9rem;
+  color: #6c757d;
+  line-height: 1.5;
+}
+
+/* Footer */
+.sr-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: .75rem;
+  flex-wrap: wrap;
+}
+
+/* Buttons */
+.sr-btn {
+  border-radius: .75rem;
+  padding: .5rem 1rem;
+  font-size: .9rem;
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: none;
+  border: 1px solid rgba(0,0,0,.1);
+  background: #fff;
+  transition: .2s;
+}
+
+.sr-btn:hover {
+  transform: translateY(-2px);
+  border-color: #ced4da;
+}
+
+</style>

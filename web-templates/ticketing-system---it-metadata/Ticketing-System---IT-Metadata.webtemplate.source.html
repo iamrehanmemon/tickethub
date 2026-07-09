@@ -1,0 +1,589 @@
+{% if mode != "view" %}
+
+<fieldset class="p-4 mb-3 col-12">
+  <legend>Request Details</legend>
+
+  <!-- Generic Hidden Submit Fields -->
+  <input type="hidden" id="supportArea"/>
+  <input type="hidden" id="scope"/>
+  <input type="hidden" id="category"/>
+  <input type="hidden" id="subCategory"/>  <!-- optional -->
+  <input type="hidden" id="service"/>      <!-- auto = category -->
+
+  <!-- Dynamic Steps -->
+  <div id="step-verticals" class="mb-5">
+    <h4 class="fw-semibold mb-3 form-label" id="supportTitle">Support *</h4>
+    <div id="verticalTiles" class="row g-3"></div>
+  </div>
+
+  <div id="step-scopes" class="mb-5" hidden>
+    <h4 class="fw-semibold mb-3 form-label" id="scopeTitle">Scope / Type *</h4>
+    <div id="scopeTiles" class="row g-3"></div>
+  </div>
+
+  <div id="step-categories" class="mb-5" hidden>
+    <h4 class="fw-semibold mb-3 form-label" id="categoryTitle">
+      Category *
+      <span id="selectedScopeLabel" class="badge bg-light text-dark ms-2"></span>
+    </h4>
+    <div id="categoryTiles" class="row g-3"></div>
+  </div>
+
+  <div class="row">
+
+      <!-- URL -->
+      <div class="col-12 col-md-8 mb-3" id="div-url" style="display:none;">
+        <label for="sh_url" class="form-label">URL</label>
+        <input type="text" class="form-control" id="sh_url" value="{{ metadata.sh_url}}">
+        
+        <div id="hint-url" class="form-text starlinks-one-tile-sub" style="display:none;">
+          Paste the related Dynamics URL here to help us quickly identify the affected record or page.
+        </div>
+      </div>
+
+      <!-- Legal Entity -->
+      <div class="col-12 col-md-4 mb-3" id="div-legalentity" style="display:none;">
+        <label for="sh_legalentity" class="form-label">Legal Entity *</label>
+        <select class="form-select" id="sh_legalentity" required>
+
+          {% assign currentLegalEntityValue = metadata.sh_legalentity.Value | string %}
+
+          <!-- Blank default option -->
+          <option value="" {% if currentLegalEntityValue == blank %}selected{% endif %} disabled selected>
+            Select
+          </option>
+
+          <option value="126450000" {% if currentLegalEntityValue == "126450000" %}selected{% endif %}>5030</option>
+          <option value="126450001" {% if currentLegalEntityValue == "126450001" %}selected{% endif %}>5031</option>
+          <option value="126450002" {% if currentLegalEntityValue == "126450002" %}selected{% endif %}>5032</option>
+          <option value="126450003" {% if currentLegalEntityValue == "126450003" %}selected{% endif %}>5033</option>
+
+        </select>
+      </div>
+
+
+      <!-- Environment -->
+      <div class="col-12 col-md-4 mb-3" id="div-environment" style="display:none;">
+        <label for="sh_environment" class="form-label">Environment *</label>
+        <select class="form-select" id="sh_environment" required>
+
+          {% assign currentEnvironmentValue = metadata.sh_environment.Value | string %}
+
+          <!-- Blank default option -->
+          <option value="" {% if currentEnvironmentValue == blank %}selected{% endif %} disabled selected>
+            Select
+          </option>
+
+          <option value="126450000" {% if currentEnvironmentValue == "126450000" %}selected{% endif %}>Live (Production) </option>
+          <option value="126450001" {% if currentEnvironmentValue == "126450001" %}selected{% endif %}>Test (UAT)</option>
+          <option value="126450002" {% if currentEnvironmentValue == "126450002" %}selected{% endif %}>Dev01 (Development 1)</option>
+          <option value="126450003" {% if currentEnvironmentValue == "126450003" %}selected{% endif %}>Dev02 (Development 2)</option>
+
+        </select>
+      </div>
+
+    </div>
+
+
+
+<div class="mb-3" id="div-description" style="display:none;">
+  <label class="form-label">Description *</label>
+  <textarea class="form-control" id="sh_description" rows="5">{{ metadata.sh_description }}</textarea>
+  <div id="hint-description" class="form-text starlinks-one-tile-sub" style="display:none;">
+    Please provide the Module name, relevant Document Number (if any), and a clear description of the issue or request you are facing.
+  </div>
+</div>
+
+<div class="mb-3">
+  <label for="sh_additionalinformation" class="form-label">Additional Information</label>
+  <textarea class="form-control" id="sh_additionalinformation" >{{ metadata.sh_additionalinformation }}</textarea>
+  <div id="hint-additional" class="form-text starlinks-one-tile-sub" style="display:none;">
+    Share any additional details, context, or specific requirements that will help us understand and process your request more effectively.
+  </div>
+</div>
+
+  
+</fieldset>
+
+{% endif %}
+
+{% if mode == "view" %}
+
+<fieldset class="p-4 mb-3 col-12">
+  <legend>Request Details</legend>
+  <div class="row">
+    <div class="col-12 col-md-4 mb-3">
+      <label class="form-label">Support *</label>
+      <input type="text" class="form-control" value="{{ metadata.sh_support }}" readonly>
+    </div>
+
+    <div class="col-12 col-md-4 mb-3">
+      <label class="form-label">Scope / Type *</label>
+      <input type="text" class="form-control" value="{{ metadata.sh_scope }}" readonly>
+    </div>
+
+    <div class="col-12 col-md-4 mb-3">
+      <label class="form-label">Category *</label>
+      <input type="text" class="form-control" value="{{ metadata.sh_category }}" readonly>
+    </div>
+
+    <!-- <div class="col-12 col-md-4 mb-3">
+      <label class="form-label">Service</label>
+      <input type="text" class="form-control" value="{{ metadata.service }}" readonly>
+    </div> -->
+
+    <!-- URL -->
+    <div class="col-12 col-md-8 mb-3" >
+      <label for="sh_url" class="form-label">URL</label>
+      <input type="text" class="form-control" id="sh_url" value="{{ metadata.sh_url}}" readonly>
+    
+    </div>
+
+    <!-- Legal Entity -->
+    <div class="col-12 col-md-4 mb-3" id="div-legalentity">
+      <label for="sh_legalentity" class="form-label">Legal Entity *</label>
+      <select class="form-select" id="sh_legalentity" disabled required>
+
+        {% assign currentLegalEntityValue = metadata.sh_legalentity.Value | string %}
+
+        <!-- Blank default option -->
+        <option value="" {% if currentLegalEntityValue == blank %}selected{% endif %} disabled selected>
+        Select
+        </option>
+
+        <option value="126450000" {% if currentLegalEntityValue == "126450000" %}selected{% endif %}>5030</option>
+        <option value="126450001" {% if currentLegalEntityValue == "126450001" %}selected{% endif %}>5031</option>
+        <option value="126450002" {% if currentLegalEntityValue == "126450002" %}selected{% endif %}>5032</option>
+        <option value="126450003" {% if currentLegalEntityValue == "126450003" %}selected{% endif %}>5033</option>
+
+      </select>
+    </div>
+
+
+      <!-- Environment -->
+      <div class="col-12 col-md-4 mb-3" id="div-environment">
+        <label for="sh_environment" class="form-label">Environment *</label>
+        <select class="form-select" id="sh_environment" disabled required>
+
+          {% assign currentEnvironmentValue = metadata.sh_environment.Value | string %}
+
+          <!-- Blank default option -->
+          <option value="" {% if currentEnvironmentValue == blank %}selected{% endif %} disabled selected>
+            Select
+          </option>
+
+          <option value="126450000" {% if currentEnvironmentValue == "126450000" %}selected{% endif %}>Live (Production) </option>
+          <option value="126450001" {% if currentEnvironmentValue == "126450001" %}selected{% endif %}>Test (UAT)</option>
+          <option value="126450002" {% if currentEnvironmentValue == "126450002" %}selected{% endif %}>Dev01 (Development 1)</option>
+          <option value="126450003" {% if currentEnvironmentValue == "126450003" %}selected{% endif %}>Dev02 (Development 2)</option>
+
+        </select>
+      </div>
+
+    <div class="mb-3">
+      <label class="form-label">Description *</label>
+      <textarea class="form-control" id="sh_description" rows="8" readonly>{{ metadata.sh_description }}</textarea>
+    </div>
+
+    <div class="mb-3">
+      <label for="sh_additionalinformation" class="form-label">Additional Information</label>
+      <textarea class="form-control" id="sh_additionalinformation" readonly>{{ metadata.sh_additionalinformation }}</textarea>
+    </div>
+
+  </div>
+</fieldset>
+
+{% endif %}
+
+{% if mode != "view" %}
+<script>
+/* =========================================================
+   GENERIC CONFIG (swap this object per department/module)
+   ========================================================= */
+// const SUPPORT_CONFIG = {
+//   ui: {
+//     supportTitle: "Support *",        // e.g. "Technology Support *" / "Finance Support *"
+//     scopeTitle: "Scope / Type *",
+//     categoryTitle: "Category *"
+//   },
+//   supportAreas: {
+//     "ERP Tech Support": {
+//       sub: "ERP incidents/requests",
+//       scopes: {
+//         "Incidents": [
+//           "Access Issues",
+//           "Funtional Reporting Issues",
+//           "Technical Reporting Issue",
+//           "Integration Issues",
+//           "Workflows Issues",
+//           "Functional Issue - Fixed Asset",
+//           "Functional Issue - Budegeting",
+//           "Functional Issue - Project Management Accounting",
+//           "Performance Issues",
+//           "Functional Issue - GL",
+//           "Functional Issue - Procurement and AP", 
+//           "Functional Issue - Sales and AR",
+//           "Functional Issue - Billing",
+//           "Functional Issue - Items Related (PIM)",
+//           "Functional Issue - Expenses (Rydoo)"
+
+//         ],
+//         "Requests": [
+//           "Access (New/Change)",
+//           "Functional Reports (New/Change)",
+//           "New Workflows", 
+//           "Functional Change - Fixed Asset",
+//           "Functional Change - Budegeting",
+//           "Functional Change - Project Management Accounting",
+//           "Functional Change - GL",
+//           "Functional Change - Procurement and AP",
+//           "Functional Change - Sales and AR",
+//           "Functional Change - Billing",
+//           "Functional Change - Items Related (PIM)",
+//           "Functional Change - Expenses (Rydoo)",
+//           "Others (Not Listed)"
+//         ]
+//       }
+//     }
+//     // Add more support areas here...
+//   }
+// };
+
+const SUPPORT_CONFIG = {
+  ui: {
+    supportTitle: "Support *",
+    scopeTitle: "Scope / Type *",
+    categoryTitle: "Category *"
+  },
+  supportAreas: {
+    "ERP Tech Support": {
+      sub: "ERP incidents/requests",
+      scopes: {
+        "Incidents": {
+          sub: "Incidents / Issue / Bug",
+          categories: [
+            "Access Issues",
+            "Funtional Reporting Issues",
+            "Technical Reporting Issue",
+            "Integration Issues",
+            "Workflows Issues",
+            "Functional Issue - Fixed Asset",
+            "Functional Issue - Budegeting",
+            "Functional Issue - Project Management Accounting",
+            "Performance Issues",
+            "Functional Issue - GL",
+            "Functional Issue - Procurement and AP", 
+            "Functional Issue - Sales and AR",
+            "Functional Issue - Customer Billing",
+            "Functional Issue - Items Related (PIM)",
+            "Functional Issue - Expenses (Rydoo)"
+          ]
+        },
+        "Requests": {
+          sub: "New Requests / Change",
+          categories: [
+            "Access (New/Change)",
+            "Functional Reports (New/Change)",
+            "New Workflows", 
+            "Functional Change - Fixed Asset",
+            "Functional Change - Budegeting",
+            "Functional Change - Project Management Accounting",
+            "Functional Change - GL",
+            "Functional Change - Procurement and AP",
+            "Functional Change - Sales and AR",
+            "Functional Change - Customer Billing",
+            "Functional Change - Items Related (PIM)",
+            "Functional Change - Expenses (Rydoo)",
+            "Others (Not Listed)"
+          ]
+        }
+      }
+    }
+    // Add more support areas here...
+  }
+};
+
+/* =========================================================
+   GENERIC STATE
+   ========================================================= */
+let state = {
+  supportArea: null,
+  scope: null,
+  category: null,
+  service: null
+};
+
+/* =========================================================
+   HELPERS
+   ========================================================= */
+function setVal(id, val) {
+  const el = document.getElementById(id);
+  if (el) el.value = val ?? "";
+}
+
+function validateRequest() {
+
+  if (!state.supportArea) {
+    showToast("Please select a Support Area.", "danger");
+    return false;
+  }
+
+  if (!state.scope) {
+    showToast("Please select a Scope / Type.", "danger");
+    return false;
+  }
+
+  if (!state.category) {
+    showToast("Please select a Category.", "danger");
+    return false;
+  }
+
+  // if (!state.service) {
+  //   showToast("Please select a Service.", "danger");
+  //   return false;
+  // }
+
+  const description = document
+  .getElementById("sh_description")
+  ?.value
+  ?.trim();
+
+  if (!description) {
+    showToast("Please provide Description.", "danger");
+    document.getElementById("sh_description")?.focus();
+    return false;
+  }
+
+  const legalentity = document
+  .getElementById("sh_legalentity")
+  ?.value
+  ?.trim();
+
+  if (!legalentity) {
+    showToast("Please select Legal Entity.", "danger");
+    document.getElementById("sh_legalentity")?.focus();
+    return false;
+  }
+
+  return true;
+}
+
+function renderTiles(containerId, items, onClick) {
+  const container = document.getElementById(containerId);
+  container.innerHTML = "";
+
+  Object.entries(items).forEach(([label, info]) => {
+    const col = document.createElement("div");
+    col.className = "col-md-4";
+
+    col.innerHTML = `
+      <div class="starlinks-one-tile" role="button" tabindex="0">
+        <div class="starlinks-one-tile-title form-label">${label}</div>
+        ${info?.sub ? `<div class="starlinks-one-tile-sub">${info.sub}</div>` : ""}
+      </div>
+    `;
+
+    const tile = col.querySelector(".starlinks-one-tile");
+
+    const select = () => {
+      [...container.querySelectorAll(".starlinks-one-tile")]
+        .forEach(t => t.classList.remove("tile-selected"));
+
+      tile.classList.add("tile-selected");
+      onClick(label, info);
+    };
+
+    tile.addEventListener("click", select);
+    tile.addEventListener("keydown", e => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        select();
+      }
+    });
+
+    container.appendChild(col);
+  });
+}
+
+function resetDownstreamFromSupportArea() {
+  state.scope = null;
+  state.category = null;
+  state.service = null;
+
+  setVal("scope", "");
+  setVal("category", "");
+  setVal("subCategory", "");
+  setVal("service", "");
+
+  document.getElementById("selectedScopeLabel").innerText = "";
+  document.getElementById("step-categories").hidden = true;
+}
+
+function resetDownstreamFromScope() {
+  state.category = null;
+  state.service = null;
+
+  setVal("category", "");
+  setVal("subCategory", "");
+  setVal("service", "");
+}
+
+/* =========================================================
+   STEP 0 — Support Area
+   ========================================================= */
+function loadSupportAreas() {
+  const items = {};
+  Object.keys(SUPPORT_CONFIG.supportAreas).forEach(k => {
+    items[k] = { sub: SUPPORT_CONFIG.supportAreas[k].sub || "" };
+  });
+
+  renderTiles("verticalTiles", items, (label) => {
+    state.supportArea = label;
+    setVal("supportArea", label);
+    
+
+    toggleERPHints(); // ✅ load Hint texts in URL, Description and Additional Information fields
+
+
+    resetDownstreamFromSupportArea();
+
+    document.getElementById("step-scopes").hidden = false;
+    loadScopes(label);
+  });
+}
+
+/* =========================================================
+   STEP 1 — Scopes
+   ========================================================= */
+function loadScopes(areaLabel) {
+  const area = SUPPORT_CONFIG.supportAreas[areaLabel];
+  const scopeKeys = area ? Object.keys(area.scopes || {}) : [];
+
+  const items = {};
+
+  //scopeKeys.forEach(s => items[s] = { sub: "" });
+
+  scopeKeys.forEach(s => {
+    items[s] = {
+      sub: area.scopes[s].sub || ""
+    };
+  });
+
+  renderTiles("scopeTiles", items, (scopeLabel) => {
+    state.scope = scopeLabel;
+    setVal("scope", scopeLabel);
+
+    document.getElementById("selectedScopeLabel").innerText = scopeLabel;
+    document.getElementById("step-categories").hidden = false;
+
+    resetDownstreamFromScope();
+    loadCategories(areaLabel, scopeLabel);
+  });
+}
+
+/* =========================================================
+   STEP 2 — Categories (Leaf)
+   ========================================================= */
+function loadCategories(areaLabel, scopeLabel) {
+  //const list = SUPPORT_CONFIG.supportAreas?.[areaLabel]?.scopes?.[scopeLabel] || [];
+  const list = SUPPORT_CONFIG.supportAreas?.[areaLabel]?.scopes?.[scopeLabel] ?.categories || [];
+
+  const items = {};
+  list.forEach(x => items[x] = { sub: "" });
+
+  renderTiles("categoryTiles", items, (leaf) => {
+    state.category = leaf;
+    state.service = leaf;
+
+    setVal("category", leaf);
+    setVal("subCategory", leaf); // optional for reporting
+    setVal("service", leaf);     // required (mirrors other modules)
+  });
+}
+
+
+//Function to load hint texts conditionally only for ERP requests
+function toggleERPHints() {
+  // your tiles store selection here:
+  // state.supportArea = label; setVal("supportArea", label);
+  const selected =
+    (state && state.supportArea) ||
+    document.getElementById("supportArea")?.value ||
+    "";
+
+  const isERP = selected.trim() === "ERP Tech Support";
+
+  // hint blocks
+  const hintIds = ["hint-description", "hint-additional", "hint-url","div-url","div-description","div-legalentity","div-environment"];
+  hintIds.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = isERP ? "block" : "none";
+  });
+
+  // optional: placeholders too (nice UX)
+  // const desc = document.getElementById("sh_description");
+  // const addi = document.getElementById("sh_additionalinformation");
+  // const url  = document.getElementById("sh_url");
+
+  // if (desc) desc.placeholder = isERP
+  //   ? "Please provide the Legal Entity, Module name, relevant Document Number (if any), and a clear description of the issue or request you are facing."
+  //   : "";
+
+  // if (addi) addi.placeholder = isERP
+  //   ? "Share any additional details, context, or specific requirements that will help us understand and process your request more effectively."
+  //   : "";
+
+  // if (url) url.placeholder = isERP
+  //   ? "Paste the related Dynamics URL here to help us quickly identify the affected record or page."
+  //   : "";
+}
+
+/* =========================================================
+   INIT
+   ========================================================= */
+document.addEventListener("DOMContentLoaded", () => {
+  // Apply UI labels (optional)
+  document.getElementById("supportTitle").innerText  = SUPPORT_CONFIG.ui.supportTitle;
+  document.getElementById("scopeTitle").innerText    = SUPPORT_CONFIG.ui.scopeTitle;
+  document.getElementById("categoryTitle").childNodes[0].textContent = SUPPORT_CONFIG.ui.categoryTitle + " ";
+
+  loadSupportAreas();
+
+
+
+});
+</script>
+{% endif %}
+
+<style>
+.starlinks-one-tile {
+  border-radius: 1rem;
+  padding: 1.25rem;
+  background: #ffffff;
+  border: 1px solid rgba(0,0,0,.08);
+  cursor: pointer;
+  transition: all .2s ease;
+  box-shadow: 0 4px 14px rgba(0,0,0,.04);
+}
+
+.starlinks-one-tile:hover {
+  transform: translateY(-3px);
+  border-color: #ced4da;
+}
+
+.tile-selected {
+  background: #f8f9fa !important;
+  border-color: #adb5bd !important;
+  box-shadow: 0 0 0 2px #dee2e6 inset;
+}
+
+.starlinks-one-tile-title {
+  font-weight: 600;
+}
+
+.starlinks-one-tile-sub {
+  font-size: .85rem;
+  color: #6c757d;
+}
+</style>
+

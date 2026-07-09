@@ -1,0 +1,33 @@
+adx_attachfilelabel: >-
+  [
+    {
+      "LCID": 1033,
+      "Value": ""
+    }
+  ]
+adx_attachfilemaxsize: 
+adx_attachfilestoragelocation: 756150000
+adx_captcharequired: false
+adx_containername: cx-portal
+adx_entityformid: f728a1d8-0449-405a-b18f-3ec8fa02dd03
+adx_entityname: sh_ticket
+adx_entitypermissionsenabled: true
+adx_entitysourcetype: 756150001
+adx_formname: StarlinksOneTimelineForm
+adx_hideformonsuccess: false
+adx_maximumnooffiles: 5
+adx_mode: 100000001
+adx_name: TicketTimelineForm
+adx_onsuccess: 756150000
+adx_recordidquerystringparametername: id
+adx_redirecturl: 
+adx_redirectwebpage: 
+adx_showcaptchaforauthenticatedusers: false
+adx_storageaccountname: starlinkspowerplatform
+adx_successmessage: >-
+  [
+    {
+      "LCID": 1033,
+      "Value": ""
+    }
+  ]

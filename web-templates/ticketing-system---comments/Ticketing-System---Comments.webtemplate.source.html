@@ -1,0 +1,229 @@
+<!-- ========================= -->
+<!-- 💬 Comments -->
+<!-- ========================= -->
+<div class="container mt-3">
+  <legend>Comments</legend>
+
+  <!-- Existing Comments -->
+  <div id="commentsSection" class="rounded mb-3" style="overflow-y: auto;">
+    <!-- Comments render here -->
+  </div>
+
+  <!-- Add Comment -->
+  <div class="d-flex align-items-start gap-2 rounded">
+    <img src="https://ui-avatars.com/api/?name={{ user.emailaddress1 }}&background=0d6efd&color=fff" 
+         alt="{{ user.emailaddress1 }}" class="rounded-circle" width="40" height="40">
+    <div class="flex-grow-1">
+      <textarea id="newComment" class="form-control mb-2" rows="2" placeholder="Write a comment..." maxlength="2000"></textarea>
+      <div class="d-flex justify-content-between align-items-center">
+      
+      <button type="button" class="btn btn-outline-secondary px-4 py-2 fw-semibold" data-bs-toggle="modal"
+        data-bs-target="#cannedResponsesModal">
+        <i class="bi bi-send me-2"></i> Canned Responses
+      </button>
+      <div class="d-flex justify-content-end">
+        <button id="addCommentBtn" class="btn btn-sm btn-primary px-3" disabled>Post</button>
+      </div>
+   
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+.comment-entry {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 1rem;
+}
+
+.comment-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.comment-body {
+  flex-grow: 1;
+  border-radius: 0.5rem;
+  padding: 0.75rem 1rem;
+}
+
+.comment-existing {
+  background-color: #f8f9fa; /* Greyed-out look for existing comments */
+}
+
+.comment-meta {
+  font-size: 0.85rem;
+  color: #6c757d;
+  margin-bottom: 0.25rem;
+}
+
+.comment-author {
+  font-weight: 600;
+  color: #0d6efd;
+}
+
+.comment-text {
+  white-space: pre-wrap;
+}
+</style>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const commentsSection = document.getElementById("commentsSection");
+  const addCommentBtn = document.getElementById("addCommentBtn");
+  const newCommentBox = document.getElementById("newComment");
+
+  
+  // Context variables
+  const currentUserEmail = "{{ user.emailaddress1 }}"; 
+  const ticketNumber = "{{ ticket.sh_ticket }}";
+
+  // Fetch Comments from Dataverse
+  async function fetchComments() {
+    try {
+
+      if (!ticketNumber || ticketNumber.trim() === "") {
+        console.log("No ticket number. Skipping comment fetch.");
+        renderComments([]); // Optional: clear comments
+        return;
+      }
+
+      const payload = { method: "GET", ticketNumber: ticketNumber };
+
+      const response = await fetch(getCommentsUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+
+      const data = await response.json();
+      console.log("Comments fetched:", data);
+
+      renderComments(data.comments || []);
+    } catch (error) {
+      console.error("Error fetching comments:", error);
+      if (commentsSection) {
+        commentsSection.innerHTML = `<div class="text-danger">Error loading comments.</div>`;
+      }
+    }
+  }
+
+  // Add Comment to Dataverse (via Flow)
+  async function addComment() {
+    const commentText = newCommentBox.value.trim();
+    if (!commentText) return;
+
+    try {
+      // static payload for now (we’ll make dynamic later)
+      const payload = {
+        commentedByEmail: currentUserEmail,
+        ticketNumber: ticketNumber,
+        ticketComment: commentText
+      };
+      addCommentBtn.disabled = true;
+      console.log("🚀 Sending payload:", payload);
+
+      const response = await fetch(addCommentsUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+
+      const result = await response.json();
+      console.log("✅ Comment added:", result);
+
+      newCommentBox.value = "";
+      addCommentBtn.disabled = true;
+
+
+      // Optionally refresh comments after posting
+      await fetchComments();
+    } catch (error) {
+      console.error("❌ Error adding comment:", error);
+      alert("Failed to add comment. Please try again.");
+    }
+  }
+
+  // Render Comments in the UI
+  function renderComments(comments) {
+  if (!commentsSection) return;
+  commentsSection.innerHTML = "";
+
+  if (!comments.length) {
+    //commentsSection.innerHTML = `<div class="text-muted text-center py-2">No comments yet.</div>`;
+    return;
+  }
+
+  comments.forEach((c) => {
+    // Support both Dataverse response and old static comment object
+    const author = c.author || c.sh_commentedbyemail || "Unknown User";
+    const text = c.text || c.sh_commenttext || "";
+    const timestamp = c.timestamp || c.createdon || new Date().toISOString();
+
+    const avatarURL = `https://ui-avatars.com/api/?name=${encodeURIComponent(author)}&background=0d6efd&color=fff`;
+    const formattedDate = new Date(timestamp).toLocaleString();
+
+    // const commentHTML = `
+    //   <div class="comment-entry">
+    //     <img src="${avatarURL}" alt="${author}" class="comment-avatar">
+    //     <div class="comment-body border bg-white">
+    //       <div class="comment-meta">
+    //         <span class="comment-author">${author}</span> · <span>${formattedDate}</span>
+    //       </div>
+    //       <div class="comment-text">${text}</div>
+    //     </div>
+    //   </div>
+    // `;
+
+    const wrapper = document.createElement("div");
+    wrapper.className = "comment-entry";
+
+    wrapper.innerHTML = `
+      <img src="${avatarURL}" alt="${author}" class="comment-avatar">
+      <div class="comment-body border bg-white">
+        <div class="comment-meta">
+          <span class="comment-author"></span> · <span>${formattedDate}</span>
+        </div>
+        <div class="comment-text"></div>
+      </div>
+    `;
+
+    wrapper.querySelector(".comment-author").innerText = author;
+    wrapper.querySelector(".comment-text").innerText = text;
+
+    commentsSection.appendChild(wrapper);
+
+
+    //commentsSection.insertAdjacentHTML("beforeend", commentHTML);
+  });
+
+  // Auto-scroll to the latest comment
+  commentsSection.scrollTop = commentsSection.scrollHeight;
+}
+
+
+  // newCommentBox.addEventListener("input", function () {
+  //   addCommentBtn.disabled = newCommentBox.value.trim().length === 0;
+  // });
+
+  //Comment Button Enable/Disable Logic
+  newCommentBox.addEventListener("input", function () {
+    const hasText = newCommentBox.value.trim().length > 0;
+    addCommentBtn.disabled = !hasText;
+  });
+
+
+  //Bind Comment Button to addComments Function
+  addCommentBtn.addEventListener("click", function (e) {
+    e.preventDefault();
+    addComment();
+  });
+
+  //Load comments on page load
+  fetchComments();
+});
+</script>

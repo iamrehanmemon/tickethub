@@ -1,0 +1,154 @@
+.tab-nav { display:flex; gap:8px; margin-bottom:24px; border-bottom:2px solid #e5e5e5; }
+
+.tab-btn {
+  padding:10px 18px; border:none; background:none;
+  font-size:1rem; color:#666; cursor:pointer; text-decoration:none;
+  border-bottom:3px solid transparent; margin-bottom:-2px;
+  transition:color .2s, border-color .2s;
+}
+
+.tab-btn:hover  { color:#000; text-decoration:none; }
+.tab-btn.active { color:#000; font-weight:600; border-bottom-color:#000; }
+
+.tab-panel { display:block; }
+
+/* 
+.tab-pane {
+    max-height: 0;
+    overflow: hidden;
+    padding: 0;
+    margin: 0;
+    transition: max-height 0.3s ease, padding 0.3s ease;
+}
+
+.tab-pane.is-open {
+    max-height: 5000px;
+    overflow-y: auto;
+}
+
+.nav-underline .nav-link,
+.nav-underline .nav-link:hover,
+.nav-underline .nav-link:focus,
+.nav-underline .nav-link.active {
+    text-decoration: none !important;
+}
+
+#ticketTabs .nav-link {
+    font-size: 1.1rem;
+    padding: 10px 18px;
+    border-radius: 10px;
+    color: #4a4a4a !important;
+    background: #f8f9fa;
+    border: 1px solid #e5e5e5;
+    transition: all .25s ease;
+}
+
+#ticketTabs .nav-link:hover {
+    background: #f1f1f1;
+    color: #000 !important;
+    border-color: #d0d0d0;
+}
+
+
+#ticketTabs .nav-link.active {
+    background: #e8e8e8;
+    border-color: #cfcfcf;
+    color: #000 !important;
+    font-weight: 600;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+.nav-underline .nav-link {
+    border: none !important;
+}
+
+.nav-underline .nav-link.active {
+    border: none !important;
+} */
+
+/* Loader for assigned to and hide the entity list until the filter is applied */
+
+/* Fullscreen overlay */
+#autoFilterOverlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(255, 255, 255, 0.9);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    font-family: "Segoe UI", Arial, sans-serif;
+}
+
+#autoFilterOverlay .spinner {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 4px solid #ccc;
+    border-top-color: #0078d4;
+    animation: spin 0.8s linear infinite;
+    margin-bottom: 1rem;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Hide filters and grid content while loading, we'll show later */
+.entitylist-filter,
+.entitylist-filters {
+    display: none !important;
+}
+
+/* .entitylist,
+.entity-grid {
+    visibility: hidden;
+} */
+
+.table,
+.thead,
+.tbody,
+.tr,
+.td {
+    overflow: visible !important;
+}
+
+/* Fix for Power Pages container overflow clipping */
+.div,
+.section,
+.fieldset,
+.container,
+.row,
+.col {
+    overflow: visible !important;
+}
+
+/* Base dropdown fix */
+.dropdown-menu {
+    position: absolute !important;
+    z-index: 99999 !important;
+    overflow: visible !important;
+}
+
+/* Specifically handle visible/popper-based dropdowns */
+.ul.dropdown-menu.show {
+    position: absolute !important;
+    z-index: 99999 !important;
+    will-change: transform !important;
+}
+
+/* Override Popper transform when clipped */
+.ul.dropdown-menu.show[data-popper-placement] {
+    transform: translate3d(0, 0, 10px) !important;
+    inset: auto !important;
+}
+
+/* Prevent parent clipping */
+.dropdown,
+.dropdown-toggle,
+.dropdown-menu * {
+    overflow: visible !important;
+}

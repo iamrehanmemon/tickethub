@@ -1,0 +1,489 @@
+<!-- BASIC INFORMATION SECTION -->
+<fieldset class="p-4 mb-3 col-12">
+  <legend class="d-flex justify-content-between align-items-center">
+    <span>Basic Information</span>
+
+    <button type="button"
+      class="btn btn-sm btn-outline-secondary sl-toggle-btn"
+      data-target="#basicInfoBody">
+      Expand
+    </button>
+  </legend>
+
+  <!-- Collapsible Body -->
+  <div id="basicInfoBody" class="sl-collapse-body" style="display:block;">
+    <div class="row">
+      <!-- Department -->
+      <div class="col-12 col-md-4 mb-3">
+        <label class="form-label">Department *</label>
+        <select class="form-select" id="sh_department" {% if mode == "view" %} disabled {% endif %} required>
+          {% if ticket.sh_department %}
+            <option selected>{{ ticket.sh_department.name }}</option>
+          {% endif %}
+        </select>
+      </div>
+      <!-- Ticket Type -->
+      <div class="col-12 col-md-4 mb-3">
+        <label class="form-label">Ticket Type *</label>
+        <select class="form-select" id="sh_tickettype" {% if mode == "view" %} disabled {% endif %} required>
+          {% if ticket.sh_tickettype %}
+            <option selected>{{ ticket.sh_tickettype.name }}</option>
+          {% endif %}
+        </select>
+      </div>
+      <!-- Request -->
+      <div class="col-12 col-md-4 mb-3">
+        <label class="form-label">Request *</label>
+        <select class="form-select" id="sh_request" {% if mode == "view" %} disabled {% endif %} required>
+          {% if ticket.sh_request %}
+            <option selected>{{ ticket.sh_request.name }}</option>
+          {% endif %}
+        </select>
+      </div>
+      <!-- Requestor Name -->
+      <div class="col-12 col-md-4 mb-3">
+        <label class="form-label">Requestor Name *</label>
+        <input type="text" class="form-control" id="sh_requestorname" 
+          value="{% if mode == 'view' %}{{ ticket.sh_requestorname }}{% else %}{{ user.fullname }}{% endif %}"
+          {% if mode == 'view' %}readonly{% endif %}
+          required>
+      </div>
+      <!-- Requestor Email -->
+      <div class="col-12 col-md-4 mb-3">
+        <label class="form-label">Requestor Email *</label>
+        <input type="email"
+          class="form-control"
+          id="sh_requestoremail"
+          value="{% if mode == 'view' %}{{ ticket.sh_requestoremail }}{% else %}{{ user.emailaddress1 }}{% endif %}"
+          {% if mode == 'view' %}readonly{% endif %}
+          required>
+      </div>
+    </div>
+  </div>
+</fieldset>
+
+<!-- Read-Only Field Enforcement -->
+<script>
+  const $ = id => document.getElementById(id);
+    document.addEventListener("DOMContentLoaded", function () {
+
+      // Toggle button binding
+      document.querySelectorAll(".sl-toggle-btn").forEach(btn => {
+        const target = document.querySelector(btn.dataset.target);
+
+        target.style.display = "block";
+        btn.textContent = "Hide";
+        btn.classList.add("active");
+
+        btn.addEventListener("click", function () {
+          const isVisible = target.style.display === "block";
+          target.style.display = isVisible ? "none" : "block";
+          btn.textContent = isVisible ? "Expand" : "Hide";
+          btn.classList.toggle("active", !isVisible);
+        });
+      });
+
+    });
+
+
+  //Make fields read only
+  document.addEventListener("DOMContentLoaded", function () {
+    // List of fields that must always be view-only
+    const viewOnlyFields = [ 
+        "#sh_tickettype",
+        "#sh_request",
+        "#sh_requestorname",
+        "#sh_requestoremail"
+    ];
+    // Disable selects and make inputs readonly
+    viewOnlyFields.forEach(selector => {
+        const el = document.querySelector(selector);
+        if (el) {
+            if (el.tagName === "SELECT") {
+                el.disabled = true;
+            } else {
+                el.readOnly = true;
+            }
+
+            // Optional: Add a "view only" look
+            el.classList.add("bg-light");
+        }
+    });
+});
+</script>
+
+<!-- <style>
+/* Smooth collapse animation */
+.sl-collapse-body {
+    transition: all 0.25s ease;
+    overflow: hidden;
+}
+
+/* Toggle button styling (matches your UI) */
+.sl-toggle-btn {
+    font-size: 0.75rem;
+    padding: 4px 10px;
+    border-radius: 8px;
+}
+
+/* When expanded */
+.sl-toggle-btn.active {
+    background: #006F4A;
+    color: white;
+    border-color: #006F4A;
+}
+</style> -->
+ 
+<!-- <style>
+  /* Remove gray background from table rows */
+  fieldset .table-striped > tbody > tr,
+  fieldset .table-striped > tbody > tr:nth-of-type(odd),
+  fieldset .table-striped > tbody > tr:nth-of-type(even) {
+    background-color: transparent !important;
+  }
+
+  /* Remove default Bootstrap table cell shading */
+  fieldset .table td,
+  fieldset .table th {
+    background-color: transparent !important;
+  }
+
+  /* Remove background & border from the attachment table wrapper */
+  fieldset .table {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+
+  /* Remove background from table rows */
+  fieldset .table tr,
+  fieldset .table td,
+  fieldset .table th {
+    background: transparent !important;
+    border: none !important;
+  }
+
+  /* Optional: remove Bootstrap stripe effect */
+  fieldset .table-striped > tbody > tr:nth-of-type(odd) {
+    --bs-table-accent-bg: transparent !important;
+  }
+
+  /* Allow dropdowns to escape any container */
+  .table-responsive,
+  .table,
+  tbody,
+  tr,
+  td,
+  fieldset,
+  section,
+  div.component-wrapper,
+  div.cell-inner,
+  div {
+    overflow: visible !important;
+  }
+
+  /* Fix dropdown positioning */
+  .dropdown-menu {
+    position: absolute !important;
+    z-index: 99999 !important;
+    top: 100% !important;
+    left: 0 !important;
+  }
+
+  /* Collapse animation */
+  .sl-collapse-body {
+    transition: all 0.25s ease;
+  }
+
+  /* Expand/Hide button style */
+  .sl-toggle-btn {
+    font-size: 0.75rem;
+    padding: 4px 10px;
+    border-radius: 8px;
+  }
+
+  .sl-toggle-btn.active {
+    background: #006F4A;
+    color: white;
+    border-color: #006F4A;
+  }
+</style>
+<style>
+  /* Allow dropdowns to escape table boundaries */
+  table { overflow: visible !important; }
+  tbody { overflow: visible !important; }
+  tr { overflow: visible !important; }
+
+  /* Fix for Power Pages container overflow clipping */
+  div, section, fieldset {
+    overflow: visible !important;
+  }
+
+  /* ensures dropdown menu is not cut */
+  .dropdown-menu {
+    transform: translate3d(0, 0, 10px) !important;
+    position: absolute !important;
+    z-index: 9999 !important;
+  }
+</style> -->
+
+<!-- PDF.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
+<script>
+  pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js";
+</script>
+
+<script>
+/* -----------------------------------------------------------
+   CONFIGURATION
+------------------------------------------------------------*/
+var attachmentsflowUrl = "{{ baseurl }}" + "/_api/cloudflow/v1.0/trigger/e14cb26f-bb07-f011-bae3-6045bd69e9dc";
+
+
+/* -----------------------------------------------------------
+   CALL CLOUD FLOW (get file as base64)
+------------------------------------------------------------*/
+function callFlow(filePath, callback) {
+
+  const payload = {
+    eventData: JSON.stringify({ filePath: filePath })
+  };
+
+  shell.ajaxSafePost({
+    url: attachmentsflowUrl,
+    type: "POST",
+    contentType: "application/json",
+    data: JSON.stringify(payload),
+    processData: false,
+    global: false
+  })
+  .done(function(response){
+    const fileData = JSON.parse(response);
+    callback(fileData);
+  })
+  .fail(function(){
+    alert("Error fetching file");
+    hideLoader();
+  });
+}
+
+/* -----------------------------------------------------------
+   DOWNLOAD
+------------------------------------------------------------*/
+function downloadBase64(base64, fileName) {
+  const link = document.createElement("a");
+  link.href = "data:application/pdf;base64," + base64;
+  link.download = fileName || "Document.pdf";
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
+/* -----------------------------------------------------------
+   PRINT
+------------------------------------------------------------*/
+function printBase64(base64) {
+  const bytes = Uint8Array.from(atob(base64), c => c.charCodeAt(0));
+  const blobUrl = URL.createObjectURL(new Blob([bytes], { type:"application/pdf" }));
+  const win = window.open(blobUrl);
+  win.onload = () => win.print();
+}
+
+/* -----------------------------------------------------------
+   VIEW – PDF.js in your modal
+------------------------------------------------------------*/
+function viewPdfBase64(base64, fileName) {
+
+  const viewer = document.getElementById("pdfViewer");
+  viewer.innerHTML = "";
+
+  const bytes = Uint8Array.from(atob(base64), c => c.charCodeAt(0));
+
+  pdfjsLib.getDocument(bytes).promise.then(pdf => {
+
+    for (let p = 1; p <= pdf.numPages; p++) {
+      pdf.getPage(p).then(page => {
+        const viewport = page.getViewport({ scale: 1.5 });
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+
+        canvas.height = viewport.height;
+        canvas.width = viewport.width;
+
+        page.render({ canvasContext: ctx, viewport });
+
+        viewer.appendChild(canvas);
+      });
+    }
+
+    document.getElementById("pdfViewerModalLabel").innerText = fileName;
+    new bootstrap.Modal(document.getElementById("pdfViewerModal")).show();
+  });
+}
+
+/* -----------------------------------------------------------
+   MAIN CLICK HANDLER ( Michel Carlo Style )
+------------------------------------------------------------*/
+document.addEventListener("click", function(e){
+
+  const btn = e.target.closest(".doc-action-item");
+  if (!btn) return;
+
+  e.preventDefault();
+  showLoader();
+
+  const action = btn.dataset.action;
+  const filePath = btn.getAttribute("href");
+
+  callFlow(filePath, function(fileData){
+
+    switch(action){
+      case "view":
+        viewPdfBase64(fileData.filecontents, fileData.filename);
+        break;
+
+      case "download":
+        downloadBase64(fileData.filecontents, fileData.filename);
+        break;
+
+      case "print":
+        printBase64(fileData.filecontents);
+        break;
+    }
+
+    hideLoader();
+  });
+
+});
+</script>
+
+<!-- Format Uploaded On Date in KSA time zone -->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+  function pad2(n) {
+    return String(n).padStart(2, "0");
+  }
+
+  document.querySelectorAll(".local-date").forEach(function (el) {
+
+    let raw = el.getAttribute("data-utc");
+    if (!raw) return;
+
+    // Just convert directly
+    let d = new Date(raw);
+
+    // Add 3 hours
+    d.setHours(d.getHours() + 3);
+
+    // Format dd/mm/yyyy
+    let day = pad2(d.getDate());
+    let month = pad2(d.getMonth() + 1);
+    let year = d.getFullYear();
+
+    // Format 12-hour time
+    let hours = d.getHours();
+    let minutes = pad2(d.getMinutes());
+
+    let ampm = hours >= 12 ? "PM" : "AM";
+    hours = hours % 12;
+    hours = hours === 0 ? 12 : hours;
+
+    // Output
+    el.textContent = `${day}/${month}/${year} ${hours}:${minutes} ${ampm}`;
+  });
+
+});
+</script>
+
+<style>
+  /* ─── Table Background Overrides ─────────────────────────────── */
+
+  /* Remove gray background from table rows */
+  fieldset .table-striped > tbody > tr,
+  fieldset .table-striped > tbody > tr:nth-of-type(odd),
+  fieldset .table-striped > tbody > tr:nth-of-type(even) {
+    background-color: transparent !important;
+  }
+
+  /* Remove default Bootstrap table cell shading */
+  fieldset .table td,
+  fieldset .table th {
+    background-color: transparent !important;
+  }
+
+  /* Remove background & border from the attachment table wrapper */
+  fieldset .table {
+    background:  transparent !important;
+    border:      none !important;
+    box-shadow:  none !important;
+  }
+
+  /* Remove background from table rows */
+  fieldset .table tr,
+  fieldset .table td,
+  fieldset .table th {
+    background: transparent !important;
+    border:     none !important;
+  }
+
+  /* Remove Bootstrap stripe effect */
+  fieldset .table-striped > tbody > tr:nth-of-type(odd) {
+    --bs-table-accent-bg: transparent !important;
+  }
+
+
+  /* ─── Overflow / Dropdown Fixes ──────────────────────────────── */
+
+  /* Allow dropdowns to escape any container */
+  .table-responsive,
+  .table,
+  tbody, tr, td,
+  fieldset, section,
+  div.component-wrapper,
+  div.cell-inner,
+  div {
+    overflow: visible !important;
+  }
+
+  /* Allow dropdowns to escape table boundaries */
+  table  { overflow: visible !important; }
+  tbody  { overflow: visible !important; }
+  tr     { overflow: visible !important; }
+
+  /* Fix for Power Pages container overflow clipping */
+  div, section, fieldset {
+    overflow: visible !important;
+  }
+
+  /* Fix dropdown positioning */
+  .dropdown-menu {
+    position:  absolute !important;
+    z-index:   99999 !important;
+    top:       100% !important;
+    left:      0 !important;
+    transform: translate3d(0, 0, 10px) !important;
+  }
+
+
+  /* ─── UI Components ───────────────────────────────────────────── */
+
+  /* Collapse animation */
+  .sl-collapse-body {
+    transition: all 0.25s ease;
+    overflow: hidden;
+  }
+
+  /* Expand/Hide button style */
+  .sl-toggle-btn {
+    font-size:     0.75rem;
+    padding:       4px 10px;
+    border-radius: 8px;
+  }
+
+  .sl-toggle-btn.active {
+    background:   #006F4A;
+    color:        white;
+    border-color: #006F4A;
+  }
+</style>

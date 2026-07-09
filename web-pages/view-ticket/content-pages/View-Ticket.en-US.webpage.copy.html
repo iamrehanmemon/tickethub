@@ -1,0 +1,1055 @@
+{% assign addCommentsEndPoint = settings["addCommentsEndPoint"] %}
+{% assign getCommentsEndPoint = settings["getCommentsEndPoint"] %}
+{% assign getHistoryLogEndPoint = settings["getHistoryLogEndPoint"] %}
+{% assign baseurl = request.url | split: request.path | first %}
+{% assign ticketId = request.params['id'] %}
+{% assign mode = "view" %}
+
+<script>
+  const addCommentsUrl = "{{ settings.addCommentsEndPoint }}";
+  const getCommentsUrl = "{{ settings.getCommentsEndPoint }}";
+  const getHistoryUrl = "{{ settings.getHistoryLogEndPoint }}";
+  const flowUrl = "{{ settings.submitTicketUrl }}";
+  const baseUrl = "{{ baseurl }}";
+  const ticketId = "{{ ticketId }}";
+   const updateMetadataFlowUrl = "{{ settings.updateMetadataFlowUrl }}";
+</script>
+
+<!-- Fetch Tickets Details -->
+{%- fetchxml ticket_result -%}
+<fetch top="1">
+  <entity name="sh_ticket">
+    <attribute name="sh_ticketstatus" />
+    <attribute name="sh_ticketstatusname" />
+    <all-attributes />
+    <filter>
+      <condition attribute="sh_ticketid" operator="eq" value="{{ ticketId }}" />
+      <condition attribute="createdon" operator="on-or-before" value='{{ "today" | date: "yyyy-MM-dd HH:mm:ss" }}' />
+    </filter>
+  </entity>
+</fetch>
+{%- endfetchxml -%}
+
+{% assign ticket = ticket_result.results.entities[0] %}
+{% assign requestType = ticket.sh_request.name %}
+{% assign parentTicketId = ticket.sh_parentticket.id | default: '' %}
+
+{% assign currentStatus = ticket.sh_ticketstatus.Value | string %}
+
+{% if currentStatus == "126450002" %}
+  {% assign metaDataMode = "view" %}
+{% else %}
+  {% assign metaDataMode = "edit" %}
+{% endif %}
+
+<script>
+  const requestType = "{{ requestType }}";
+</script>
+<!-- End Fetch Tickets Details -->
+
+<!-- Fetch Metadata Details -->
+{% if requestType == "Procurement Request" %}
+  {%- fetchxml metadata_result -%}
+    <fetch>
+    <!-- Table -->
+    <entity name="sh_procurementmetadata">
+      <all-attributes />
+      <!-- Filter By -->
+      <filter type="and">
+          <condition attribute="sh_ticketnumber" operator="eq" value="{{ ticketId }}" />
+          <condition attribute="createdon" operator="on-or-before" value='{{ "today" | date: "yyyy-MM-dd HH:mm:ss" }}' />
+      </filter>
+      <!-- Many To One Relationships -->
+      <!-- <link-entity name="sh_vendors" from="sh_vendorsid" to="sh_vendor" alias="sh_Vendor" link-type="outer">
+        <attribute name="sh_vendorname" />
+      </link-entity> -->
+    </entity>
+  </fetch>
+  {%- endfetchxml -%}
+
+{% elsif requestType == "PO Creation" or requestType == "Vendor Selection" or requestType == "GRN Posting" or requestType == "GRN Entry" %}
+  {%- fetchxml metadata_result -%}
+  <fetch>
+    <entity name="sh_procurementmetadata">
+      <all-attributes />
+      <!-- Filter By -->
+      <filter type="and">
+          <condition attribute="sh_ticketnumber" operator="eq" value="{{ parentTicketId }}" />
+          <condition attribute="createdon" operator="on-or-before" value='{{ "today" | date: "yyyy-MM-dd HH:mm:ss" }}' />
+      </filter>
+      <!-- Many To One Relationships -->
+      <link-entity name="sh_vendors" from="sh_vendorsid" to="sh_vendor" alias="sh_Vendor" link-type="outer">
+        <attribute name="sh_vendorname" />
+      </link-entity>
+    </entity>
+  </fetch>
+  {%- endfetchxml -%}
+
+{% elsif requestType == "HR Request"  %}
+  {%- fetchxml metadata_result -%}
+  <fetch>
+    <entity name="sh_hrmetadata">
+      <all-attributes />
+      <filter>
+          <condition attribute="sh_ticketnumber" operator="eq" value="{{ ticketId }}" />
+          <condition attribute="createdon" operator="on-or-before" value='{{ "today" | date: "yyyy-MM-dd HH:mm:ss" }}' />
+      </filter>
+    </entity>
+  </fetch>
+  {%- endfetchxml -%}
+
+{% elsif requestType == "IT Request" %}
+  {%- fetchxml metadata_result -%}
+  <fetch>
+    <entity name="sh_itmetadata">
+      <all-attributes />
+      <filter>
+        <condition attribute="sh_ticketnumber" operator="eq" value="{{ ticketId }}" />
+        <condition attribute="createdon" operator="on-or-before" value='{{ "today" | date: "yyyy-MM-dd HH:mm:ss" }}' />
+      </filter>
+    </entity>
+  </fetch>
+  {%- endfetchxml -%}
+
+{% elsif requestType == "User Setup & Approver Assignment" or requestType == "Vendor Setup Request" or requestType == "Vendor Mapping" %}
+{%- fetchxml metadata_result -%}
+<fetch>
+    <entity name="sh_itmetadata">
+      <all-attributes />
+      <filter>
+        <condition attribute="sh_ticketnumber" operator="eq" value="{{ parentTicketId }}" />
+        <condition attribute="createdon" operator="on-or-before" value='{{ "today" | date: "yyyy-MM-dd HH:mm:ss" }}' />
+      </filter>
+    </entity>
+  </fetch>
+{%- endfetchxml -%}                                         
+
+{% elsif requestType == "Finance Request" %}
+  {%- fetchxml metadata_result -%}
+  <fetch>
+    <entity name="sh_hrmetadata">
+      <all-attributes />
+      <filter>
+        <condition attribute="sh_ticketnumber" operator="eq" value="{{ ticketId }}" />
+      </filter>
+    </entity>
+  </fetch>
+  {%- endfetchxml -%}
+
+{% elsif requestType == "Consignee Support" %}
+  {%- fetchxml metadata_result -%}
+  <fetch>
+    <entity name="sh_customerservicemetadata">
+      <all-attributes />
+      <filter>
+          <condition attribute="sh_ticketnumber" operator="eq" value="{{ ticketId }}" />
+          <condition attribute="createdon" operator="on-or-before" value='{{ "today" | date: "yyyy-MM-dd HH:mm:ss" }}' />
+      </filter>
+    </entity>
+  </fetch>
+  {%- endfetchxml -%}
+
+{% elsif requestType == "Operations - Live Announcement" or requestType == "Tech Account Creation" or requestType == "Finance Account Creation" or requestType == "Account Manager Assignment" %}
+  {%- fetchxml metadata_result -%}
+  <fetch>
+    <entity name="sh_customeronboardingmetadata">
+      <all-attributes />
+      <filter>
+        <condition attribute="sh_ticketnumber" operator="eq" value="{{ parentTicketId }}" />
+      </filter>
+    </entity>
+  </fetch>
+  {%- endfetchxml -%}
+
+{% elsif requestType == "Customer Onboarding" %}
+  {%- fetchxml metadata_result -%}
+  <fetch>
+    <entity name="sh_customeronboardingmetadata">
+      <all-attributes />
+      <filter>
+        <condition attribute="sh_ticketnumber" operator="eq" value="{{ ticketId }}" />
+      </filter>
+    </entity>
+  </fetch>
+  {%- endfetchxml -%}
+
+{% elsif requestType == "Legal Request" %}
+  {%- fetchxml metadata_result -%}
+  <fetch>
+    <entity name="sh_legalmetadata">
+      <all-attributes />
+      <filter>
+          <condition attribute="sh_ticketnumber" operator="eq" value="{{ ticketId }}" />
+          <condition attribute="createdon" operator="on-or-before" value='{{ "today" | date: "yyyy-MM-dd HH:mm:ss" }}' />
+      </filter>
+    </entity>
+  </fetch>
+  {%- endfetchxml -%}
+
+{% else %}
+  {% assign metadata_result = null %}
+{% endif %}
+
+{% assign metadata = metadata_result.results.entities[0] %}
+<!-- End Fetch Metadata Details -->
+
+<!-- Fetch Attachments -->
+{%- fetchxml attachments_result -%}
+<!-- <fetch>
+  <entity name="sh_ticketattachment">
+    <all-attributes />
+    <filter type="and">
+      <condition attribute="sh_ticketnumber" operator="eq" value="{{ ticketId }}" />
+      <condition attribute="createdon" operator="on-or-before" value='{{ "today" | date: "yyyy-MM-dd HH:mm:ss" }}' />
+    </filter>
+  </entity>
+</fetch> -->
+
+<fetch>
+  <entity name="sh_ticketattachment">
+    <all-attributes />
+    <filter type="and">
+      <filter type="or">
+        <condition attribute="sh_ticketnumber" operator="eq" value="{{ ticketId }}" />
+        <condition attribute="sh_ticketnumber" operator="eq" value="{{ parentTicketId }}" />
+      </filter>
+      <condition attribute="createdon" operator="on-or-before" value='{{ "today" | date: "yyyy-MM-dd HH:mm:ss" }}' />
+    </filter>
+  </entity>
+</fetch>
+{%- endfetchxml -%}
+
+{% comment %}
+
+{% if parentTicketId %}
+  {%- fetchxml attachments_result -%}
+  <fetch>
+    <entity name="sh_ticketattachment">
+      <all-attributes />
+      <filter type="and">
+        <condition attribute="sh_ticketnumber" operator="eq" value="{{ parentTicketId }}" />
+        <condition attribute="createdon" operator="on-or-before" value='{{ "today" | date: "yyyy-MM-dd HH:mm:ss" }}' />
+      </filter>
+    </entity>
+  </fetch>
+  {%- endfetchxml -%}
+{% else %}
+  {%- fetchxml attachments_result -%}
+  <fetch>
+    <entity name="sh_ticketattachment">
+      <all-attributes />
+      <filter type="and">
+        <condition attribute="sh_ticketnumber" operator="eq" value="{{ ticketId }}" />
+        <condition attribute="createdon" operator="on-or-before" value='{{ "today" | date: "yyyy-MM-dd HH:mm:ss" }}' />
+      </filter>
+    </entity>
+  </fetch>
+  {%- endfetchxml -%}
+{% endif %}
+{% endcomment %}
+
+<!-- End Fetch Attachments -->
+
+{% assign showCanned = false %}
+
+{% if requestType == "Procurement Request" and user.roles contains "Starlinks Procurement Team" %}
+  {% assign showCanned = true %}
+{% elsif requestType == "HR Request" and user.roles contains "Starlinks HR Team" %}
+  {% assign showCanned = true %}
+{% elsif requestType == "Consignee Support" and user.roles contains "Starlinks Customer Service Team" %}
+  {% assign showCanned = true %}
+{% elsif requestType == "IT Request" and user.roles contains "Starlinks Technology Team" %}
+  {% assign showCanned = true %}
+{% elsif requestType == "Tech Account Creation" and user.roles contains "Starlinks Technology Team" %}
+  {% assign showCanned = true %}
+{% elsif requestType == "Fulfilment (Mintsoft) Account Creation" and user.roles contains "Starlinks Technology Team" %}
+  {% assign showCanned = true %}
+{% elsif requestType == "Finance Account Creation" and user.roles contains "Starlinks Finance Team" %}
+  {% assign showCanned = true %}
+{% elsif requestType == "Operations - Live Announcement" and user.roles contains "Starlinks Operations Team" %}
+  {% assign showCanned = true %}
+{% elsif requestType == "Legal Request" and user.roles contains "Starlinks Legal Team" %}
+  {% assign showCanned = true %}
+{% endif %}
+
+<!-- Page Header -->
+<div class="container mt-3">
+
+  <!-- Back Button (top-left) -->
+  <div class="mb-3">
+    <a href="/" class="btn btn-secondary d-flex align-items-center">
+      Back to Home
+    </a>
+  </div>
+
+  <!-- Title Row with History Log Button -->
+  <div class="d-flex justify-content-between align-items-center flex-wrap">
+
+    <!-- Left: Ticket Info -->
+    <div class="d-flex align-items-center flex-wrap">
+      <span class="d-flex align-items-center justify-content-center rounded-circle me-3"
+        style="background: #FAEDED; width: 48px; height: 48px;">
+        <!-- Chat / Complaint SVG Icon -->
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+          class="lucide lucide-circle-help w-6 h-6 text-accent">
+          <circle cx="12" cy="12" r="10"></circle>
+          <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+          <path d="M12 17h.01"></path>
+        </svg>
+      </span>
+
+      <div>
+        <h2 class="fw-bold mb-1" style="font-size: 1.8rem;">
+          View Ticket ({{ ticket.sh_ticket }})
+        </h2>
+        <div class="text-muted" style="font-size: 1rem;">
+          <span class="chip">Ticket Status<span class="dot"></span>{{ ticket.sh_ticketstatus.Label }}</span> Please find your ticket details as per below
+        </div>
+      </div>
+    </div>
+    {% if requestType == "Consignee Support"  or requestType == "IT Request"  or requestType == "Legal Request" or requestType == "Procurement Request"%}
+    <!-- Right: History Log Button -->
+    <div class="mt-3 mt-md-0">
+      <!-- <button type="button" class="btn btn-outline-secondary px-4 py-2 fw-semibold" data-bs-toggle="modal"
+        data-bs-target="#cannedResponsesModal">
+        <i class="bi bi-send me-2"></i> Canned Responses
+      </button> -->
+      <button type="button" class="btn btn-outline-secondary px-4 py-2 fw-semibold" data-bs-toggle="modal"
+        data-bs-target="#historyModal">
+        <i class="bi bi-clock-history me-2"></i> View Ticket History Log
+      </button>
+    </div>
+    {% endif %}
+    {% if showCanned %}
+    <!-- Right: History Log Button -->
+    <!-- <div class="mt-3 mt-md-0">
+      <button type="button" class="btn btn-outline-secondary px-4 py-2 fw-semibold" data-bs-toggle="modal"
+        data-bs-target="#cannedResponsesModal">
+        <i class="bi bi-send me-2"></i> Canned Responses
+      </button>
+     <button class="btn btn-outline-secondary btn-sm" type="button" data-bs-toggle="offcanvas" data-bs-target="#notesLogOffcanvas">
+        <i class="bi bi-journal-text"></i> Internal Notes Log
+      </button> 
+    </div> -->
+    {% endif %}
+    <!-- Show Reopen ticket button for Resolved or Completed tickets -->
+     {% if requestType == "Consignee Support" %}
+       {% if  ticket.sh_ticketstatus.Value == "126450011" or  ticket.sh_ticketstatus.Value == "126450002" %}
+          <div class="text-muted" style="font-size: 1rem;">
+            <button type="button" id="reopenTicketBtn" class="btn btn-success mt-3">
+              Reopen
+            </button>
+          </div>
+        {% endif %}
+     {% endif %}
+
+     {% if showCanned %}
+       {% if  requestType == "IT Request" or requestType == "Procurement Request" %}
+          {% if ticket.sh_ticketstatus.Value != "126450002" %}
+            <div class="mt-3 mt-md-0 d-flex gap-2">
+
+              <!-- Edit / Cancel toggle -->
+              <button type="button" id="enableEditBtn" class="btn btn-primary px-4 py-2 fw-semibold">
+                <i class="bi bi-pencil me-2"></i> Edit
+              </button>
+
+              <!-- Save — hidden until edit mode is active -->
+              <button type="button" id="saveChangesBtn" class="btn btn-success px-4 py-2 fw-semibold" style="display:none;">
+                <i class="bi bi-check-lg me-2"></i> Save Changes
+              </button>
+
+            </div>
+          {% endif %}
+        {% endif %}
+      {% endif %}
+  </div>
+</div>
+
+<!-- View Ticket Main Form-->
+<div class="container border p-4 mt-3">
+  <div id="view-ticket-form">
+    <div class="row">
+      {% if requestType == "Procurement Request" or requestType == "PO Creation" or requestType == "Vendor Selection" or requestType == "GRN Posting" or requestType == "GRN Entry" %}
+        {% include "Ticketing System - Procurement Metadata" mode: mode %}
+      {% elsif requestType == "HR Request" %}
+        {% include "Ticketing System - HR Metadata" mode: mode %}
+      {% elsif requestType == "IT Request" or requestType == "User Setup & Approver Assignment" or requestType == "Vendor Setup Request" or requestType == "Vendor Mapping" %}
+       <!-- { include "Ticketing System - IT Metadata" mode: mode } -->
+      {% include "Ticket System - IT Generic Metadata" mode: mode %}
+      {% elsif requestType == "User Setup & Approver Assignment" %}
+       <!-- { include "Ticketing System - IT Metadata" mode: mode } -->
+      {% include "Ticket System - IT Generic Metadata" mode: mode %}
+      {% elsif requestType == "Finance Request" %}
+        {% include "Ticketing System - Finance Metadata" mode: mode %}
+      {% elsif requestType == "Consignee Support" %}
+        {% include "Ticketing System - Customer Support Metadata" mode: mode %}
+      {% elsif requestType == "Legal Request" %}
+        {% include "Ticketing System - Legal Case" %}
+      {% elsif requestType == "Customer Onboarding" or requestType == "Fulfilment (Mintsoft) Account Creation" or requestType == "Operations - Live Announcement" or requestType == "Account Manager Assignment" or requestType == "Tech Account Creation" or requestType == "Finance Account Creation" %}
+        {% include "Ticketing System - eCom Customer Onboarding" mode: mode %}
+        {% include "Ticketing System - Customer Onboarding - Departments Sections" mode: mode %}
+
+        {% else %}
+      <div class="alert alert-secondary mt-3">
+        No metadata form available for this request type.
+      </div>
+      {% endif %}
+      {% include "Ticketing System - Basic Information" mode: mode %}
+
+    </div>
+  </div>
+</div>
+
+{% include "Ticketing System - Attachments" mode: "view" %}
+
+{% if requestType == "Procurement Request" and user.roles contains "Starlinks Procurement Team" %}
+{% include "Ticket System - MetaData Update" mode: metaDataMode %}
+
+{% elsif requestType == "Vendor Selection" and user.roles contains "Starlinks Procurement Team" %} 
+{% include "Ticket System - MetaData Update" mode: metaDataMode %}
+
+{% elsif requestType == "PO Creation" and user.roles contains "Starlinks Procurement Team" %} 
+{% include "Ticket System - MetaData Update" mode: metaDataMode %}
+
+{% elsif requestType == "GRN Entry" and user.emailaddress1 | downcase == ticket.sh_requestoremail | downcase %}
+{% include "Ticket System - MetaData Update" mode: metaDataMode %}
+
+{% elsif requestType == "GRN Posting" and user.roles contains "Starlinks Procurement Team" %} 
+{% include "Ticket System - MetaData Update" mode: metaDataMode %}
+
+{% elsif requestType == "HR Request" and user.roles contains "Starlinks HR Team" %} 
+{% include "Ticket System - MetaData Update" mode: metaDataMode %}
+
+{% elsif requestType == "Consignee Support" and user.roles contains "Starlinks Customer Service Team" %}
+{% include "Ticket System - MetaData Update" mode: metaDataMode %}
+
+{% elsif requestType == "Consignee Support" and user.roles contains "Starlinks Operations Team" %}
+{% include "Ticket System - MetaData Update" mode: metaDataMode %}
+
+{% elsif requestType == "IT Request" and user.roles contains "Starlinks Technology Team" %}
+{% include "Ticket System - MetaData Update" mode: metaDataMode %}
+
+{% elsif requestType == "User Setup & Approver Assignment" and user.roles contains "Starlinks Technology Team" %}
+{% include "Ticket System - MetaData Update" mode: metaDataMode %}
+
+{% elsif requestType == "Vendor Setup Request" and user.roles contains "Starlinks Procurement Team" %}
+{% include "Ticket System - MetaData Update" mode: metaDataMode %}
+
+{% elsif requestType == "Vendor Mapping" and user.roles contains "Starlinks HR Team" %}
+{% include "Ticket System - MetaData Update" mode: metaDataMode %}
+
+{% elsif requestType == "Tech Account Creation" and user.roles contains "Starlinks Technology Team" %}
+{% include "Ticket System - MetaData Update" mode: metaDataMode %}
+
+{% elsif requestType == "Fulfilment (Mintsoft) Account Creation" and user.roles contains "Starlinks Technology Team" %} 
+{% include "Ticket System - MetaData Update" mode: metaDataMode %}
+
+{% elsif requestType == "Finance Account Creation" and user.roles contains "Starlinks Finance Team" %}    
+{% include "Ticket System - MetaData Update" mode: metaDataMode %}
+
+{% elsif requestType == "Operations - Live Announcement" and user.roles contains "Starlinks Operations Team" %}
+{% include "Ticket System - MetaData Update" mode: metaDataMode %}
+
+{% elsif requestType == "Account Manager Assignment" %}       
+{% include "Ticket System - MetaData Update" mode: metaDataMode %}
+
+{% elsif requestType == "Fulfilment (Mintsoft) Account Creation" %}       
+{% include "Ticket System - MetaData Update" mode: metaDataMode %}
+
+{% elsif requestType == "Legal Request" and user.roles contains "Starlinks Legal Team" %}       
+{% include "Ticket System - MetaData Update" mode: metaDataMode %}
+
+{% endif %}
+
+{% include "Ticketing System - Workflow Section" %}
+{% include "Ticketing System - Approvals Section" %}
+
+<!-- Loader, Comments, History Log & Canned Responses -->
+{% include "Ticketing System - Loader" %}
+{% include "Ticketing System - Comments" %}
+{% include "Ticketing System - History Log" %}
+{% include "Ticketing System - Canned Responses" %}
+{% include "Ticketing System - Internal Logs" %}
+
+<!-- PDF Modal -->
+<!-- <div id="pdfViewerModal" aria-labelledby="pdfViewerModal" aria-hidden="true" class="modal fade">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title w-100 text-center" id="pdfViewerModalLabel">PDF Embed</h5>
+        <button type="button" data-bs-dismiss="modal" aria-label="Close" class="btn-close"></button>
+      </div>
+      <div class="modal-body">
+        <div id="pdfViewer"></div>
+      </div>
+      <div class="modal-footer" style="justify-content: flex-start;">
+        <button id="close-pdfviewer" type="button" data-bs-dismiss="modal" class="btn btn-secondary">Close</button>
+      </div>
+    </div>
+  </div>
+</div> -->
+
+<!-- Reopen Confirmation Modal -->
+<div class="modal fade" id="reopenModal" tabindex="-1" aria-labelledby="reopenModalLabel" aria-modal="true" role="dialog">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5 class="modal-title" id="reopenModalLabel">Reopen ticket</h5>
+        <span class="badge bg-secondary ms-auto" id="cancelReopenBadge"
+          style="cursor: pointer; font-size: 0.8rem; padding: 6px 12px;"
+          data-bs-dismiss="modal" role="button" aria-label="Close">
+          Close ✕
+        </span>
+      </div>
+
+      <div class="modal-body">
+        <p class="text-muted" style="font-size: 0.9rem;">
+          Please provide a reason for reopening this ticket.
+        </p>
+        <div class="mb-3">
+          <!-- <label for="reopenComment" class="form-label fw-semibold">
+            Comment <span class="text-danger">*</span>
+          </label> -->
+          <textarea
+            id="reopenComment"
+            class="form-control"
+            rows="4"
+            placeholder="Write here..."></textarea>
+          <div class="invalid-feedback" id="reopenCommentError">
+            This field is required.
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" id="submitReopenBtn" class="btn btn-success">
+          Reopen ticket
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div id="pdfViewerModal" class="modal fade" tabindex="-1">
+  <div class="modal-dialog modal-fullscreen pdf-modal-dialog">
+    <div class="modal-content pdf-modal-content">
+
+      <div class="modal-header">
+        <h5 class="modal-title text-center" id="pdfViewerModalLabel"></h5>
+      </div>
+
+      <div class="modal-body pdf-scroll-container">
+        <div id="pdfViewer" class="pdf-viewer"></div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<style>
+  /* Add margin so fullscreen modal does NOT touch screen edges */
+.pdf-modal-dialog {
+    padding: 20px !important;
+}
+
+/* Modal content styling */
+.pdf-modal-content {
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+/* Scrollable area */
+.pdf-scroll-container {
+    background: #2f3336;
+    height: calc(100vh - 160px); /* Keeps header + footer visible */
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+
+    display: flex;
+    justify-content: center; /* Center horizontally */
+}
+
+/* PDF Viewer area */
+.pdf-viewer {
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Center canvas horizontally */
+    width: 100%;
+    max-width: 100%;
+    padding: 20px;
+}
+
+/* Canvas: ensure it fits within modal, not cut off */
+.pdf-viewer canvas {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    background: white;
+    box-shadow: 0 0 10px rgba(0,0,0,0.25);
+}
+
+</style>
+
+<!-- To see all the Values of Ticket and Consignee Metadata Table -->
+{% include "DEVDEBUG" %}
+
+<!-- Ticket Read Form -->
+<!-- <div class="row sectionBlockLayout text-start" style="display: flex; flex-wrap: wrap; margin: 0px; min-height: auto; padding: 8px;">
+  <div class="container" style="padding: 0px; display: flex; flex-wrap: wrap;">
+    <div class="col-lg-12 columnBlockLayout" style="flex-grow: 1; display: flex; flex-direction: column; min-width: 250px;">{% entityform name: 'Ticket - Portal - Read' %}</div>
+  </div>
+</div> -->
+
+<div class="row sectionBlockLayout text-start"
+  style="display: flex; flex-wrap: wrap; margin: 0px; min-height: auto; padding: 8px;">
+  <div class="container" style="padding: 0px; display: flex; flex-wrap: wrap;">
+    <div class="col-lg-12 columnBlockLayout"
+      style="flex-grow: 1; display: flex; flex-direction: column; min-width: 250px;"></div>
+  </div>
+</div>
+
+<!-- ATTACHMENT UPLOAD MODAL -->
+<div class="modal fade" id="addAttachmentModal" tabindex="-1">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable modal-dialog-centered attachment-modal-dialog">
+    <div class="modal-content">
+
+      <div class="modal-body" id="attachmentModalBody">
+
+        <!-- ⭐ Inject your existing Web Template here -->
+        {% include "Ticketing System - Attachments" mode: "edit" %}
+      </div>
+
+      <div class="modal-footer d-flex align-items-center">
+
+        <span class="text-danger me-auto" 
+              data-bs-toggle="tooltip" 
+              title="Files may take a couple of minutes to process. Viewing them immediately may show an error.">
+            ⚠ Important Info - Files may take a couple of minutes to process. Viewing them immediately may show an error.
+        </span>
+
+        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">
+          Cancel
+        </button>
+
+        <button type="button" id="submitAttachmentBtn" class="btn btn-primary btn-sm">
+          Upload Attachments
+        </button>
+
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<style>
+/* Modal size */
+.attachment-modal-dialog {
+    max-width: 950px;
+    width: 95%;
+}
+
+/* Scroll area */
+#attachmentModalBody {
+    max-height: 65vh;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    padding-right: 8px;
+}
+
+/* Each row spacing */
+#addAttachmentRows .row {
+    margin-bottom: 10px;
+}
+
+/* Dropdown + file input layout */
+#addAttachmentRows .form-select {
+    width: 100%;
+    font-size: 0.9rem;
+}
+#addAttachmentRows .form-control[type='file'] {
+    width: 100%;
+    font-size: 0.9rem;
+}
+</style>
+
+<script>
+// ---------------
+// SUBMIT ATTACHMENTS FROM MODAL
+// ---------------
+document.getElementById("submitAttachmentBtn").addEventListener("click", function () {
+
+    const fileInputs = document.querySelectorAll('#attachmentFields input[type="file"]');
+    const attachments = [];
+
+    // ---------------------
+    // VALIDATION (Mandatory)
+    // ---------------------
+    const attachmentRows = document.querySelectorAll('#attachmentFields .row');
+    let isValid = true;
+
+    attachmentRows.forEach(row => {
+        const typeSelect = row.querySelector("select");
+        const fileInput = row.querySelector("input[type=\"file\"]");
+
+        if (!typeSelect || typeSelect.value === "") {
+            isValid = false;
+        }
+
+        if (!fileInput || fileInput.files.length === 0) {
+            isValid = false;
+        }
+    });
+
+    if (!isValid) {
+        showToast("Please select an attachment type and file for all rows.", "danger");
+        return;
+    }
+
+    // ---------------------
+    // VALIDATION END
+    // ---------------------
+
+    readAllAttachmentsModal(fileInputs, attachments, function () {
+        submitAttachmentUpload(attachments);
+    });
+});
+
+
+// ---------------------
+// READ FILES (same as form but modal-specific)
+// ---------------------
+function readAllAttachmentsModal(inputs, resultArray, callback) {
+    let processed = 0;
+
+    inputs.forEach(input => {
+        const file = input.files[0];
+        if (!file) return countAndCheck();
+
+        const reader = new FileReader();
+
+        reader.onload = function () {
+            const row = input.closest(".row");
+            const select = row.querySelector("select");
+
+            resultArray.push({
+                name: file.name,
+                type: file.type,
+                content: reader.result.split(',')[1], // base64
+                attachmentType: select ? select.value : ""
+            });
+
+            countAndCheck();
+        };
+
+        reader.readAsDataURL(file);
+
+        function countAndCheck() {
+            processed++;
+            if (processed === inputs.length) callback();
+        }
+    });
+}
+
+// ---------------------
+// SUBMIT ATTACHMENTS (modal version of submitSupportTicket)
+// ---------------------
+// async function submitAttachmentUpload(attachments) {
+
+//     // const ticketId = "{{ ticket.sh_ticketid }}";
+//     const ticketId = "{{ parentTicketId }}" || "{{ ticket.sh_ticketid }}";
+
+//     if (!ticketId) {
+//         alert("❌ Ticket ID missing. Cannot upload attachments.");
+//         return;
+//     }
+
+//     showLoader("Uploading attachments...");
+
+//     try {
+//         const response = await fetch(flowUrl, {
+//             method: "POST",
+//             headers: { "Content-Type": "application/json" },
+//             body: JSON.stringify({
+//                 operation: "add-attachments",
+//                 requestorName: `{{user.fullname}}`,
+//                 requestorEmail: `{{user.emailaddress1}}`,
+//                 ticketId: ticketId,
+//                 attachments: attachments
+//             })
+//         });
+
+//       const result = await response.json();
+      
+
+//       if (response.ok && result?.success === true) {
+//         hideLoader();
+//         showToast("Attachments uploaded successfully!", "success");
+
+//         const modal = bootstrap.Modal.getInstance(document.getElementById("addAttachmentModal"));
+//         if (modal) modal.hide();
+
+//         const toastEl = document.getElementById("globalToast");
+//         toastEl.addEventListener("hidden.bs.toast", () => {
+//           location.reload();
+//         }, { once: true });
+
+//       }
+//     } 
+//     catch (err) {
+//       hideLoader();
+//       showToast(result?.message || "Failed to upload attachments.", "danger");
+//     }
+
+    
+
+// }
+
+async function submitAttachmentUpload(attachments) {
+    const ticketId = "{{ parentTicketId }}" || "{{ ticket.sh_ticketid }}";
+
+    if (!ticketId) {
+        alert("❌ Ticket ID missing. Cannot upload attachments.");
+        return;
+    }
+
+    showLoader("Uploading attachments...");
+
+    let result;
+
+    try {
+        const response = await fetch(flowUrl, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                operation: "add-attachments",
+                requestorName: `{{user.fullname}}`,
+                requestorEmail: `{{user.emailaddress1}}`,
+                ticketId: ticketId,
+                attachments: attachments
+            })
+        });
+
+        try {
+            result = await response.json();
+        } catch {
+            result = null; // response wasn't valid JSON (e.g. gateway error page)
+        }
+
+        if (response.ok && result?.success === true) {
+            hideLoader();
+            showToast("Attachments uploaded successfully!", "success");
+
+            const modal = bootstrap.Modal.getInstance(document.getElementById("addAttachmentModal"));
+            if (modal) modal.hide();
+
+            const toastEl = document.getElementById("globalToast");
+            toastEl.addEventListener("hidden.bs.toast", () => {
+                location.reload();
+            }, { once: true });
+        } else {
+            hideLoader();
+            showToast(result?.message || `Upload failed (status ${response.status}).`, "danger");
+        }
+    }
+    catch (err) {
+        hideLoader();
+        showToast(result?.message || err.message || "Failed to upload attachments.", "danger");
+    }
+}
+</script>
+
+<!-- Toast Container -->
+<div class="position-fixed top-0 end-0 p-3" style="z-index: 9999">
+  <div id="globalToast" class="toast align-items-center" role="alert" aria-live="assertive" aria-atomic="true">
+    <div class="d-flex">
+      <div id="globalToastBody" class="toast-body">
+        <!-- Toast message injected via JS -->
+      </div>
+      <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+    </div>
+  </div>
+</div>
+
+<script>
+// var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+// tooltipTriggerList.map(function (tooltipTriggerEl) {
+//   return new bootstrap.Tooltip(tooltipTriggerEl);
+// });
+
+function showToast(message, type = "success") {
+    const toastEl = document.getElementById("globalToast");
+    const toastBody = document.getElementById("globalToastBody");
+
+    // Reset color classes
+    toastEl.classList.remove("text-bg-success", "text-bg-danger", "text-bg-warning", "text-bg-info");
+    
+    // Add Bootstrap contextual background
+    toastEl.classList.add(`text-bg-${type}`);
+
+    // Set message
+    toastBody.textContent = message;
+
+    // Create and show toast
+    const toast = new bootstrap.Toast(toastEl, { delay: 3000 });
+    toast.show();
+}
+
+</script>
+
+ <!-- Open confirmation modal on Reopen button click -->
+<script>
+  // Open modal
+  document.getElementById("reopenTicketBtn").addEventListener("click", function () {
+    var modal = new bootstrap.Modal(document.getElementById("reopenModal"));
+    document.getElementById("reopenComment").value = "";
+    document.getElementById("reopenComment").classList.remove("is-invalid");
+    modal.show();
+  });
+
+  // Clear validation on typing
+  document.getElementById("reopenComment").addEventListener("input", function () {
+    this.classList.remove("is-invalid");
+  });
+
+  // Submit — just hijack the existing update button
+  document.getElementById("submitReopenBtn").addEventListener("click", function () {
+    const commentEl = document.getElementById("reopenComment");
+    const comment = commentEl.value.trim();
+
+    if (!comment) {
+      commentEl.classList.add("is-invalid");
+      return;
+    }
+    commentEl.classList.remove("is-invalid");
+
+    // 1️⃣ Override the status with the Reopen code
+    document.getElementById("sh_ticketstatus").value = "126450013";
+
+    // // 2️⃣ Put the comment into the SLA reason field
+    document.getElementById("sh_comment").value = comment;
+
+    // 3️⃣ Close modal and fire the existing update flow
+    bootstrap.Modal.getInstance(document.getElementById("reopenModal")).hide();
+    document.getElementById("updateTicketBtn").click();
+  });
+</script>
+
+
+<!-- Enable metadataUpdate Submission -->
+{% assign metadataFormName = "" %}
+{% assign metadataTableName = "" %}
+{% assign metadataRowIdColumn = "" %}
+{% assign metadataRowId = "" %}
+
+{% if requestType == "IT Request" %}
+  {% assign metadataFormName = "it-request" %}
+  {% assign metadataTableName = "sh_itmetadatas" %}
+  {% assign metadataRowIdColumn = "sh_itmetadataid" %}
+  {% assign metadataRowId = metadata.sh_itmetadataid %}
+
+{% elsif requestType == "Procurement Request" %}
+  {% assign metadataFormName = "procurement-request" %}
+  {% assign metadataTableName = "sh_procurementmetadatas" %}
+  {% assign metadataRowIdColumn = "sh_procurementmetadataid" %}
+  {% assign metadataRowId = metadata.sh_procurementmetadataid %}
+
+{% elsif requestType == "PO Creation" %}
+  {% assign metadataFormName = "procurement-request" %}
+  {% assign metadataTableName = "sh_procurementmetadata" %}
+  {% assign metadataRowIdColumn = "sh_procurementmetadataid" %}
+  {% assign metadataRowId = metadata.sh_procurementmetadataid %}
+
+{% elsif requestType == "Vendor Selection" %}
+  {% assign metadataFormName = "procurement-request" %}
+  {% assign metadataTableName = "sh_procurementmetadata" %}
+  {% assign metadataRowIdColumn = "sh_procurementmetadataid" %}
+  {% assign metadataRowId = metadata.sh_procurementmetadataid %}
+
+{% elsif requestType == "HR Request" %}
+  {% assign metadataFormName = "hr-request" %}
+  {% assign metadataTableName = "sh_hrmetadata" %}
+  {% assign metadataRowIdColumn = "sh_hrmetadataid" %}
+  {% assign metadataRowId = metadata.sh_hrmetadataid %}
+
+{% elsif requestType == "Finance Request" %}
+  {% assign metadataFormName = "finance-request" %}
+  {% assign metadataTableName = "sh_hrmetadata" %}
+  {% assign metadataRowIdColumn = "sh_hrmetadataid" %}
+  {% assign metadataRowId = metadata.sh_hrmetadataid %}
+
+{% elsif requestType == "Consignee Support" %}
+  {% assign metadataFormName = "consignee-support" %}
+  {% assign metadataTableName = "sh_customerservicemetadata" %}
+  {% assign metadataRowIdColumn = "sh_customerservicemetadataid" %}
+  {% assign metadataRowId = metadata.sh_customerservicemetadataid %}
+
+{% elsif requestType == "Legal Request" %}
+  {% assign metadataFormName = "legal-request" %}
+  {% assign metadataTableName = "sh_legalmetadata" %}
+  {% assign metadataRowIdColumn = "sh_legalmetadataid" %}
+  {% assign metadataRowId = metadata.sh_legalmetadataid %}
+
+{% elsif requestType == "Customer Onboarding" %}
+  {% assign metadataFormName = "customer-onboarding" %}
+  {% assign metadataTableName = "sh_customeronboardingmetadata" %}
+  {% assign metadataRowIdColumn = "sh_customeronboardingmetadataid" %}
+  {% assign metadataRowId = metadata.sh_customeronboardingmetadataid %}
+
+{% elsif requestType == "Tech Account Creation" %}
+  {% assign metadataFormName = "customer-onboarding" %}
+  {% assign metadataTableName = "sh_customeronboardingmetadata" %}
+  {% assign metadataRowIdColumn = "sh_customeronboardingmetadataid" %}
+  {% assign metadataRowId = metadata.sh_customeronboardingmetadataid %}
+
+{% elsif requestType == "Finance Account Creation" %}
+  {% assign metadataFormName = "customer-onboarding" %}
+  {% assign metadataTableName = "sh_customeronboardingmetadata" %}
+  {% assign metadataRowIdColumn = "sh_customeronboardingmetadataid" %}
+  {% assign metadataRowId = metadata.sh_customeronboardingmetadataid %}
+
+{% elsif requestType == "Account Manager Assignment" %}
+  {% assign metadataFormName = "customer-onboarding" %}
+  {% assign metadataTableName = "sh_customeronboardingmetadata" %}
+  {% assign metadataRowIdColumn = "sh_customeronboardingmetadataid" %}
+  {% assign metadataRowId = metadata.sh_customeronboardingmetadataid %}
+
+{% elsif requestType == "Operations - Live Announcement" %}
+  {% assign metadataFormName = "customer-onboarding" %}
+  {% assign metadataTableName = "sh_customeronboardingmetadata" %}
+  {% assign metadataRowIdColumn = "sh_customeronboardingmetadataid" %}
+  {% assign metadataRowId = metadata.sh_customeronboardingmetadataid %}
+
+{% elsif requestType == "Fulfilment (Mintsoft) Account Creation" %}
+  {% assign metadataFormName = "customer-onboarding" %}
+  {% assign metadataTableName = "sh_customeronboardingmetadata" %}
+  {% assign metadataRowIdColumn = "sh_customeronboardingmetadataid" %}
+  {% assign metadataRowId = metadata.sh_customeronboardingmetadataid %}
+{% endif %}
+
+<script>
+  const metadataUpdateInfo = {
+    requestType: "{{ requestType | escape }}",
+    formName: "{{ metadataFormName | escape }}",
+    tableName: "{{ metadataTableName | escape }}",
+    rowIdColumn: "{{ metadataRowIdColumn | escape }}",
+    rowId: "{{ metadataRowId | escape }}"
+  };
+</script>
+
+<style>
+/* Edit mode: give editable fields a visible active state */
+body.edit-mode-active #view-ticket-form select:not([disabled]),
+body.edit-mode-active #view-ticket-form input:not([readonly]):not([type="hidden"]),
+body.edit-mode-active #view-ticket-form textarea:not([readonly]) {
+  border-color: #E2E8E4 !important;
+  background-color: #fff !important;
+  box-shadow: 0 0 0 0.2rem rgba(13,110,253,.15) !important;
+}
+</style>

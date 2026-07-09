@@ -1,0 +1,45 @@
+adx_accept: 
+adx_attachfile: false
+adx_attachfilelabel: >-
+  [
+    {
+      "LCID": 1033,
+      "Value": ""
+    }
+  ]
+adx_attachfilemaxsize: 
+adx_attachfilerestrictaccept: false
+adx_attachfilestoragelocation: 756150000
+adx_containername: cx-portal
+adx_entitypermissionsenabled: true
+adx_entitysourcestep: a74f03f6-0610-49b6-b59e-eb8803c9116e
+adx_entitysourcetype: 100000003
+adx_formname: Ticket - Attachments
+adx_geolocation_maptype: 756150000
+adx_hideformonsuccess: true
+adx_maximumnooffiles: 5
+adx_mode: 100000001
+adx_movepreviouspermitted: true
+adx_name: Attachments
+adx_populatereferenceentitylookupfield: true
+adx_referenceentitylogicalname: sh_ticketattachment
+adx_referenceentityrelationshipname: sh_ticketattachment_TicketNumber_sh_ticket
+adx_referenceentitysourcetype: 100000000
+adx_referenceentitystep: a74f03f6-0610-49b6-b59e-eb8803c9116e
+adx_referencequerystringisprimarykey: true
+adx_referencequerystringname: id
+adx_setentityreference: false
+adx_storageaccountname: starlinkspowerplatform
+adx_submitbuttoncssclass: btn btn-primary button next submit-btn submit-ticket
+adx_submiteventkeyname: procurementSubmitForm
+adx_successmessage: >-
+  [
+    {
+      "LCID": 1033
+    }
+  ]
+adx_targetentitylogicalname: sh_ticket
+adx_type: 100000001
+adx_validationsummarylinksenabled: true
+adx_webform: ea16627f-a49c-4e9c-bb4d-32c5e985e651
+adx_webformstepid: cd11419b-c067-45e1-b714-2504d421758c

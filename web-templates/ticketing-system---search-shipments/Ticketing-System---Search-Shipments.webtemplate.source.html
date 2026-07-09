@@ -1,0 +1,335 @@
+<legend>Search Shipment</legend>
+
+<div class="form-check form-switch mb-3">
+  <input class="form-check-input" type="checkbox" id="searchModeToggle">
+  <label class="form-check-label" for="searchModeToggle">
+    Search by Mobile Number (toggle off for AWB)
+  </label>
+</div>
+
+<!-- AWB Input -->
+<div class="mb-3" id="awbContainer">
+  <label for="sh_awb_search" class="form-label">Airway Bill *</label>
+  <input type="text" class="form-control" id="sh_awb_search" placeholder="Enter AWB number">
+</div>
+
+<!-- Mobile Input -->
+<div class="mb-3 d-none" id="mobileContainer">
+  <label for="sh_mobile_search" class="form-label">Mobile Number *</label>
+  <input type="text" class="form-control" id="sh_mobile_search" placeholder="Enter Mobile Number">
+</div>
+
+<button type="button" id="fetchDataBtn" class="btn btn-primary">Search</button>
+
+<!-- ========================= -->
+<!-- 📋 Results Table -->
+<!-- ========================= -->
+<div class="mt-4 mb-3 col-md" id="resultsSection" style="display:none;">
+  <legend>Shipment Information</legend>
+  <table class="table table-bordered align-middle" id="resultsTable">
+    <thead class="table-light">
+      <tr>
+        <th>AWB</th>
+        <th>Order Number</th>
+        <th>Mobile</th>
+        <th>Status</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+</div>
+
+<!-- ========================= -->
+<!-- 📋 Previous Tickets Section -->
+<!-- ========================= -->
+<div class="mt-4 mb-3 col-md" id="previousTicketsSection" style="display:none;">
+  <legend>Previous Tickets</legend>
+  <table class="table table-bordered align-middle" id="previousTicketsTable">
+    <thead class="table-light">
+      <tr>
+        <th>Ticket #</th>
+        <th>AWB</th>
+        <!-- <th>Order Number</th> -->
+        <th>Mobile</th>
+        <th>Status</th>
+        <th>Created On</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+</div>
+
+<!-- <script>
+document.addEventListener("DOMContentLoaded", function () {
+  const toggle = document.getElementById("searchModeToggle");
+  const awbContainer = document.getElementById("awbContainer");
+  const mobileContainer = document.getElementById("mobileContainer");
+  const fetchBtn = document.getElementById("fetchDataBtn");
+  const resultsSection = document.getElementById("resultsSection");
+  const resultsTableBody = document.querySelector("#resultsTable tbody");
+
+  // 🔁 Toggle between AWB and Mobile search
+  toggle.addEventListener("change", function () {
+    if (toggle.checked) {
+      awbContainer.classList.add("d-none");
+      mobileContainer.classList.remove("d-none");
+    } else {
+      mobileContainer.classList.add("d-none");
+      awbContainer.classList.remove("d-none");
+    }
+  });
+
+  // 🚀 Main Search Logic
+  fetchBtn.addEventListener("click", async function () {
+    const isMobile = toggle.checked;
+    const searchValue = isMobile
+      ? document.getElementById("sh_mobile_search").value.trim()
+      : document.getElementById("sh_awb_search").value.trim();
+
+    if (!searchValue) {
+      alert("Please enter a value before searching.");
+      return;
+    }
+
+    try {
+      showLoader("Fetching shipment details...");
+
+      // 🔹 1. Call Power Automate Flow
+      const response = await fetch(fetchShipmentUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ referenceNumberList: [searchValue] }),
+      });
+
+      const data = await response.json();
+      hideLoader();
+
+      if (!response.ok || !data || data.length === 0) {
+        alert("No shipment records found.");
+        resultsSection.style.display = "none";
+      } else {
+        resultsSection.style.display = "block";
+        resultsTableBody.innerHTML = "";
+
+        data.forEach((item, index) => {
+          const row = `
+            <tr>
+              <td>${item.awb}</td>
+              <td>${item.orderNumber}</td>
+              <td>${item.mobile}</td>
+              <td>${item.type}</td>
+              <td>${item.category}</td>
+              <td><button class="btn btn-sm btn-success populateBtn" data-index="${index}">Populate</button></td>
+            </tr>
+          `;
+          resultsTableBody.insertAdjacentHTML("beforeend", row);
+        });
+
+        document.querySelectorAll(".populateBtn").forEach((btn) => {
+          btn.addEventListener("click", function () {
+            const record = data[this.dataset.index];
+            populateForm(record);
+          });
+        });
+      }
+
+      // 🔹 2. Fetch Previous Tickets
+      fetchAndRenderPreviousTickets(searchValue);
+
+    } catch (error) {
+      console.error("❌ Error calling Power Automate flow:", error);
+      hideLoader();
+      alert("An error occurred while fetching data. Please try again.");
+    }
+  });
+
+  // 🎯 Populate form fields
+  function populateForm(record) {
+    document.getElementById("sh_awb").value = record.awb || "";
+    document.getElementById("sh_ordernumber").value = record.orderNumber || "";
+    document.getElementById("sh_newmobilenumber").value = record.mobile || "";
+    document.getElementById("sh_sourcechannel").value = record.sourceChannel || "";
+    document.getElementById("sh_selfor3pl").value = record.selfOr3PL || "";
+    document.getElementById("sh_hub").value = record.hubCode || "";
+    document.getElementById("sh_plpartner").value = record.courierPartner || "";
+
+    populateDropdown("sh_selfor3pl", "csServiceProvider", record.selfOr3PL);
+    populateDropdown("sh_hub", "csHub", record.hubCode);
+    populateDropdown("sh_plpartner", "3PLPartners", record.courierPartner);
+    populateDropdown("sh_shipmenttype", "shipmentType", "Local محلية");
+
+    document.getElementById("sh_consigneename").value = record.consigneeName || "";
+    document.getElementById("sh_consigneeemail").value = record.consigneeEmail || "";
+    document.getElementById("sh_consigneephone").value = record.consigneePhone || "";
+  }
+});
+</script> -->
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const toggle = document.getElementById("searchModeToggle");
+  const awbContainer = document.getElementById("awbContainer");
+  const mobileContainer = document.getElementById("mobileContainer");
+  const fetchBtn = document.getElementById("fetchDataBtn");
+  const resultsSection = document.getElementById("resultsSection");
+  const resultsTableBody = document.querySelector("#resultsTable tbody");
+
+  // 🔁 Toggle between AWB and Mobile search
+  toggle.addEventListener("change", function () {
+    if (toggle.checked) {
+      awbContainer.classList.add("d-none");
+      mobileContainer.classList.remove("d-none");
+    } else {
+      mobileContainer.classList.add("d-none");
+      awbContainer.classList.remove("d-none");
+    }
+  });
+
+  // 🚀 Main Search Logic
+  fetchBtn.addEventListener("click", async function () {
+    const isMobile = toggle.checked;
+    const searchValue = isMobile
+      ? document.getElementById("sh_mobile_search").value.trim()
+      : document.getElementById("sh_awb_search").value.trim();
+
+    if (!searchValue) {
+      alert("Please enter a value before searching.");
+      return;
+    }
+
+    const payload = isMobile
+    ? { destinationPhoneNumberList: [searchValue] }  // mobile search format
+    : { referenceNumberList: [searchValue] }; 
+
+    try {
+      showLoader("Fetching shipment details...");
+
+      // 🔹 1. Call Power Automate Flow for Shipment
+      const response = await fetch(fetchShipmentUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        //body: JSON.stringify({ referenceNumberList: [searchValue] })
+        body: JSON.stringify(payload)
+      });
+
+      const data = await response.json();
+      hideLoader();
+
+      if (!response.ok || !data || data.length === 0) {
+        alert("No shipment records found.");
+        resultsSection.style.display = "none";
+      } else {
+        resultsSection.style.display = "block";
+        resultsTableBody.innerHTML = "";
+
+        data.forEach((item, index) => {
+          const row = `
+            <tr>
+              <td>${item.awb}</td>
+              <td>${item.orderNumber}</td>
+              <td>${item.mobile}</td>
+              <td>${item.category}</td>
+              <td><button class="btn btn-sm btn-success populateBtn" data-index="${index}">Populate</button></td>
+            </tr>
+          `;
+          resultsTableBody.insertAdjacentHTML("beforeend", row);
+        });
+
+        document.querySelectorAll(".populateBtn").forEach((btn) => {
+          btn.addEventListener("click", function () {
+            const record = data[this.dataset.index];
+            populateForm(record);
+          });
+        });
+      }
+
+      // 🔹 2. Fetch Previous Tickets via Power Automate
+      fetchAndRenderPreviousTickets(searchValue);
+
+    } catch (error) {
+      console.error("❌ Error calling Power Automate flow:", error);
+      hideLoader();
+      alert("An error occurred while fetching data. Please try again.");
+    }
+  });
+
+  // 🎯 Populate form fields
+  function populateForm(record) {
+    document.getElementById("sh_awb").value = record.awb || "";
+    document.getElementById("sh_ordernumber").value = record.orderNumber || "";
+    //document.getElementById("sh_newmobilenumber").value = record.mobile || "";
+    document.getElementById("sh_sourcechannel").value = record.sourceChannel || "";
+    document.getElementById("sh_selfor3pl").value = record.selfOr3PL || "";
+    document.getElementById("sh_hub").value = record.hubCode || "";
+    document.getElementById("sh_plpartner").value = record.courierPartner || "";
+
+    populateDropdown("sh_selfor3pl", "csServiceProvider", record.selfOr3PL);
+    populateDropdown("sh_hub", "csHub", record.hubCode);
+    populateDropdown("sh_plpartner", "3PLPartners", record.courierPartner);
+    populateDropdown("sh_shipmenttype", "shipmentType", "Local محلية");
+
+    document.getElementById("sh_consigneename").value = record.consigneeName || "";
+    document.getElementById("sh_consigneeemail").value = record.consigneeEmail || "";
+    document.getElementById("sh_consigneephone").value = record.consigneeMobile || "";
+    document.getElementById("sh_customername").value = record.customerName || "";
+  }
+
+  // ⚙️ Fetch and Render Previous Tickets (via Power Automate Flow)
+  async function fetchAndRenderPreviousTickets(searchValue) {
+    if (!searchValue) return;
+
+    showLoader("Fetching previous tickets...");
+
+    try {
+      const response = await fetch(fetchTicketsUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ searchValue: searchValue }),
+      });
+
+      const result = await response.json();
+      hideLoader();
+
+      const previousTicketsSection = document.getElementById("previousTicketsSection");
+      const tableBody = document.querySelector("#previousTicketsTable tbody");
+      tableBody.innerHTML = "";
+
+      const tickets = result.tickets || [];
+
+      if (tickets.length === 0) {
+        tableBody.innerHTML = `<tr><td colspan="8" class="text-center text-muted">No previous tickets found.</td></tr>`;
+        previousTicketsSection.style.display = "block";
+        return;
+      }
+
+      tickets.forEach((ticket) => {
+        const viewUrl = `/View-Ticket/?id=${ticket.ticketId}`;
+        const createdOn = ticket.createdOn
+          ? new Date(ticket.createdOn).toLocaleDateString()
+          : "-";
+
+        const row = `
+          <tr>
+            <td><a href="${viewUrl}" target="_blank">${ticket.ticketNumber}</a></td>
+            <td>${ticket.awb || "-"}</td>
+            <td>${ticket.mobile || "-"}</td>
+            <td>${ticket.status || "-"}</td>
+            <td>${createdOn}</td>
+            <td><a href="${viewUrl}" target="_blank" class="btn btn-sm btn-info">View</a></td>
+          </tr>
+        `;
+        tableBody.insertAdjacentHTML("beforeend", row);
+      });
+
+      previousTicketsSection.style.display = "block";
+    } catch (error) {
+      hideLoader();
+      console.error("❌ Error fetching previous tickets:", error);
+      alert("Unable to load previous tickets. Please try again later.");
+    }
+  }
+});
+</script>
+

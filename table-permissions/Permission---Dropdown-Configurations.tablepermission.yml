@@ -1,0 +1,16 @@
+adx_accountrelationship: 
+adx_append: true
+adx_appendto: true
+adx_contactrelationship: 
+adx_create: false
+adx_delete: false
+adx_entitylogicalname: sh_dropdownconfiguration
+adx_entityname: Permission - Dropdown Configurations
+adx_entitypermission_webrole:
+- c5ed9554-79a1-4c31-bea9-a940211a85a0
+adx_entitypermissionid: a0516257-b73a-4986-9992-169640744f1b
+adx_parententitypermission: 
+adx_parentrelationship: 
+adx_read: true
+adx_scope: 756150000
+adx_write: false

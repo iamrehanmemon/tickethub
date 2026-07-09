@@ -1,0 +1,188 @@
+{% assign userEmail = user.emailaddress1 %} {% assign active_tab = request.params['tab'] | default: 'assigned' %}
+<input type="hidden" id="filter_0" value="{{ userEmail }}" />
+<script>
+  const loggedInEmail = "{{ userEmail }}".trim();
+</script>
+
+<!-- Original header -->
+<div class="container mt-4" style="width: 90%; max-width: 90%; margin: 0 auto;">
+  <div class="d-flex justify-content-between align-items-center">
+    <a href="/" class="btn btn-secondary d-flex align-items-center">Back to Home</a>
+    {% if user.roles contains "Starlinks Customer Service Team" %}
+    <button type="button" class="btn btn-success" onclick="window.location.href='/Submit-Ticket/?formname=consignee-support'">Create Ticket</button>
+    {% endif %}
+  </div>
+  <div class="d-flex align-items-center mt-3">
+    <span class="d-flex align-items-center justify-content-center rounded-circle me-3" style="background: #FAEDED; width: 48px; height: 48px;">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"></circle>
+        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+        <path d="M12 17h.01"></path>
+      </svg>
+    </span>
+    <div>
+      <h2 class="fw-bold mb-1" style="font-size: 2rem;">Track Ticket</h2>
+      <div class="text-muted" style="font-size: 1rem;">Monitor the status and progress of your tickets.</div>
+    </div>
+  </div>
+</div>
+
+<div class="container mt-4" style="width: 90%; max-width: 90%; margin: 0 auto;">
+  <div class="ticket-tabs-wrapper">
+    <nav class="tab-nav" role="tablist">
+      <a class="tab-btn {% if active_tab == 'assigned' %}active{% endif %}" href="?tab=assigned">Assigned to Me</a>
+      <a class="tab-btn {% if active_tab == 'requests' %}active{% endif %}" href="?tab=requests">My Requests</a>
+
+      {% if user.roles contains "Department Manager" and (user.roles contains "Starlinks CX Team" or user.roles contains "Starlinks Operations Team" or user.roles contains "Starlinks Technology Team" or user.roles contains "Starlinks Customer Service Team" or user.roles contains "Starlinks Procurement Team" or user.roles contains "Starlinks HR Team" or user.roles contains "Starlinks Legal Team" or user.roles contains "Starlinks Lifestyle and Automotive Vertical" or user.roles contains "Starlinks CPG and Others Vertical" or user.roles contains "Starlinks P2P Team") %}
+      <a class="tab-btn {% if active_tab == 'department' %}active{% endif %}" href="?tab=department">Department</a>
+      {% endif %} {% if user.roles contains "Backend Office" or user.roles contains "Administrators" %}
+      <a class="tab-btn {% if active_tab == 'all' %}active{% endif %}" href="?tab=all">All Tickets</a>
+      {% endif %}
+    </nav>
+
+    <div class="tab-panels">
+      {% if active_tab == 'assigned' %}
+      <div class="tab-panel active" id="tab-assigned">{% include 'entity_list' key:'Tickets Assigned To Me' isNLSearchEnabled:'true' %}</div>
+      {% elsif active_tab == 'requests' %}
+      <div class="tab-panel active" id="tab-requests">{% include 'entity_list' key:'User Tickets' AISummaryTitle:'AI Insights' isAISummaryExpanded:'true' AISummaryChartTypes:'[1,2,3,4,5]' isAISummaryEnabled:'false' isNLSearchEnabled:'true' %}</div>
+      {% elsif active_tab == 'department' and user.roles contains "Department Manager" %}
+      <div class="tab-panel active" id="tab-department">{% if user.roles contains "Starlinks HR Team" %} {% include 'entity_list' key:'HR Tickets list' isNLSearchEnabled:'true'%} {% elsif user.roles contains "Starlinks Lifestyle and Automotive Vertical" %} {% include 'entity_list' key:'IT Lifestyle and Automotive Tickets' isNLSearchEnabled:'true' %} {% elsif user.roles contains "Starlinks CPG and Others Vertical" %} {% include 'entity_list' key:'IT CPG and Other Tickets' isNLSearchEnabled:'true' %} {% elsif user.roles contains "Starlinks Technology Team" %} {% include 'entity_list' key:'ERP Tickets list' isNLSearchEnabled:'true' %} {% elsif user.roles contains "Starlinks CX Team" or user.roles contains "Starlinks Operations Team" %} {% include 'entity_list' key:'Customer Onboarding - Tickets List' isNLSearchEnabled:'true' %} {% elsif user.roles contains "Starlinks Customer Service Team" %} {% include 'entity_list' key:'IT Customer Service Tickets' isNLSearchEnabled:'true' %} {% elsif user.roles contains "Starlinks P2P Team" %} {% include 'entity_list' key:'P2P Tickets List' isNLSearchEnabled:'true' %} {% elsif user.roles contains "Starlinks Procurement Team" %} {% include 'entity_list' key:'Procurement Tickets List' isNLSearchEnabled:'true' %} {% elsif user.roles contains "Starlinks Legal Team" %} {% include 'entity_list' key:'Legal Portal List' isNLSearchEnabled:'true' %} {% endif %}</div>
+      {% elsif active_tab == 'all' %} {% if user.roles contains "Backend Office" or user.roles contains "Administrators" %}
+      <div class="tab-panel active" id="tab-all">{% include 'entity_list' key:'Admin - All Tickets View' %}</div>
+      {% endif %} {% endif %}
+    </div>
+  </div>
+</div>
+
+{% include "Ticketing System - Loader" %} {% include 'helper' %}
+
+<script>
+  (function () {
+
+    function applySLABadges() {
+
+      console.log("Running applySLABadges()...");
+      // const cells = document.querySelectorAll('td[data-attribute="sh_sla"]');
+      const cells = document.querySelectorAll('td[data-attribute="sh_sla"], td[data-attribute$=".sh_sla"]');
+      if (!cells.length) {
+          console.warn("No SLA cells found yet.");
+          return;
+      }
+
+      cells.forEach(cell => {
+
+        const row = cell.closest("tr");
+
+        if (!row) return;
+
+        // ---- Get the SLA breach cell from the same row ----
+
+        // const breachCell = row.querySelector('td[data-attribute="sh_slabreach"]');
+        const breachCell = row.querySelector('td[data-attribute="sh_slabreach"], td[data-attribute$=".sh_slabreach"]');
+
+        if (breachCell?.querySelector('.badge')) return;
+
+        // const breachCell = row.querySelector('td[data-attribute="sh_slabreach"], td[data-attribute$=".sh_slabreach"]');
+
+        // ---- Parse SLA Date ----
+
+        const rawSla = cell.getAttribute("data-value");
+        const slaMatch = rawSla ? rawSla.match(/\/Date\((\d+)\)\//) : null;
+        const slaMs = slaMatch ? Number(slaMatch[1]) : null;
+
+        // ---- Parse Breach Value ----
+
+        const rawBreach = breachCell ? breachCell.getAttribute("data-value") : null;
+        let breachVal = null;
+
+        if (rawBreach === "true" || rawBreach === "1") breachVal = true;
+        if (rawBreach === "false" || rawBreach === "0") breachVal = false;
+
+
+        // ---- Parse Status Value ----
+        const statusCell = row.querySelector('td[data-attribute="sh_ticketstatus"], td[data-attribute$=".sh_ticketstatus"]');
+        const rawStatus = statusCell ? statusCell.getAttribute("data-value") : null;
+        const statusVal = rawStatus ? JSON.parse(rawStatus)?.Value : null;
+        const RESOLVED_STATUSES = [126450011, 126450002]; // Resolved and Completed Status values
+        const isResolved = statusVal !== null && RESOLVED_STATUSES.includes(statusVal);
+
+        // ---- Default badge: missing SLA date OR missing breach value ----
+
+        if (slaMs === null || breachVal === null) {
+
+          if (breachCell) {
+            breachCell.innerHTML = `<span class="badge rounded-pill bg-secondary" style="font-size:0.9rem; padding:6px 10px;">No SLA Set</span>`;
+          }
+          return;
+        }
+
+        // ---- Date windows ----
+
+        const todayStart = new Date();
+        todayStart.setHours(0, 0, 0, 0);
+        const todayMs = todayStart.getTime();
+        const todayEnd = new Date(todayStart);
+        todayEnd.setHours(23, 59, 59, 999);
+        const todayEndMs = todayEnd.getTime();
+        const isToday = slaMs >= todayMs && slaMs <= todayEndMs;
+
+        // ---- Badge matrix ----
+
+        let badgeClass = "";
+        let badgeText = "";
+
+        if (breachVal === true) {
+          badgeClass = "badge rounded-pill bg-danger";
+          badgeText = "Breached SLA";
+        } else {
+
+          // breachVal === false: system says not breached
+
+         if (isToday && !isResolved)  {
+
+            badgeClass = "badge rounded-pill bg-warning text-dark";
+            badgeText = "SLA Due";
+
+          } else {
+
+            // past or future — system confirmed not breached
+
+            badgeClass = "badge rounded-pill bg-success";
+            badgeText = "Within SLA";
+          }
+
+        }
+
+        if (breachCell) {
+          breachCell.innerHTML = `<span class="${badgeClass}" style="font-size:0.9rem; padding:6px 10px;">${badgeText}</span>`;
+        }
+
+      });
+
+      console.log("Finished SLA badge update.");
+    }
+
+    // Re-run badges whenever the grid mutates (pagination, filters)
+    function watchGrid() {
+      let debounce;
+      const observer = new MutationObserver(() => {
+        clearTimeout(debounce);
+        debounce = setTimeout(applySLABadges, 150);
+      });
+      observer.observe(document.querySelector('.tab-panel') || document.body, {
+        childList: true, subtree: true
+      });
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', () => { applySLABadges(); watchGrid(); });
+    } else {
+      applySLABadges();
+      watchGrid();
+    }
+
+  })();
+</script>
+<div class="row sectionBlockLayout text-start" style="display: flex; flex-wrap: wrap; margin: 0px; min-height: auto; padding: 8px; overflow: visible;">
+  <div class="container" style="padding: 0px; display: flex; flex-wrap: wrap; overflow-x: visible; overflow-y: visible;"><div class="col-lg-12 columnBlockLayout" style="flex-grow: 1; display: flex; flex-direction: column; min-width: 250px;"></div></div>
+</div>

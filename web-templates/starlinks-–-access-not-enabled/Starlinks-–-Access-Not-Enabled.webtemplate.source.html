@@ -1,0 +1,127 @@
+{% assign title = title | default: "Oops! Something went wrong" %}
+{% assign subtitle = subtitle | default: "This page is not enabled for your account." %}
+{% assign primaryUrl = primaryUrl | default: "/" %}
+{% assign primaryText = primaryText | default: "Back to home page" %}
+{% assign secondaryUrl = secondaryUrl | default: "mailto:rehan.memon@starlinks-me.com" %}
+{% assign secondaryText = secondaryText | default: "Contact Administrator" %}
+
+<style>
+  :root{
+    --sl-green:#006F4A;
+    --sl-teal:#00A0AF;
+    --sl-orange:#FAA633;
+    --sl-char:#58595B;
+    --sl-grey:#94A0A9;
+    --sl-bg:#ffffff;
+    --sl-soft:#F6F7F8;
+    --sl-border: rgba(88,89,91,.15);
+  }
+
+  .sl-error-wrap{
+    min-height:70vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:28px 14px;
+  }
+
+  .sl-error-card{
+    width:min(980px,100%);
+    border:1px solid var(--sl-border);
+    border-radius:18px;
+    background:#fff;
+    box-shadow:0 12px 30px rgba(0,0,0,.06);
+    overflow:hidden;
+  }
+
+  .sl-error-grid{
+    display:grid;
+    grid-template-columns:1.1fr .9fr;
+  }
+
+  @media(max-width:900px){
+    .sl-error-grid{grid-template-columns:1fr;}
+  }
+
+  .sl-error-left{
+    padding:34px;
+  }
+
+  .sl-badge{
+    display:inline-block;
+    padding:6px 12px;
+    border-radius:999px;
+    background:rgba(0,111,74,.1);
+    color:var(--sl-green);
+    font-weight:700;
+    font-size:12px;
+  }
+
+  .sl-error-title{
+    margin:16px 0 8px;
+    font-size:34px;
+    font-weight:800;
+  }
+
+  .sl-error-sub{
+    color:rgba(0,0,0,.7);
+    max-width:52ch;
+  }
+
+  .sl-actions{
+    display:flex;
+    gap:10px;
+    margin-top:18px;
+    flex-wrap:wrap;
+  }
+
+  .sl-btn{
+    padding:10px 14px;
+    border-radius:12px;
+    border:1px solid var(--sl-border);
+    text-decoration:none;
+    font-weight:700;
+  }
+
+  .sl-btn-primary{
+    background:var(--sl-green);
+    color:#fff;
+    border-color:var(--sl-green);
+  }
+
+  .sl-error-right{
+    background:radial-gradient(1200px 380px at 30% 30%, rgba(0,160,175,.18), transparent 60%),
+               radial-gradient(900px 340px at 70% 70%, rgba(250,166,51,.20), transparent 60%),
+               var(--sl-soft);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+
+  .sl-404{
+    font-size:96px;
+    font-weight:900;
+    opacity:.85;
+  }
+</style>
+
+<div class="sl-error-wrap">
+  <div class="sl-error-card">
+    <div class="sl-error-grid">
+      <div class="sl-error-left">
+        <span class="sl-badge">Access Not Enabled</span>
+        <div class="sl-error-title">{{ title }}</div>
+        <p class="sl-error-sub">{{ subtitle }}</p>
+
+        <div class="sl-actions">
+          <a class="sl-btn sl-btn-primary" href="{{ primaryUrl }}">{{ primaryText }}</a>
+          <a class="sl-btn" href="{{ secondaryUrl }}">{{ secondaryText }}</a>
+        </div>
+      </div>
+
+      <div class="sl-error-right">
+        <div class="sl-404">404</div>
+      </div>
+    </div>
+  </div>
+</div>

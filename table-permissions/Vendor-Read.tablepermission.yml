@@ -1,0 +1,17 @@
+adx_accountrelationship: 
+adx_append: false
+adx_appendto: false
+adx_contactrelationship: 
+adx_create: false
+adx_delete: false
+adx_entitylogicalname: sh_vendors
+adx_entityname: Vendor Read
+adx_entitypermission_webrole:
+- c5ed9554-79a1-4c31-bea9-a940211a85a0
+- d6727e9e-02ca-f011-8543-6045bd6b3a2c
+adx_entitypermissionid: 425fc8bb-5460-4611-beb4-b37f040e2435
+adx_parententitypermission: 
+adx_parentrelationship: 
+adx_read: true
+adx_scope: 756150000
+adx_write: false

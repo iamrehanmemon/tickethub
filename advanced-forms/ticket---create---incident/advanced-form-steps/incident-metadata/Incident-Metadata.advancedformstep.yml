@@ -1,0 +1,36 @@
+adx_accept: 
+adx_allowmultiplefiles: true
+adx_attachfile: true
+adx_attachfilelabel: >-
+  [
+    {
+      "LCID": 1033,
+      "Value": "Attachments"
+    }
+  ]
+adx_attachfilemaxsize: 80000
+adx_attachfilerestrictaccept: false
+adx_attachfilestoragelocation: 756150000
+adx_containername: cx-portal
+adx_entitypermissionsenabled: true
+adx_formname: Incident Metadata
+adx_geolocation_maptype: 756150000
+adx_hideformonsuccess: true
+adx_maximumnooffiles: 15
+adx_mode: 100000000
+adx_movepreviouspermitted: true
+adx_name: Incident Metadata
+adx_populatereferenceentitylookupfield: true
+adx_referenceentitylogicalname: sh_ticket
+adx_referenceentityrelationshipname: sh_incidentmetadata_TicketNumber_sh_ticket
+adx_referenceentitysourcetype: 100000001
+adx_referenceentitystep: 6c41ffc4-1aba-4947-a84b-1aeeaf12359f
+adx_referencequerystringisprimarykey: true
+adx_referencetargetlookupattributelogicalname: sh_ticketnumber
+adx_setentityreference: true
+adx_storageaccountname: starlinkspowerplatform
+adx_targetentitylogicalname: sh_incidentmetadata
+adx_type: 100000001
+adx_validationsummarylinksenabled: true
+adx_webform: 336db71d-95bc-4330-9cb9-9b69f36cfae8
+adx_webformstepid: 33ab1ae1-984b-4e6a-b87f-228ed9a66a87

@@ -1,0 +1,66 @@
+- adx_anonymoususersrole: false
+  adx_authenticatedusersrole: false
+  adx_name: Starlinks Operations Team
+  adx_webroleid: 289326bb-02ca-f011-8543-6045bd6b3a2c
+- adx_anonymoususersrole: false
+  adx_authenticatedusersrole: false
+  adx_name: Starlinks CPG and Others Vertical
+  adx_webroleid: 2d7cc3dc-8f2d-f111-88b3-6045bd6ad297
+- adx_anonymoususersrole: false
+  adx_authenticatedusersrole: false
+  adx_name: Starlinks HR Team
+  adx_webroleid: 599d5ae7-02d4-f011-8544-002248cbd80a
+- adx_anonymoususersrole: false
+  adx_authenticatedusersrole: false
+  adx_name: Starlinks Lifestyle and Automotive Vertical
+  adx_webroleid: 68d25bce-8f2d-f111-88b3-6045bd6ad297
+- adx_anonymoususersrole: false
+  adx_authenticatedusersrole: false
+  adx_description: This web role will be assigned to the managers of the departments.
+  adx_name: Department Manager
+  adx_webroleid: 706af9e5-60d0-f011-8543-0022480dc2d4
+- adx_anonymoususersrole: false
+  adx_authenticatedusersrole: false
+  adx_name: Starlinks Finance Team
+  adx_webroleid: 8d11396e-37d4-f011-8543-6045bd69b99d
+- adx_anonymoususersrole: false
+  adx_authenticatedusersrole: false
+  adx_name: Starlinks Technology Team
+  adx_webroleid: 91803298-02ca-f011-8543-6045bd6b3a2c
+- adx_anonymoususersrole: false
+  adx_authenticatedusersrole: false
+  adx_name: Starlinks Customer Service Team
+  adx_webroleid: 9ac337ab-02ca-f011-8543-6045bd6b3a2c
+- adx_anonymoususersrole: false
+  adx_authenticatedusersrole: false
+  adx_name: Administrators
+  adx_webroleid: a056d286-4322-41f8-82af-46802e0ea645
+- adx_anonymoususersrole: false
+  adx_authenticatedusersrole: false
+  adx_description: This role will be assigned to supervisor responsible for PO Creation tickets in Procurement.
+  adx_name: Starlinks P2P Team
+  adx_webroleid: b8a6c4ed-d742-f111-88b3-6045bd69be5f
+- adx_anonymoususersrole: false
+  adx_authenticatedusersrole: false
+  adx_name: Starlinks CX Team
+  adx_webroleid: c01fb2b4-02ca-f011-8543-6045bd6b3a2c
+- adx_anonymoususersrole: false
+  adx_authenticatedusersrole: true
+  adx_name: Authenticated Users
+  adx_webroleid: c5ed9554-79a1-4c31-bea9-a940211a85a0
+- adx_anonymoususersrole: false
+  adx_authenticatedusersrole: false
+  adx_name: Beta User
+  adx_webroleid: d2d1b496-e3ea-f011-8406-7ced8dacb417
+- adx_anonymoususersrole: false
+  adx_authenticatedusersrole: false
+  adx_name: Starlinks Procurement Team
+  adx_webroleid: d6727e9e-02ca-f011-8543-6045bd6b3a2c
+- adx_anonymoususersrole: false
+  adx_authenticatedusersrole: false
+  adx_name: Starlinks Legal Team
+  adx_webroleid: dd17533d-2be2-f011-8406-70a8a5224032
+- adx_anonymoususersrole: true
+  adx_authenticatedusersrole: false
+  adx_name: Anonymous Users
+  adx_webroleid: eff576d4-1e72-468f-815e-f0909ccd5f05

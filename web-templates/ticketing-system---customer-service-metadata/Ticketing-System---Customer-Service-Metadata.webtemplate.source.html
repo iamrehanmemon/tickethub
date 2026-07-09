@@ -1,0 +1,170 @@
+<!-- Not being used. Can be Removed -->
+
+<fieldset class="p-4 mb-3 col-md">
+  <legend>Customer Support Metadata</legend>
+
+{% capture currentPath %}{{ request.path | downcase }}{% endcapture %}
+  {% assign viewMode = currentPath contains '/view-ticket' %}
+  {% assign metadata = metadata_result.results.entities[0] %}
+
+  <!-- Consignee -->
+  <div class="mb-3">
+    <label for="consignee" class="form-label">Consignee *</label>
+    {% if viewMode %}
+      <input type="text" id="consignee" class="form-control" value="{{ metadata.sh_consignee.name }}" readonly />
+    {% else %}
+      <select id="consignee" class="form-select" required>
+        <option value="">Select Consignee</option>
+        <option>Ali Express</option>
+        <option>Amazon Logistics</option>
+        <option>BlueDart Courier</option>
+        <option>DHL Express</option>
+        <option>FedEx</option>
+        <option>UPS</option>
+      </select>
+    {% endif %}
+  </div>
+
+  <!-- Type -->
+  <div class="mb-3">
+    <label for="csType" class="form-label">Type *</label>
+    {% if viewMode %}
+      <input type="text" class="form-control" value="{{ metadata.sh_type.name }}" readonly />
+    {% else %}
+      <select class="form-select" id="csType" required></select>
+    {% endif %}
+  </div>
+
+  <!-- Category -->
+  <div class="mb-3">
+    <label for="csCategories" class="form-label">Category *</label>
+    {% if viewMode %}
+      <input type="text" class="form-control" value="{{ metadata.sh_category.name }}" readonly />
+    {% else %}
+      <select class="form-select" id="csCategories" required></select>
+    {% endif %}
+  </div>
+
+  <!-- Airway Bill -->
+  <div class="mb-3">
+    <label for="awb" class="form-label">Airway Bill</label>
+    <input
+      type="text"
+      class="form-control"
+      id="awb"
+      value="{{ metadata.sh_awb }}"
+      {% if viewMode %}readonly{% endif %}
+    />
+  </div>
+
+  <!-- Self or 3PL -->
+  <div class="mb-3">
+    <label for="csServiceProvider" class="form-label">Self or 3PL ? *</label>
+    {% if viewMode %}
+      <input type="text" class="form-control" value="{{ metadata.sh_selfor3pl.name }}" readonly />
+    {% else %}
+      <select class="form-select" id="csServiceProvider" required></select>
+    {% endif %}
+  </div>
+
+  <!-- Hub -->
+  <div class="mb-3">
+    <label for="csHub" class="form-label">Hub *</label>
+    {% if viewMode %}
+      <input type="text" class="form-control" value="{{ metadata.sh_hub.name }}" readonly />
+    {% else %}
+      <select class="form-select" id="csHub" required></select>
+    {% endif %}
+  </div>
+
+  <!-- 3PL Partner -->
+  <div class="mb-3">
+    <label for="3PLPartners" class="form-label">3PL Partner *</label>
+    {% if viewMode %}
+      <input type="text" class="form-control" value="{{ metadata.sh_plpartner.name }}" readonly />
+    {% else %}
+      <select class="form-select" id="3PLPartners" required></select>
+    {% endif %}
+  </div>
+
+  <!-- Shipment Type -->
+  <div class="mb-3">
+    <label for="shipmentType" class="form-label">Shipment Type *</label>
+    {% if viewMode %}
+      <input type="text" class="form-control" value="{{ metadata.sh_shipmenttype.name }}" readonly />
+    {% else %}
+      <select class="form-select" id="shipmentType" required></select>
+    {% endif %}
+  </div>
+
+  <!-- Order Number -->
+  <div class="mb-3">
+    <label for="orderNumber" class="form-label">Order Number</label>
+    <input
+      type="text"
+      class="form-control"
+      id="orderNumber"
+      value="{{ metadata.sh_ordernumber }}"
+      {% if viewMode %}readonly{% endif %}
+    />
+  </div>
+
+  <!-- New Mobile Number -->
+  <div class="mb-3">
+    <label for="newMobileNumber" class="form-label">New Mobile Number</label>
+    <input
+      type="text"
+      class="form-control"
+      id="newMobileNumber"
+      value="{{ metadata.sh_newmobilenumber }}"
+      {% if viewMode %}readonly{% endif %}
+    />
+  </div>
+
+  <!-- Source Channel -->
+  <div class="mb-3">
+    <label for="sourceChannel" class="form-label">Source Channel *</label>
+    {% if viewMode %}
+      <input type="text" class="form-control" value="{{ metadata.sh_sourcechannel.name }}" readonly />
+    {% else %}
+      <select class="form-select" id="sourceChannel" required></select>
+    {% endif %}
+  </div>
+</fieldset>
+
+<style>
+  input[readonly], select[disabled] {
+    background-color: #f8f9fa;
+    border-color: #ddd;
+    color: #555;
+    cursor: not-allowed;
+  }
+</style>
+
+<script>
+  
+
+
+  document.addEventListener("DOMContentLoaded", async function () {
+
+    const isViewMode = "{{ request.path | downcase }}"?.includes("/view-ticket");
+    console.log("Detected View Mode:", isViewMode);
+
+    if (isViewMode) {
+      document
+        .querySelectorAll("input, select, textarea, button")
+        .forEach((el) => el.setAttribute("disabled", "disabled"));
+    } else {
+      // ✅ Only load dropdowns if not view mode
+      await loadAllDropdownConfigs();
+      populateDropdown("csType", "csType");
+      populateDropdown("csCategories", "csCategories");
+      populateDropdown("csServiceProvider", "csServiceProvider");
+      populateDropdown("csHub", "csHub");
+      populateDropdown("3PLPartners", "3PLPartners");
+      populateDropdown("shipmentType", "shipmentType");
+      populateDropdown("sourceChannel", "sourceChannel");
+  
+    }
+  });
+</script>

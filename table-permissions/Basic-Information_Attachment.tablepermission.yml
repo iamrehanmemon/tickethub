@@ -1,0 +1,16 @@
+adx_accountrelationship: 
+adx_append: true
+adx_appendto: false
+adx_contactrelationship: 
+adx_create: true
+adx_delete: false
+adx_entitylogicalname: annotation
+adx_entityname: Basic Information_Attachment
+adx_entitypermission_webrole:
+- a056d286-4322-41f8-82af-46802e0ea645
+adx_entitypermissionid: 2abee0f9-4710-4a95-b026-17e0acf90cb7
+adx_parententitypermission: 2dfeab65-b3d6-4295-8c37-ee6a71d51293
+adx_parentrelationship: sh_ticket_Annotations
+adx_read: true
+adx_scope: 756150003
+adx_write: false
