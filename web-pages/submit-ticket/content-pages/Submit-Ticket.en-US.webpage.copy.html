@@ -55,7 +55,7 @@
 <div id="ticketFormContainer" class="container mt-4">
   {% if form_selector == 'system-outage' %} 
   {% webform name: 'Ticket - Create - Incident' %}
-  {% elsif form_selector == 'consignee-support' or form_selector == 'procurement-request' or form_selector == 'customer-onboarding' or form_selector == 'legal-request' %}
+  {% elsif form_selector == 'consignee-support' or form_selector == 'employee-transport-request' or form_selector == 'procurement-request' or form_selector == 'customer-onboarding' or form_selector == 'legal-request' %}
     <div class="sl-card sl-form-wrapper mt-4">
     <form id="create-ticket-form"  enctype="multipart/form-data">
       <div class="row">
@@ -63,9 +63,8 @@
       {% if form_selector == 'procurement-request' %} {% include "Ticketing System - Procurement Metadata" %}
       {% elsif form_selector == 'consignee-support' %} {% include "Ticketing System - Customer Support Metadata" %}
       {% elsif form_selector == 'customer-onboarding' %} {% include "Ticketing System - eCom Customer Onboarding" %}
-      {% elsif form_selector == 'legal-request' %} {% include "Ticketing System - Legal Case" %}
 
-  
+      {% elsif form_selector == 'legal-request' %} {% include "Ticketing System - Legal Case" %}
       {% else %}
       <div class="alert alert-warning">No Metadata Form configured. Please navigate to the correct section.</div>
       {% endif %}
@@ -88,7 +87,7 @@
 
 {% if form_selector == 'system-outage' %} 
   {% webform name: 'Ticket - Create - Incident' %}
-{% elsif form_selector == 'consignee-support' or form_selector == 'procurement-request' or form_selector == 'customer-onboarding' or form_selector == 'legal-request' or form_selector == 'hr-request' or form_selector == 'finance-request' or form_selector == 'it-request' %}
+{% elsif form_selector == 'consignee-support' or form_selector == 'employee-transport-request' or form_selector == 'procurement-request' or form_selector == 'customer-onboarding' or form_selector == 'legal-request' or form_selector == 'hr-request' or form_selector == 'finance-request' or form_selector == 'it-request' %}
 <div class="sl-card sl-form-wrapper mt-4 container">
     <form id="create-ticket-form" enctype="multipart/form-data">
         {% if form_selector == 'consignee-support' %} 
@@ -102,6 +101,7 @@
             {% if form_selector == 'procurement-request' %} {% include "Ticketing System - Procurement Metadata" %}
             {% elsif form_selector == 'hr-request' %} {% include "Ticketing System - HR Metadata" %}
             {% elsif form_selector == 'finance-request' %} {% include "Ticketing System - Finance Metadata" %}
+            {% elsif form_selector == 'employee-transport-request' %} {% include "Ticketing System - Finance Metadata" %}
             {% elsif form_selector == 'it-request' %} {% include "Ticket System - IT Generic Metadata" %}
             {% elsif form_selector == 'consignee-support' %} {% include "Ticketing System - Customer Support Metadata" %}
             {% elsif form_selector == 'customer-onboarding' %} {% include "Ticketing System - eCom Customer Onboarding" %}

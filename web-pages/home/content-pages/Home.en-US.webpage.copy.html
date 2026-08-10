@@ -41,26 +41,27 @@
 
 <!-- Script for Request Cards -->
 <script>
-      const typeConfig = [
-        {
-          key: "request",
-          label: "Request",
-          cards: [
-            { id: "hr-request", title: "HR", desc: "Request HR-related needs all in one place.", btnText: "Submit Request", btnClass: "btn-primary", comingSoon: false },
-            { id: "procurement-request", title: "Procurement", desc: "Raise procurement-related requests.", btnText: "Submit Request", btnClass: "btn-primary", comingSoon: false },
-            { id: "it-request", title: "IT", desc: "Raise IT-related requests and support.", btnText: "Submit Request", btnClass: "btn-primary", comingSoon: false },
-            //{ id: "it-request", title: "IT", desc: "Raise IT-related requests and support.", btnText: "Submit Request", btnClass: "btn-secondary disabled", comingSoon: true },
-            { id: "consignee-support", title: "Consignee Support", desc: "Raise support for consignee-related requests", btnText: "Submit Request", btnClass: "btn-primary", comingSoon: false, requiredRole: "starlinks customer service team" },
-            //{ id: "consignee-support", title: "Consignee Support", desc: "Consignee Support (Coming soon)", btnText: "Coming Soon", btnClass: "btn-secondary disabled", comingSoon: true },
-            { id: "legal-request", title: "Legal", desc: "Raise legal case requests.", btnText: "Submit Request", btnClass: "btn-primary", comingSoon: false, requiredRole: "beta user" },
-            // { id: "customer-onboarding", title: "Customer Onboarding", desc: "Request onboarding for new customers.", btnText: "Submit Request", btnClass: "btn-secondary disabled", comingSoon: true },
-            { id: "finance-request", title: "Finance", desc: "Submit finance-related requests and queries.", btnText: "Submit Request", btnClass: "btn-primary", comingSoon: true },
-            { id: "facilities-request", title: "Facilities & WPS", desc: "Raise facilities & workplace related requests and support.", btnText: "Submit Request", btnClass: "btn-secondary disabled", comingSoon: true },
-            // { id: "asset-management", title: "Asset Management", desc: "Raise asset-related requests.", btnText: "Submit Request", btnClass: "btn-secondary disabled", comingSoon: true },
-            { id: "compliance-risk-management", title: "Compliance & Risk", desc: "Raise compliance & risk related requests.", btnText: "Submit Request", btnClass: "btn-secondary disabled", comingSoon: true }
-          ]
-        }
-      ];
+        const typeConfig = [
+          {
+            key: "request",
+            label: "Request",
+            cards: [
+              { id: "hr-request", title: "HR", desc: "Request HR-related needs all in one place.", btnText: "Submit Request", btnClass: "btn-primary", comingSoon: false },
+              { id: "procurement-request", title: "Procurement", desc: "Raise procurement-related requests.", btnText: "Submit Request", btnClass: "btn-primary", comingSoon: false },
+              { id: "it-request", title: "IT", desc: "Raise IT-related requests and support.", btnText: "Submit Request", btnClass: "btn-primary", comingSoon: false },
+              //{ id: "it-request", title: "IT", desc: "Raise IT-related requests and support.", btnText: "Submit Request", btnClass: "btn-secondary disabled", comingSoon: true },
+              { id: "consignee-support", title: "Consignee Support", desc: "Raise support for consignee-related requests", btnText: "Submit Request", btnClass: "btn-primary", comingSoon: false, requiredRole: "starlinks customer service team" },
+              { id: "legal-request", title: "Legal", desc: "Raise legal related requests.", btnText: "Submit Request", btnClass: "btn-primary", comingSoon: false },
+              // { id: "legal-request", title: "Legal", desc: "Raise legal related requests.", btnText: "Submit Request", btnClass: "btn-primary", comingSoon: false, requiredRole: "beta user" },
+              // { id: "customer-onboarding", title: "Customer Onboarding", desc: "Request onboarding for new customers.", btnText: "Submit Request", btnClass: "btn-secondary disabled", comingSoon: true },
+              { id: "finance-request", title: "Finance", desc: "Submit finance-related requests and queries.", btnText: "Submit Request", btnClass: "btn-primary", comingSoon: true },
+              { id: "facilities-request", title: "Facilities & WPS", desc: "Raise facilities & workplace related requests and support.", btnText: "Submit Request", btnClass: "btn-secondary disabled", comingSoon: true },
+              // { id: "asset-management", title: "Asset Management", desc: "Raise asset-related requests.", btnText: "Submit Request", btnClass: "btn-secondary disabled", comingSoon: true },
+              { id: "compliance-risk-management", title: "Compliance & Risk", desc: "Raise compliance & risk related requests.", btnText: "Submit Request", btnClass: "btn-secondary disabled", comingSoon: true },
+              { id: "employee-transport-request", title: "Employee Transport", desc: "Transportation service for Starlinks Employees", btnText: "Submit Request", btnClass: "btn-primary", comingSoon: false }
+            ]
+          }
+        ];
 
     function populateDropdown() {
       const dropdown = document.getElementById('typeDropdown');

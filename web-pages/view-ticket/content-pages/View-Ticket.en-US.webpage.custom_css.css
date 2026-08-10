@@ -55,3 +55,11 @@ fieldset {
     background: rgba(16, 24, 40, .25);
     display: inline-block;
 }
+.btn-secondary:hover,.btn-secondary:focus{
+  color: #1c232e !important;
+}
+
+.btn-secondary:active{
+    background-color: #E5E7EB !important;
+     color: #1c232e !important;
+}

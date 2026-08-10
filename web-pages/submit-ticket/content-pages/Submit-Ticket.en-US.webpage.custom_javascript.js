@@ -641,6 +641,7 @@ document.getElementById('create-ticket-form').addEventListener('submit', functio
           return {
             projectname: sh_projectname.value,
             serviceneededby: sh_serviceneededby.value,
+            serviceEndDate: sh_serviceenddate.value,
             //projectLocation: sh_location.value,
             countryName: sh_country.value,
             procurementCategory: sh_procurementcategory.value,

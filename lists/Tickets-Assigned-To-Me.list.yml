@@ -781,19 +781,19 @@ adx_views: >-
     "Views": [
       {
         "Type": "View",
+        "ViewId": "fcfe2201-659c-f011-bbd3-002248cbd80a",
         "DisplayName": [
-          {
-            "Type": "LanguageResources",
-            "LCID": 1033,
-            "Value": ""
-          },
           {
             "Type": "LanguageResources",
             "LCID": 1025,
             "Value": ""
+          },
+          {
+            "Type": "LanguageResources",
+            "LCID": 1033,
+            "Value": ""
           }
-        ],
-        "ViewId": "fcfe2201-659c-f011-bbd3-002248cbd80a"
+        ]
       }
     ]
   }
