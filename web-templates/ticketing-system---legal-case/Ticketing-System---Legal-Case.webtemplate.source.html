@@ -1,3 +1,5 @@
+
+
 <fieldset class="p-4 mb-3 col-12">
   <legend>Request Information</legend>
   <div class="row">
@@ -71,7 +73,7 @@
     <!-- Vertical -->
     <div class="col-12 col-md-4 mb-3">
       <label for="sh_vertical" class="form-label">Vertical *</label>
-      <select class="form-select" id="sh_vertical" {% if mode=="view" %} disabled {% endif %} required>
+      <select class="form-select" id="sh_vertical" {% if mode == "view" %} disabled {% endif %} required>
         {% if metadata.sh_vertical %}
         <option selected>{{ metadata.sh_vertical.name }}</option>
         {% endif %}
@@ -81,7 +83,7 @@
     <!-- Request Type -->
     <div class="col-12 col-md-4 mb-3">
       <label for="sh_requesttype" class="form-label">Request Type *</label>
-      <select class="form-select" id="sh_requesttype" {% if mode=="view" %} disabled {% endif %} required>
+      <select class="form-select" id="sh_requesttype" {% if mode == "view" %} disabled {% endif %} required>
         {% if metadata.sh_requesttype %}
         <option selected>{{ metadata.sh_requesttype.name }}</option>
         {% endif %}
@@ -91,7 +93,7 @@
     <!-- NDA Type -->
     <div class="col-12 col-md-4 mb-3">
       <label for="sh_ndatype" class="form-label">NDA Type *</label>
-      <select class="form-select" id="sh_ndatype" {% if mode=="view" %}disabled{% endif %}>
+      <select class="form-select" id="sh_ndatype" {% if mode == "view" %}disabled{% endif %}>
         {% if metadata.sh_ndatype %}
         <option selected>{{ metadata.sh_ndatype.name }}</option>
         {% endif %}
@@ -101,7 +103,7 @@
     <!-- Contract Category -->
     <div class="col-12 col-md-4 mb-3">
       <label for="sh_contractcategory" class="form-label">Contract Category *</label>
-      <select class="form-select" id="sh_contractcategory" {% if mode=="view" %}disabled{% endif %}>
+      <select class="form-select" id="sh_contractcategory" {% if mode == "view" %}disabled{% endif %}>
         {% if metadata.sh_contractcategory %}
         <option selected>{{ metadata.sh_contractcategory.name }}</option>
         {% endif %}
@@ -111,19 +113,19 @@
     <!-- Claim Amount -->
     <div class="col-12 col-md-4 mb-3">
       <label for="sh_claimamount" class="form-label">Claim Amount *</label>
-      <input type="text" class="form-control" id="sh_claimamount" value="{{ metadata.sh_claimamount }}" {% if mode=="view" %}readonly{% endif %}>
+      <input type="text" class="form-control" id="sh_claimamount" value="{{ metadata.sh_claimamount }}" {% if mode == "view" %}readonly{% endif %}>
     </div>
 
     <!-- Counterparty Name -->
     <div class="col-12 col-md-4 mb-3">
       <label for="sh_counterpartyname" class="form-label">Counterparty Name *</label>
-      <input type="text" class="form-control" id="sh_counterpartyname" value="{{ metadata.sh_counterpartyname }}" {% if mode=="view" %}readonly{% endif %}>
+      <input type="text" class="form-control" id="sh_counterpartyname" value="{{ metadata.sh_counterpartyname }}" {% if mode == "view" %}readonly{% endif %}>
     </div>
 
     <!-- Termination Type -->
     <div class="col-12 col-md-4 mb-3">
       <label for="sh_terminationtype" class="form-label">Termination Type *</label>
-      <select class="form-select" id="sh_terminationtype" {% if mode=="view" %}disabled{% endif %}>
+      <select class="form-select" id="sh_terminationtype" {% if mode == "view" %}disabled{% endif %}>
         {% if metadata.sh_terminationtype %}
         <option selected>{{ metadata.sh_terminationtype.name }}</option>
         {% endif %}
@@ -133,37 +135,37 @@
     <!-- Dispute explanation -->
     <div class="col-12 mb-3">
       <label for="sh_disputeexplanation" class="form-label">Dispute Explanation *</label>
-      <textarea class="form-control" id="sh_disputeexplanation" rows="2" {% if mode=='view' %}readonly{% endif %}>{{ metadata.sh_disputeexplanation }}</textarea>
+      <textarea class="form-control" id="sh_disputeexplanation" rows="2" {% if mode == 'view' %}readonly{% endif %}>{{ metadata.sh_disputeexplanation }}</textarea>
     </div>
 
     <!-- Agreement Type -->
     <div class="col-12 col-md-4 mb-3">
       <label for="sh_agreementtype" class="form-label">Agreement Type *</label>
-      <input type="text" class="form-control" id="sh_agreementtype" value="{{ metadata.sh_agreementtype }}" {% if mode=="view" %}readonly{% endif %}>
+      <input type="text" class="form-control" id="sh_agreementtype" value="{{ metadata.sh_agreementtype }}" {% if mode == "view" %}readonly{% endif %}>
     </div>
 
     <!-- Service Good Type -->
     <div class="col-12 col-md-4 mb-3">
       <label for="sh_servicesgoodtype" class="form-label">Service Good Type *</label>
-      <input type="text" class="form-control" id="sh_servicesgoodtype" value="{{ metadata.sh_servicesgoodtype }}" {% if mode=="view" %}readonly{% endif %}>
+      <input type="text" class="form-control" id="sh_servicesgoodtype" value="{{ metadata.sh_servicesgoodtype }}" {% if mode == "view" %}readonly{% endif %}>
     </div>
 
     <!--  Go live date -->
     <div class="col-12 col-md-4 mb-3">
       <label for="sh_golivedate" class="form-label">Go Live Date *</label>
-      <input type="date" class="form-control" id="sh_golivedate" value="{{ metadata.sh_golivedate | date: 'yyyy-MM-dd'}}" {% if mode=='view' %}readonly{% endif %}>
+      <input type="date" class="form-control" id="sh_golivedate" value="{{ metadata.sh_golivedate | date: 'yyyy-MM-dd'}}" {% if mode == 'view' %}readonly{% endif %}>
     </div>
  
     <!-- Expected savings -->
     <div class="col-12 col-md-4 mb-3">
       <label for="sh_expectedsavings" class="form-label">Expected Savings </label>
-      <input type="text" class="form-control" id="sh_expectedsavings" value="{{ metadata.sh_expectedsavings}}" {% if mode=="view" %}readonly{% endif %}>
+      <input type="text" class="form-control" id="sh_expectedsavings" value="{{ metadata.sh_expectedsavings}}" {% if mode == "view" %}readonly{% endif %}>
     </div>
 
     <!-- Supporting Appendix Included -->
     <div class="col-12 col-md-4 mb-3">
       <label for="sh_supportingappendixincluded" class="form-label">Supporting Appendix Included </label>
-      <select class="form-select" id="sh_supportingappendixincluded" {% if mode=="view" %}disabled{% endif %}>
+      <select class="form-select" id="sh_supportingappendixincluded" {% if mode == "view" %}disabled{% endif %}>
         {% if metadata.sh_supportingappendixincluded %}
         <option selected>{{ metadata.sh_supportingappendixincluded.name }}</option>
         {% endif %}
@@ -173,7 +175,7 @@
     <!-- Insurance Status -->
     <div class="col-12 col-md-4 mb-3">
       <label for="sh_insurancestatus" class="form-label">Insurance Status </label>
-      <select class="form-select" id="sh_insurancestatus" {% if mode=="view" %}disabled{% endif %}>
+      <select class="form-select" id="sh_insurancestatus" {% if mode == "view" %}disabled{% endif %}>
         {% if metadata.sh_insurancestatus %}
         <option selected>{{ metadata.sh_insurancestatus.name }}</option>
         {% endif %}
@@ -183,13 +185,13 @@
     <!-- Reason for no insurance -->
     <div class="col-12 mb-3">
       <label for="sh_reasonfornoinsurance" class="form-label">Reason for No Insurance *</label>
-      <textarea class="form-control" id="sh_reasonfornoinsurance" rows="2" {% if mode=='view' %}readonly{% endif %}>{{ metadata.sh_reasonfornoinsurance }}</textarea>
+      <textarea class="form-control" id="sh_reasonfornoinsurance" rows="2" {% if mode == 'view' %}readonly{% endif %}>{{ metadata.sh_reasonfornoinsurance }}</textarea>
     </div>
     
     <!-- Starlinks Template Usage -->
     <div class="col-12 col-md-4 mb-3">
       <label for="sh_starlinkstemplateusage" class="form-label">Starlinks Template Usage *</label>
-      <select class="form-select" id="sh_starlinkstemplateusage" {% if mode=="view" %}disabled{% endif %}>
+      <select class="form-select" id="sh_starlinkstemplateusage" {% if mode == "view" %}disabled{% endif %}>
         {% if metadata.sh_starlinkstemplateusage %}
         <option selected>{{ metadata.sh_starlinkstemplateusage.name }}</option>
         {% endif %}
@@ -199,7 +201,7 @@
     <!-- Reason for not using template -->
     <div class="col-12 mb-3">
       <label for="sh_reasonfornotusingtemplate" class="form-label">Please specify reason for not using template *</label>
-      <textarea class="form-control" id="sh_reasonfornotusingtemplate" rows="2" {% if mode=='view' %}readonly{% endif %}>{{ metadata.sh_reasonfornotusingtemplate }}</textarea>
+      <textarea class="form-control" id="sh_reasonfornotusingtemplate" rows="2" {% if mode == 'view' %}readonly{% endif %}>{{ metadata.sh_reasonfornotusingtemplate }}</textarea>
     </div>
     
     <!-- Subitter Department -->
@@ -225,7 +227,7 @@
     <!-- ====== Comments field ====== -->
     <div class="col-12 mb-3">
       <label for="sh_comment" class="form-label">Please insert comments and information relevant to your request</label>
-      <textarea class="form-control" id="sh_comment" rows="3" {% if mode=='view' %}readonly{% endif %}>{{ metadata.sh_comment }}</textarea>
+      <textarea class="form-control" id="sh_comment" rows="3" {% if mode == 'view' %}readonly{% endif %}>{{ metadata.sh_comment }}</textarea>
     </div>
 
   </div>

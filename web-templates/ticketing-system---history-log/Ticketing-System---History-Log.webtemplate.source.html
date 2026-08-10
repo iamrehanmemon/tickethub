@@ -133,6 +133,7 @@ document.addEventListener("DOMContentLoaded", function () {
   // FIX DATE LOGIC (WORKS FOR ANY FORMAT)
   // ==============================
   function formatDateValue(dateString) {
+    console.log(dateString)
     if (!dateString) return "Unknown Date";
 
     // If Flow sends 11/12/2025 02:15 PM
@@ -144,7 +145,20 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     return parsedDate.toLocaleString();
+    // return parsedDate.toLocaleString('en-US', {
+    //         timeZone: 'Asia/Riyadh',
+    //         year: 'numeric',
+    //         month: '2-digit',
+    //         day: '2-digit',
+    //         hour: '2-digit',
+    //         minute: '2-digit',
+    //         hour12: true
+    //     });
   }
+
+
+
+
 
   // Open modal → fetch logs
   const historyModal = document.getElementById("historyModal");

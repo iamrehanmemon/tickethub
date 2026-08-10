@@ -40,10 +40,20 @@
 
     <!-- Service Needed By -->
     <div class="col-12 col-md-4 mb-3">
-      <label for="sh_serviceneededby" class="form-label">Service Needed By *</label>
+      <!-- <label for="sh_serviceneededby" class="form-label">Service Needed By *</label> -->
+      <label for="sh_serviceneededby" class="form-label">Service Start Date *</label>
       <input type="date" class="form-control" id="sh_serviceneededby"
 
         value="{% if metadata.sh_serviceneededby %}{{ metadata.sh_serviceneededby | date: 'yyyy-MM-dd' }}{% endif %}"
+        {% if mode == "view" %}readonly{% endif %}
+        required>
+    </div>
+    <!-- Service End Date -->
+    <div class="col-12 col-md-4 mb-3">
+      <label for="sh_serviceenddate" class="form-label">Service End Date *</label>
+      <input type="date" class="form-control" id="sh_serviceenddate"
+
+        value="{% if metadata.sh_serviceenddate %}{{ metadata.sh_serviceenddate | date: 'yyyy-MM-dd' }}{% endif %}"
         {% if mode == "view" %}readonly{% endif %}
         required>
     </div>

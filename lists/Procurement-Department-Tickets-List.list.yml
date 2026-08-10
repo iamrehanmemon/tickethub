@@ -1,6 +1,7 @@
 adx_calendar_initialview: 756150001
 adx_calendar_style: 756150000
 adx_calendar_timezonemode: 756150000
+adx_emptylisttext: ''
 adx_entitylistid: 58c881a0-555d-4808-8b45-4f4ccc851426
 adx_entityname: sh_ticket
 adx_entitypermissionsenabled: true
@@ -27,14 +28,7 @@ adx_settings: >-
     "ItemActions": [
       {
         "Type": "CrmEntityFormView-DetailsAction",
-        "RecordIdQueryStringParameterName": "id",
-        "TargetType": 1,
-        "OnComplete": 0,
-        "RedirectWebpageId": "d1b5d983-5436-d5ea-da56-782f5eeb5d30",
-        "RedirectUrl": "",
-        "EntityFormId": "",
-        "ShowModal": 0,
-        "Confirmation": [
+        "SuccessMessage": [
           {
             "Type": "LanguageResources",
             "LCID": 1025,
@@ -46,7 +40,14 @@ adx_settings: >-
             "Value": ""
           }
         ],
-        "SuccessMessage": [
+        "RecordIdQueryStringParameterName": "id",
+        "TargetType": 1,
+        "OnComplete": 0,
+        "RedirectWebpageId": "d1b5d983-5436-d5ea-da56-782f5eeb5d30",
+        "RedirectUrl": "",
+        "EntityFormId": "",
+        "ShowModal": 0,
+        "Confirmation": [
           {
             "Type": "LanguageResources",
             "LCID": 1025,

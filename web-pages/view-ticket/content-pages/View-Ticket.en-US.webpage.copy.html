@@ -98,6 +98,19 @@
   </fetch>
   {%- endfetchxml -%}
 
+{% elsif requestType == "Offboarding Acceptance" or requestType == "HRBP Acceptance" or requestType == "Department Clearances" or requestType == "Separation Preparation" or requestType == "Final Payment Confirmation" %}
+{%- fetchxml metadata_result -%}
+<fetch>
+    <entity name="sh_hrmetadata">
+      <all-attributes />
+      <filter>
+        <condition attribute="sh_ticketnumber" operator="eq" value="{{ parentTicketId }}" />
+        <condition attribute="createdon" operator="on-or-before" value='{{ "today" | date: "yyyy-MM-dd HH:mm:ss" }}' />
+      </filter>
+    </entity>
+  </fetch>
+{%- endfetchxml -%}  
+
 {% elsif requestType == "IT Request" %}
   {%- fetchxml metadata_result -%}
   <fetch>
@@ -195,16 +208,6 @@
 
 <!-- Fetch Attachments -->
 {%- fetchxml attachments_result -%}
-<!-- <fetch>
-  <entity name="sh_ticketattachment">
-    <all-attributes />
-    <filter type="and">
-      <condition attribute="sh_ticketnumber" operator="eq" value="{{ ticketId }}" />
-      <condition attribute="createdon" operator="on-or-before" value='{{ "today" | date: "yyyy-MM-dd HH:mm:ss" }}' />
-    </filter>
-  </entity>
-</fetch> -->
-
 <fetch>
   <entity name="sh_ticketattachment">
     <all-attributes />
@@ -277,7 +280,7 @@
 
   <!-- Back Button (top-left) -->
   <div class="mb-3">
-    <a href="/" class="btn btn-secondary d-flex align-items-center">
+    <a href="/Track-Ticket" class="btn btn-secondary d-flex align-items-center">
       Back to Home
     </a>
   </div>
@@ -308,18 +311,39 @@
         </div>
       </div>
     </div>
-    {% if requestType == "Consignee Support"  or requestType == "IT Request"  or requestType == "Legal Request" or requestType == "Procurement Request"%}
-    <!-- Right: History Log Button -->
-    <div class="mt-3 mt-md-0">
-      <!-- <button type="button" class="btn btn-outline-secondary px-4 py-2 fw-semibold" data-bs-toggle="modal"
-        data-bs-target="#cannedResponsesModal">
-        <i class="bi bi-send me-2"></i> Canned Responses
-      </button> -->
+    <!-- Right: Parent Ticket Link + History Log Button -->
+    <div class="mt-3 mt-md-0 d-flex align-items-center gap-2">
+
+      {% if parentTicketId != '' %}
+      <a href="/View-Ticket/?id={{ ticket.sh_parentticket.id }}" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:5px;padding:4px 10px;font-size:12px;
+               font-weight:500;border:1px solid #d1d5db;border-radius:6px;color:#374151;
+               text-decoration:none;background:#ffffff;white-space:nowrap"
+              onmouseover="this.style.background='#f9fafb';this.style.borderColor='#9ca3af'"
+              onmouseout="this.style.background='#ffffff';this.style.borderColor='#d1d5db'">
+              <svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path d="M5 2H2a1 1 0 0 0-1 1v7a1 1 0 0 0 1 1h7a1 1 0 0 0 1-1V7" />
+                <path d="M8 1h3m0 0v3m0-3L5 7" />
+              </svg>
+              View Parent Ticket
+            </a>
+      {% endif %}
+
+      {% if requestType == "Consignee Support"  or requestType == "IT Request"  or requestType == "Legal Request" or requestType == "Procurement Request" %}
       <button type="button" class="btn btn-outline-secondary px-4 py-2 fw-semibold" data-bs-toggle="modal"
         data-bs-target="#historyModal">
         <i class="bi bi-clock-history me-2"></i> View Ticket History Log
       </button>
+      {% endif %}
+
     </div>
+    {% if requestType == "Consignee Support"  or requestType == "IT Request"  or requestType == "Legal Request" or requestType == "Procurement Request"%}
+    <!-- Right: History Log Button -->
+    <!-- <div class="mt-3 mt-md-0">
+      <button type="button" class="btn btn-outline-secondary px-4 py-2 fw-semibold" data-bs-toggle="modal"
+        data-bs-target="#historyModal">
+        <i class="bi bi-clock-history me-2"></i> View Ticket History Log
+      </button>
+    </div> -->
     {% endif %}
     {% if showCanned %}
     <!-- Right: History Log Button -->
@@ -372,7 +396,7 @@
     <div class="row">
       {% if requestType == "Procurement Request" or requestType == "PO Creation" or requestType == "Vendor Selection" or requestType == "GRN Posting" or requestType == "GRN Entry" %}
         {% include "Ticketing System - Procurement Metadata" mode: mode %}
-      {% elsif requestType == "HR Request" %}
+      {% elsif requestType == "HR Request" or requestType == "Offboarding Acceptance" or requestType == "HRBP Acceptance" or requestType == "Department Clearances" or requestType == "Separation Preparation" or requestType == "Final Payment Confirmation" %}
         {% include "Ticketing System - HR Metadata" mode: mode %}
       {% elsif requestType == "IT Request" or requestType == "User Setup & Approver Assignment" or requestType == "Vendor Setup Request" or requestType == "Vendor Mapping" %}
        <!-- { include "Ticketing System - IT Metadata" mode: mode } -->
@@ -385,7 +409,7 @@
       {% elsif requestType == "Consignee Support" %}
         {% include "Ticketing System - Customer Support Metadata" mode: mode %}
       {% elsif requestType == "Legal Request" %}
-        {% include "Ticketing System - Legal Case" %}
+        {% include "Ticketing System - Legal Case" mode: mode %}
       {% elsif requestType == "Customer Onboarding" or requestType == "Fulfilment (Mintsoft) Account Creation" or requestType == "Operations - Live Announcement" or requestType == "Account Manager Assignment" or requestType == "Tech Account Creation" or requestType == "Finance Account Creation" %}
         {% include "Ticketing System - eCom Customer Onboarding" mode: mode %}
         {% include "Ticketing System - Customer Onboarding - Departments Sections" mode: mode %}
@@ -418,7 +442,7 @@
 {% elsif requestType == "GRN Posting" and user.roles contains "Starlinks Procurement Team" %} 
 {% include "Ticket System - MetaData Update" mode: metaDataMode %}
 
-{% elsif requestType == "HR Request" and user.roles contains "Starlinks HR Team" %} 
+{% elsif (requestType == "HR Request" or requestType == "Separation Preparation" or requestType == "Final Payment Confirmation") and user.roles contains "Starlinks HR Team" %} 
 {% include "Ticket System - MetaData Update" mode: metaDataMode %}
 
 {% elsif requestType == "Consignee Support" and user.roles contains "Starlinks Customer Service Team" %}

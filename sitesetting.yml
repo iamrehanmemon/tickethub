@@ -292,6 +292,11 @@
   adx_name: MultiLanguage/DisplayLanguageCodeInURL
   adx_sitesettingid: c31f93cb-0bc8-4043-b87b-f08e851b1eb3
   adx_value: False
+- adx_description: Flow URL for Fetching DocuSign Statuses
+  adx_envvar_schema: sh_DocuSignStatusFlowUrl
+  adx_name: DocuSign/StatusFlowUrl
+  adx_sitesettingid: c37b42a2-118b-f111-8077-70a8a520a5db
+  adx_source: 1
 - adx_name: Authentication/OpenIdConnect/AzureAD/Caption
   adx_sitesettingid: c4844fec-3c8e-f011-b4cb-002248cbd80a
   adx_value: Starlinks

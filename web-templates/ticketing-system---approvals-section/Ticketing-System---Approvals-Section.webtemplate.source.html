@@ -451,1039 +451,363 @@
 })();
 </script>
 
-{% comment %}
-{% if ticket.sh_approvalid %}
-<div class="container border p-4 mt-3">
-    <fieldset class="p-4 mb-3 col-12">
-        <legend class="d-flex justify-content-between align-items-center">
-            <span>Approvals Section</span>
-        </legend>
-        <div class="approval-container">
-            <div id="approval-section" data-flow-url="{{ settings['approvalFlowResponseEndPoint'] }}"
-                data-current-user="{{ user.emailaddress1 }}">
-                <div id="approval-body"></div>
-            </div>
-        </div>
-    </fieldset>
-</div>
-{% endif %} 
+{% assign docuSignEnvelopeStatusEndPoint = settings["DocuSign/StatusFlowUrl"] %}
 
-<style>
-  .approval-container {
-    margin-top: 24px;
+{% if ticket.sh_docusignenvelopeid %}
+<div class="container border p-4 mt-3">
+  <fieldset class="p-4 mb-3 col-12">
+    <legend class="d-flex justify-content-between align-items-center">
+      <span>Signatures Section</span>
+    </legend>
+    <div id="signature-section"
+         data-envelope-id="{{ ticket.sh_docusignenvelopeid }}"
+         data-flow-url="{{ docuSignEnvelopeStatusEndPoint }}">
+      <div id="signature-body"></div>
+    </div>
+  </fieldset>
+</div>
+
+<!--
+  FLOW RESPONSE CONTRACT (as returned by the DocuSign status flow)
+  -----------------------------------------------------------------
+  POST { "envelopeId": "<ticket.sh_docusignenvelopeid>" }
+
+  {
+    "envelopeId": "e6bb209c-faca-802e-808d-5137c6751ce1",
+    "overallStatus": "Sent",              // Sent | Completed | Declined | Voided (case varies)
+    "totalCount": 9,
+    "completedCount": 0,
+    "declinedCount": 0,
+    "allCompleted": false,
+    "recipients": [
+      {
+        "role": "Finance",                // recipient's role label — doubles as display name
+        "email": "sara.alamin@starlinks-me.com",
+        "status": "created | sent | delivered | completed | declined | voided",
+        "order": "1",                     // string; groups recipients into stages
+        "sentDateTime": "2026-07-28T13:58:41.1900000Z",   // null until sent
+        "completedDateTime": null          // set once signed/declined
+      }
+      // recipient count is dynamic — sometimes fewer, sometimes more
+    ]
   }
 
-  /* Match the card styling from View Ticket */
-  .approval-card {
+  NOTES:
+  - Kept intentionally simple: recipients are sorted by "order" and just
+    displayed with role, email, status, and dates. No turn-taking or
+    "your signature required" logic — that's left out on purpose.
+  - If your flow's HTTP trigger URL contains a SAS signature (sig=...),
+    remember that anyone viewing page source can see and call it directly.
+-->
+
+<style>
+  .sig-card {
     background: #ffffff;
-    border-radius: 12px;
-    border: 1px solid #e5e5e5;
+    border-radius: 10px;
+    border: 1px solid #e5e7eb;
     overflow: hidden;
   }
 
-  .approval-header {
-    background: #ffffff;
-    padding: 24px;
-    border-bottom: 1px solid #e5e5e5;
+  .sig-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid #e5e7eb;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
   }
 
-  .approval-title {
-    font-size: 16px;
+  .sig-title {
+    font-size: 14px;
     font-weight: 600;
-    color: #000000;
-    margin: 0 0 12px 0;
+    color: #111827;
+    margin: 0 0 8px 0;
   }
 
-  .approval-meta {
+  .sig-meta {
     display: flex;
     align-items: center;
-    gap: 16px;
+    gap: 8px;
     flex-wrap: wrap;
   }
 
-  .status-badge {
+  .sig-badge {
     display: inline-flex;
     align-items: center;
-    padding: 6px 14px;
-    border-radius: 6px;
-    font-size: 13px;
-    font-weight: 500;
-  }
-
-  .status-pending {
-    background: #fef3c7;
-    color: #92400e;
-  }
-
-  .status-approved {
-    background: #d1fae5;
-    color: #065f46;
-  }
-
-  .status-rejected {
-    background: #fee2e2;
-    color: #991b1b;
-  }
-
-  .approval-timeline {
-    padding: 24px;
-  }
-
-  .timeline-item {
-    display: flex;
-    gap: 16px;
-    padding-bottom: 28px;
-    position: relative;
-  }
-
-  .timeline-item:last-child {
-    padding-bottom: 0;
-  }
-
-  .timeline-item:not(:last-child)::after {
-    content: '';
-    position: absolute;
-    left: 19px;
-    top: 48px;
-    bottom: 0;
-    width: 2px;
-    background: #e5e5e5;
-  }
-
-  .timeline-dot {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 16px;
-    font-weight: 600;
-    flex-shrink: 0;
-    z-index: 1;
-    background: #f3f4f6;
-    color: #6b7280;
-  }
-
-  .timeline-dot.pending {
-    background: #f3f4f6;
-    color: #6b7280;
-    border: 2px solid #e5e5e5;
-  }
-
-  .timeline-dot.approved {
-    background: #10b981;
-    color: white;
-    border: none;
-  }
-
-  .timeline-dot.rejected {
-    background: #ef4444;
-    color: white;
-    border: none;
-  }
-
-  .timeline-content {
-    flex: 1;
-  }
-
-  .approver-info {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 6px;
-  }
-
-  .approver-name {
-    font-size: 15px;
-    font-weight: 600;
-    color: #000000;
-  }
-
-  .you-badge {
-    display: inline-block;
-    background: #dbeafe;
-    color: #1e40af;
-    font-size: 11px;
-    font-weight: 600;
     padding: 3px 10px;
-    border-radius: 4px;
-    margin-left: 8px;
-  }
-
-  .decision-badge {
-    font-size: 13px;
+    border-radius: 20px;
+    font-size: 12px;
     font-weight: 500;
-    padding: 6px 12px;
-    border-radius: 6px;
   }
 
-  .decision-badge.approved {
-    background: #d1fae5;
-    color: #065f46;
-  }
+  .sig-badge-pending   { background: #fef3c7; color: #92400e; }
+  .sig-badge-completed { background: #d1fae5; color: #065f46; }
+  .sig-badge-declined  { background: #fee2e2; color: #991b1b; }
+  .sig-badge-type      { background: #f3f4f6; color: #374151; }
 
-  .decision-badge.rejected {
-    background: #fee2e2;
-    color: #991b1b;
-  }
-
-  .timeline-dates {
-    font-size: 13px;
-    color: #6b7280;
-    margin-bottom: 10px;
-  }
-
-  .timeline-comment {
-    font-size: 14px;
-    color: #374151;
-    margin: 0 0 16px 0;
-    line-height: 1.5;
-  }
-
-  .timeline-comment.empty {
+  .sig-created {
+    font-size: 12px;
     color: #9ca3af;
-    font-style: italic;
   }
 
-  .action-panel {
-    background: #f9fafb;
-    border: 1px solid #e5e5e5;
-    border-radius: 8px;
-    padding: 20px;
-    margin-top: 16px;
-  }
-
-  .comment-textarea {
-    width: 100%;
-    padding: 12px 14px;
-    border: 1px solid #d1d5db;
-    border-radius: 8px;
-    font-size: 14px;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-    resize: vertical;
-    min-height: 80px;
-    box-sizing: border-box;
+  .sig-refresh {
+    flex-shrink: 0;
     background: #ffffff;
-  }
-
-  .comment-textarea:focus {
-    outline: none;
-    border-color: #10b981;
-    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
-  }
-
-  .comment-textarea::placeholder {
-    color: #9ca3af;
-  }
-
-  .action-buttons {
-    display: flex;
-    gap: 10px;
-    margin-top: 14px;
-  }
-
-  .btn {
-    padding: 10px 24px;
-    border: none;
-    border-radius: 8px;
-    font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-
-  .btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-
-  .btn-approve {
-    background: #10b981;
-    color: white;
-  }
-
-  .btn-approve:hover:not(:disabled) {
-    background: #059669;
-  }
-
-  .btn-reject {
-    background: #ef4444;
-    color: white;
-  }
-
-  .btn-reject:hover:not(:disabled) {
-    background: #dc2626;
-  }
-
-  .btn-refresh {
-    background: white;
     border: 1px solid #d1d5db;
     color: #374151;
-    padding: 8px 16px;
-    font-size: 13px;
+    padding: 6px 14px;
+    font-size: 12px;
+    font-weight: 500;
     border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
   }
 
-  .btn-refresh:hover {
+  .sig-refresh:hover {
     background: #f9fafb;
     border-color: #9ca3af;
   }
 
-  .error-message {
-    background: #fee2e2;
-    color: #991b1b;
-    padding: 16px 20px;
-    border-radius: 8px;
-    border: 1px solid #fecaca;
-    font-size: 14px;
+  .sig-list {
+    padding: 4px 0;
   }
 
-  .toast {
-    position: fixed;
-    bottom: 24px;
-    right: 24px;
-    z-index: 9999;
-    padding: 14px 24px;
-    border-radius: 8px;
+  .sig-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 14px 20px;
+  }
+
+  .sig-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+
+  .sig-avatar-pending   { background: #f3f4f6; color: #6b7280; border: 2px solid #e5e7eb; }
+  .sig-avatar-completed { background: #d1fae5; color: #065f46; border: 2px solid #a7f3d0; }
+  .sig-avatar-declined  { background: #fee2e2; color: #991b1b; border: 2px solid #fecaca; }
+
+  .sig-row-body {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .sig-row-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 3px;
+  }
+
+  .sig-name {
     font-size: 14px;
+    font-weight: 600;
+    color: #111827;
+  }
+
+  .sig-decision {
+    font-size: 12px;
     font-weight: 500;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    padding: 3px 10px;
+    border-radius: 20px;
+    white-space: nowrap;
   }
 
-  .toast.success {
-    background: #d1fae5;
-    color: #065f46;
-    border: 1px solid #a7f3d0;
+  .sig-decision-completed { background: #d1fae5; color: #065f46; }
+  .sig-decision-declined  { background: #fee2e2; color: #991b1b; }
+
+  .sig-date {
+    font-size: 12px;
+    color: #9ca3af;
+    margin-bottom: 4px;
   }
 
-  .toast.danger {
+  .sig-msg {
+    font-size: 13px;
+    margin: 0;
+    line-height: 1.5;
+  }
+
+  .sig-error {
     background: #fee2e2;
     color: #991b1b;
+    padding: 14px 18px;
+    border-radius: 8px;
     border: 1px solid #fecaca;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
   }
 
-  .skeleton {
-    background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
+  .sig-skeleton {
+    background: linear-gradient(90deg, #f3f4f6 25%, #e9eaec 50%, #f3f4f6 75%);
     background-size: 200% 100%;
-    animation: skeleton-loading 1.5s ease-in-out infinite;
-    border-radius: 6px;
+    animation: sig-shimmer 1.5s ease-in-out infinite;
+    border-radius: 5px;
   }
 
-  @keyframes skeleton-loading {
-    0% { background-position: 200% 0; }
+  @keyframes sig-shimmer {
+    0%   { background-position: 200% 0; }
     100% { background-position: -200% 0; }
   }
 </style>
-<script>
-  (async function () {
-    const section = document.getElementById("approval-section");
-    const approvalId = "{{ ticket.sh_approvalid }}";
-    const currentUser = section?.dataset.currentUser?.toLowerCase().trim();
-    const flowUrl = section?.dataset.flowUrl;
 
-    if (!approvalId || approvalId.trim() === "") {
-      if (section) section.style.display = "none";
+<script>
+(async function () {
+  const section     = document.getElementById("signature-section");
+  const envelopeId  = section?.dataset.envelopeId;
+  const flowUrl     = section?.dataset.flowUrl;
+
+  if (!envelopeId || envelopeId.trim() === "") {
+    if (section) section.style.display = "none";
+    return;
+  }
+
+  async function loadSignatureData(showSkeleton = true) {
+    if (showSkeleton) {
+      document.getElementById("signature-body").innerHTML = skeletonHTML();
+    }
+
+    if (!flowUrl || flowUrl.trim() === "") {
+      document.getElementById("signature-body").innerHTML =
+        `<div class="sig-error">Signature status flow URL is not configured.</div>`;
       return;
     }
 
-    // ── Load ───────────────────────────────────────────────────────────────────
-    async function loadApprovalData(showSkeleton = true) {
-      if (showSkeleton) {
-        document.getElementById("approval-body").innerHTML = skeletonHTML();
-      }
+    try {
+      const res = await fetch(flowUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        cache: "no-store",
+        body: JSON.stringify({ envelopeId })
+      });
 
-      try {
-        
-        // Generate current datetime in ISO format
-        const now = new Date().toISOString();
+      if (!res.ok) throw new Error(`Flow call failed: ${res.status}`);
 
-        const [approvalRes, requestsRes, responsesRes] = await Promise.all([
-          fetch(`/_api/msdyn_flow_approvals?$filter=(msdyn_flow_approvalid eq '${approvalId}' and createdon le ${now})&$top=1`, {
-            cache: "no-store"
-          }),
+      const envelope = await res.json();
 
-          fetch(`/_api/msdyn_flow_approvalrequests?$filter=(_msdyn_flow_approvalrequest_approval_value eq '${approvalId}' and createdon le ${now})&$orderby=msdyn_flow_approvalrequest_stepnumber asc`, {
-            cache: "no-store"
-          }),
-
-          fetch(`/_api/msdyn_flow_approvalresponses?$filter=(_msdyn_flow_approvalresponse_approval_value eq '${approvalId}' and createdon le ${now})`, {
-            cache: "no-store"
-          })
-        ]);
-
-        if (!approvalRes.ok) throw new Error(`Approval: ${approvalRes.status}`);
-        if (!requestsRes.ok) throw new Error(`Requests: ${requestsRes.status}`);
-        if (!responsesRes.ok) throw new Error(`Responses: ${responsesRes.status}`);
-
-        const approval = (await approvalRes.json()).value?.[0];
-        const requests = (await requestsRes.json()).value || [];
-        const responses = (await responsesRes.json()).value || [];
-
-        // Log stage information for debugging
-        requests.forEach((req, idx) => {
-          console.log(`Request ${idx + 1}:`, {
-            owner: req["_ownerid_value@OData.Community.Display.V1.FormattedValue"],
-            stage: req.msdyn_flow_approvalrequest_stage,
-            statecode: req.statecode,
-            pending: req.statecode === 0
-          });
-        });
-
-        if (!approval) {
-          document.getElementById("approval-body").innerHTML =
-            `<div class="approval-card"><div style="padding:24px;text-align:center;color:#6c757d;font-size:14px">No approval record found.</div></div>`;
-          return;
-        }
-
-        // ── Fetch systemuser emails for exact matching ─────────────────────────
-        let userEmailMap = {};
-        const ownerIds = [...new Set(requests.map(r => r["_ownerid_value"]).filter(Boolean))];
-
-        if (ownerIds.length > 0) {
-          const userFilter = ownerIds.map(id => `systemuserid eq ${id}`).join(" or ");
-          const usersRes = await fetch(
-            `/_api/systemusers?$select=systemuserid,internalemailaddress&$filter=${userFilter}`,
-            { cache: "no-store" }
-          );
-          if (usersRes.ok) {
-            const usersData = await usersRes.json();
-            usersData.value?.forEach(u => {
-              userEmailMap[u.systemuserid.toLowerCase()] = u.internalemailaddress?.toLowerCase();
-            });
-          }
-          console.log("✅ User email map:", userEmailMap);
-        }
-
-        // ── Exact email match for pending approver ─────────────────────────────
-        const myRequest = requests.find(r => {
-          const ownerEmail = userEmailMap[r["_ownerid_value"]?.toLowerCase()] ?? "";
-          const isPending = r.statecode === 0;
-          return ownerEmail === currentUser && isPending;
-        });
-
-        console.log("✅ Approval:", approval);
-        console.log("✅ Requests:", requests);
-        console.log("✅ Responses:", responses);
-        console.log("✅ My request:", myRequest ?? "None — not a pending approver");
-
-        renderApproval(approval, requests, responses, myRequest, userEmailMap);
-
-      } catch (err) {
-        console.error("Approval load error:", err);
-        document.getElementById("approval-body").innerHTML =
-          `<div class="error-message">
-            Failed to load approval details.
-            <button onclick="window.loadApprovalData()" class="btn btn-refresh" style="margin-left:12px">Retry</button>
-          </div>`;
-      }
-    }
-    // ── Submit ─────────────────────────────────────────────────────────────────
-    async function submitResponse(response) {
-      const comments = document.getElementById("approval-comments")?.value?.trim() || "";
-
-        // ✅ Get approvalRequestId from button data attribute
-      const btn = document.getElementById(`btn-${response.toLowerCase()}`);
-      const approvalRequestId = btn?.dataset?.requestId;
-
-      if (!approvalRequestId) {
-        showToast("Approval request ID not found", "danger");
+      if (!envelope || !Array.isArray(envelope.recipients)) {
+        document.getElementById("signature-body").innerHTML =
+          `<div class="sig-card"><div style="padding:20px;text-align:center;color:#9ca3af;font-size:13px">No signature record found.</div></div>`;
         return;
       }
 
-      ["approve", "reject"].forEach(r => {
-        const b = document.getElementById(`btn-${r}`);
-        if (b) { b.disabled = true; }
-      });
-      // const btn = document.getElementById(`btn-${response.toLowerCase()}`);
-      if (btn) btn.textContent = "Submitting...";
-
-      try {
-        const res = await fetch(flowUrl, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ approvalId, approvalRequestId, response, comments, responderEmail: currentUser })
-        });
-
-        if (!res.ok) throw new Error(`Flow: ${res.status}`);
-
-        showToast(
-          response === "Approve" ? "Approved successfully" : "Rejection submitted.",
-          response === "Approve" ? "success" : "danger"
-        );
-        
-        // Reload after 2 seconds
-        setTimeout(() => loadApprovalData(), 2000);
-
-      } catch (err) {
-        console.error("Submit error:", err);
-        showToast("Something went wrong. Please try again.", "danger");
-        ["approve", "reject"].forEach(r => {
-          const b = document.getElementById(`btn-${r}`);
-          if (b) { b.disabled = false; }
-        });
-        if (btn) btn.textContent = response === "Approve" ? "Approve" : "Reject";
-      }
-    }
-
-    // ── Render ─────────────────────────────────────────────────────────────────
-    // function renderApproval(approval, requests, responses, myRequest, userEmailMap) {
-    //   const result = approval.msdyn_flow_approval_result;
-    //   const isApproved = result === "Approve";
-    //   const isRejected = result === "Reject";
-    //   const isPending = !result;
-
-    //   const statusClass = isPending ? "status-pending" : isApproved ? "status-approved" : "status-rejected";
-    //   const statusLabel = isPending ? "Pending" : isApproved ? "Approved" : "Rejected";
-
-    // const isSequential = requests.some(r => r.msdyn_flow_approvalrequest_stage != null);
-
-    //   let html = `
-    //   <div class="approval-card">
-    //     <div class="approval-header">
-    //       <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px">
-    //         <div style="flex:1">
-    //           <h3 class="approval-title">
-    //             ${approval.msdyn_flow_approval_title ?? "Approval Request"}
-    //           </h3>
-    //           <div class="approval-meta">
-    //             <span class="status-badge ${statusClass}">
-    //               ${statusLabel}
-    //             </span>
-    //             <span style="font-size:12px;color:#6b7280">
-    //               Created ${formatDate(approval.createdon)}
-    //             </span>
-    //             ${approval.msdyn_flow_approval_completedon ? `
-    //               <span style="color:#6b7280">•</span>
-    //               <span style="font-size:12px;color:#6b7280">
-    //                 Completed ${formatDate(approval.msdyn_flow_approval_completedon)}
-    //               </span>` : ""}
-    //           </div>
-    //         </div>
-    //         <button onclick="window.loadApprovalData()" class="btn btn-refresh">
-    //           Refresh
-    //         </button>
-    //       </div>
-    //     </div>
-
-    //     <div class="approval-timeline">`;
-
-    //   requests.forEach((req, index) => {
-    //     const name = req["_ownerid_value@OData.Community.Display.V1.FormattedValue"] ?? "—";
-    //     const initial = name.charAt(0).toUpperCase();
-    //     const assignedOn = req.createdon;
-
-    //     const resp = responses.find(r => r["_ownerid_value"] === req["_ownerid_value"]);
-    //     const decision = resp?.msdyn_flow_approvalresponse_response;
-    //     const comment = resp?.msdyn_flow_approvalresponse_comments?.trim();
-    //     const actionOn = resp?.createdon;
-
-    //     const rowPending = !resp;
-    //     const rowApproved = decision === "Approve";
-
-    //     const ownerEmail = userEmailMap[req["_ownerid_value"]?.toLowerCase()] ?? "";
-    //     const isCurrentUser = ownerEmail === currentUser;
-    //     const showActions = isCurrentUser && rowPending;
-
-    //     const dotClass = rowPending ? "pending" : rowApproved ? "approved" : "rejected";
-    //     const dotChar = rowPending ? initial : rowApproved ? "✓" : "✕";
-
-    //     html += `
-    //     <div class="timeline-item">
-    //       <div class="timeline-dot ${dotClass}">
-    //         ${dotChar}
-    //       </div>
-
-    //       <div class="timeline-content">
-    //         <div class="approver-info">
-    //           <div>
-    //             <span class="approver-name">${name}</span>
-    //             ${isCurrentUser ? `<span class="you-badge">You</span>` : ""}
-    //           </div>
-    //           ${!rowPending ? `
-    //             <span class="decision-badge ${rowApproved ? "approved" : "rejected"}">
-    //               ${rowApproved ? "Approved" : "Rejected"}
-    //             </span>` : ""}
-    //         </div>
-
-    //         <div class="timeline-dates">
-    //           Assigned ${formatDate(assignedOn)}
-    //           ${actionOn ? ` • ${rowApproved ? "Approved" : "Rejected"} ${formatDate(actionOn)}` : ""}
-    //         </div>
-
-    //         <p class="timeline-comment ${!comment && !rowPending ? "empty" : ""}">
-    //           ${rowPending
-    //             ? '<span style="color:#9ca3af;font-style:italic">Awaiting response</span>'
-    //             : comment || '<span style="font-style:italic">No comments added</span>'}
-    //         </p>
-
-    //         ${showActions ? `
-    //           <div class="action-panel">
-    //             <textarea id="approval-comments" class="comment-textarea" rows="2" placeholder="Add a comment (optional)"></textarea>
-    //             <div class="action-buttons">
-    //               <button id="btn-approve" onclick="window.submitResponse('Approve')" class="btn btn-approve">
-    //                 Approve
-    //               </button>
-    //               <button id="btn-reject" onclick="window.submitResponse('Reject')" class="btn btn-reject">
-    //                 Reject
-    //               </button>
-    //             </div>
-    //           </div>` : ""}
-    //       </div>
-    //     </div>`;
-    //   });
-
-    //   html += `</div></div>`;
-    //   document.getElementById("approval-body").innerHTML = html;
-    // }
-
-    // ── Render ─────────────────────────────────────────────────────────────────
-    // function renderApproval(approval, requests, responses, myRequest, userEmailMap) {
-    //   const result = approval.msdyn_flow_approval_result;
-    //   const isApproved = result === "Approve";
-    //   const isRejected = result === "Reject";
-    //   const isPending = !result;
-
-    //   const statusClass = isPending ? "status-pending" : isApproved ? "status-approved" : "status-rejected";
-    //   const statusLabel = isPending ? "Pending" : isApproved ? "Approved" : "Rejected";
-
-    //   // ✅ DETERMINE APPROVAL TYPE FROM MODEL TYPE
-    //   const modelType = approval.msdyn_flow_approval_modeltype;
-      
-    //   const isBasic = modelType === "msdyn_flow_basicapprovalmodel";
-    //   const isAwaitAll = modelType === "msdyn_flow_awaitallapprovalmodel";
-    //   const isSequential = modelType === "msdyn_flow_sequentialapprovalmodel";
-
-    //   const typeLabel = isBasic ? "First to respond" : 
-    //                    isAwaitAll ? "Everyone must approve" : 
-    //                    isSequential ? "Sequential" : "Unknown";
-
-    //   let html = `
-    //   <div class="approval-card">
-    //     <div class="approval-header">
-    //       <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px">
-    //         <div style="flex:1">
-    //           <h3 class="approval-title">
-    //             ${approval.msdyn_flow_approval_title ?? "Approval Request"}
-    //           </h3>
-    //           <div class="approval-meta">
-    //             <span class="status-badge ${statusClass}">
-    //               ${statusLabel}
-    //             </span>
-    //             <span class="status-badge" style="background:#e0e7ff;color:#4338ca">${typeLabel}</span>
-    //             <span style="font-size:12px;color:#6b7280">
-    //               Created ${formatDate(approval.createdon)}
-    //             </span>
-    //             ${approval.msdyn_flow_approval_completedon ? `
-    //               <span style="color:#6b7280">•</span>
-    //               <span style="font-size:12px;color:#6b7280">
-    //                 Completed ${formatDate(approval.msdyn_flow_approval_completedon)}
-    //               </span>` : ""}
-    //           </div>
-    //         </div>
-    //         <button onclick="window.loadApprovalData()" class="btn btn-refresh">
-    //           Refresh
-    //         </button>
-    //       </div>
-    //     </div>
-
-    //     <div class="approval-timeline">`;
-
-    //   // ✅ SORT REQUESTS BY STAGE (for sequential) OR BY CREATION DATE
-    //   const sortedRequests = [...requests].sort((a, b) => {
-    //     if (isSequential) {
-    //       // For sequential: sort by stage number
-    //       const stageA = a.msdyn_flow_approvalrequest_stage ?? 0;
-    //       const stageB = b.msdyn_flow_approvalrequest_stage ?? 0;
-    //       return stageA - stageB;
-    //     }
-    //     // For others: sort by creation date
-    //     return new Date(a.createdon) - new Date(b.createdon);
-    //   });
-
-    //   // ✅ DETERMINE WHO CAN TAKE ACTION
-    //   let canApprove = new Set(); // Set of owner IDs who can take action
-      
-    //   if (isBasic) {
-    //     // BASIC: All pending users can respond (first to respond wins)
-    //     sortedRequests.forEach(r => {
-    //       if (r.statecode === 0) {
-    //         canApprove.add(r["_ownerid_value"]?.toLowerCase());
-    //       }
-    //     });
-    //   } else if (isAwaitAll) {
-    //     // AWAIT ALL: All pending users can respond (everyone must approve/reject)
-    //     sortedRequests.forEach(r => {
-    //       if (r.statecode === 0) {
-    //         canApprove.add(r["_ownerid_value"]?.toLowerCase());
-    //       }
-    //     });
-    //   } else if (isSequential) {
-    //     // SEQUENTIAL: Only the first pending user can respond
-    //     const firstPending = sortedRequests.find(r => r.statecode === 0);
-    //     if (firstPending) {
-    //       canApprove.add(firstPending["_ownerid_value"]?.toLowerCase());
-    //     }
-    //   }
-
-    //   // ✅ RENDER EACH APPROVER
-    //   sortedRequests.forEach((req, index) => {
-    //     const name = req["_ownerid_value@OData.Community.Display.V1.FormattedValue"] ?? "—";
-    //     const initial = name.charAt(0).toUpperCase();
-    //     const assignedOn = req.createdon;
-    //     const ownerId = req["_ownerid_value"]?.toLowerCase();
-    //     const stage = req.msdyn_flow_approvalrequest_stage;
-
-    //     const resp = responses.find(r => r["_ownerid_value"] === req["_ownerid_value"]);
-    //     const decision = resp?.msdyn_flow_approvalresponse_response;
-    //     const comment = resp?.msdyn_flow_approvalresponse_comments?.trim();
-    //     const actionOn = resp?.createdon;
-
-    //     const rowPending = !resp;
-    //     const rowApproved = decision === "Approve";
-
-    //     const ownerEmail = userEmailMap[ownerId] ?? "";
-    //     const isCurrentUser = ownerEmail === currentUser;
-
-    //     // ✅ Check if this user can take action
-    //     const showActions = isCurrentUser && canApprove.has(ownerId);
-
-    //     const dotClass = rowPending ? "pending" : rowApproved ? "approved" : "rejected";
-    //     const dotChar = rowPending ? initial : rowApproved ? "✓" : "✕";
-
-    //     html += `
-    //     <div class="timeline-item">
-    //       <div class="timeline-dot ${dotClass}">
-    //         ${dotChar}
-    //       </div>
-
-    //       <div class="timeline-content">
-    //         <div class="approver-info">
-    //           <div>
-    //             <span class="approver-name">${name}</span>
-    //             ${isCurrentUser ? `<span class="you-badge">You</span>` : ""}
-    //             ${isSequential && stage != null ? `<span style="margin-left:8px;font-size:11px;color:#6b7280;font-weight:normal">Stage ${stage}</span>` : ""}
-    //           </div>
-    //           ${!rowPending ? `
-    //             <span class="decision-badge ${rowApproved ? "approved" : "rejected"}">
-    //               ${rowApproved ? "Approved" : "Rejected"}
-    //             </span>` : ""}
-    //         </div>
-
-    //         <div class="timeline-dates">
-    //           Assigned ${formatDate(assignedOn)}
-    //           ${actionOn ? ` • ${rowApproved ? "Approved" : "Rejected"} ${formatDate(actionOn)}` : ""}
-    //         </div>
-
-    //         <p class="timeline-comment ${!comment && !rowPending ? "empty" : ""}">
-    //           ${rowPending
-    //             ? (isCurrentUser && !showActions && isSequential 
-    //                 ? '<span style="color:#f59e0b;font-style:italic">⏳ Waiting for previous approver</span>'
-    //                 : '<span style="color:#9ca3af;font-style:italic">Awaiting response</span>')
-    //             : comment || '<span style="font-style:italic">No comments added</span>'}
-    //         </p>
-
-    //         ${showActions ? `
-    //           <div class="action-panel">
-    //             <textarea id="approval-comments" class="comment-textarea" rows="2" placeholder="Add a comment (optional)"></textarea>
-    //             <div class="action-buttons">
-    //               <button id="btn-approve" onclick="window.submitResponse('Approve')" class="btn btn-approve">
-    //                 Approve
-    //               </button>
-    //               <button id="btn-reject" onclick="window.submitResponse('Reject')" class="btn btn-reject">
-    //                 Reject
-    //               </button>
-    //             </div>
-    //           </div>` : ""}
-    //       </div>
-    //     </div>`;
-    //   });
-
-    //   html += `</div></div>`;
-    //   document.getElementById("approval-body").innerHTML = html;
-    // }
-
-    function renderApproval(approval, requests, responses, myRequest, userEmailMap) {
-      const result = approval.msdyn_flow_approval_result;
-      const isApproved = result === "Approve";
-      const isRejected = result === "Reject";
-      const isPending = !result;
-
-      const statusClass = isPending ? "status-pending" : isApproved ? "status-approved" : "status-rejected";
-      const statusLabel = isPending ? "Pending" : isApproved ? "Approved" : "Rejected";
-
-      // ✅ DETERMINE APPROVAL TYPE FROM MODEL TYPE
-      const modelType = approval.msdyn_flow_approval_modeltype;
-      
-      const isBasic = modelType === "msdyn_flow_basicapprovalmodel";
-      const isAwaitAll = modelType === "msdyn_flow_awaitallapprovalmodel";
-      const isSequential = modelType === "msdyn_flow_sequentialapprovalmodel";
-
-      const typeLabel = isBasic ? "First to respond" : 
-                      isAwaitAll ? "Everyone must approve" : 
-                      isSequential ? "Sequential" : "Unknown";
-
-      let html = `
-      <div class="approval-card">
-        <div class="approval-header">
-          <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px">
-            <div style="flex:1">
-              <h3 class="approval-title">
-                ${approval.msdyn_flow_approval_title ?? "Approval Request"}
-              </h3>
-              <div class="approval-meta">
-                <span class="status-badge ${statusClass}">
-                  ${statusLabel}
-                </span>
-                <span class="status-badge" style="background:#fff3e0;color:#e65100">${typeLabel}</span>
-                <span style="font-size:12px;color:#6b7280">
-                  Created ${formatDate(approval.createdon)}
-                </span>
-                ${approval.msdyn_flow_approval_completedon ? `
-                  <span style="color:#6b7280">•</span>
-                  <span style="font-size:12px;color:#6b7280">
-                    Completed ${formatDate(approval.msdyn_flow_approval_completedon)}
-                  </span>` : ""}
-              </div>
-            </div>
-            <button onclick="window.loadApprovalData(false)" class="btn btn-refresh">
-              Refresh
-            </button>
-            
-          </div>
-        </div>
-
-        <div class="approval-timeline">`;
-
-      // ✅ SORT REQUESTS BY STAGE (for sequential) OR BY CREATION DATE
-      const sortedRequests = [...requests].sort((a, b) => {
-        if (isSequential) {
-          const stageA = a.msdyn_flow_approvalrequest_stage ?? 0;
-          const stageB = b.msdyn_flow_approvalrequest_stage ?? 0;
-          return stageA - stageB;
-        }
-        return new Date(a.createdon) - new Date(b.createdon);
-      });
-
-      // ✅ DETERMINE WHO CAN TAKE ACTION
-      let canApprove = new Set();
-
-      // 🚫 CRITICAL: If approval has a result, it's completed - NO actions allowed
-      // This aligns with Power Automate Flow completion logic
-      if (result) {
-        canApprove = new Set(); // Empty - approval is done
-        console.log("⛔ Approval completed with result:", result, "- No further actions allowed");
-
-      } else {
-        // Approval is still pending - check who can act based on approval type
-
-        if (isBasic) {
-          // BASIC (First to Respond): Allow actions only if NO responses exist yet
-          // Once someone responds, Flow will mark as complete
-          const hasAnyResponse = responses.length > 0;
-
-          if (!hasAnyResponse) {
-            // No responses yet - all pending requests can act
-            sortedRequests.forEach(r => {
-              if (r.statecode === 0) {
-                canApprove.add(r["_ownerid_value"]?.toLowerCase());
-              }
-            });
-          }
-          console.log("📍 Basic - Has responses:", hasAnyResponse, "| Can approve:", canApprove.size);
-
-        } else if (isAwaitAll) {
-          // AWAIT ALL: All pending users who haven't responded can act
-          // Flow will mark complete when all respond OR anyone rejects
-          sortedRequests.forEach(r => {
-            if (r.statecode === 0) {
-              const hasResponded = responses.some(resp =>
-                resp["_ownerid_value"] === r["_ownerid_value"]
-              );
-              if (!hasResponded) {
-                canApprove.add(r["_ownerid_value"]?.toLowerCase());
-              }
-            }
-          });
-          console.log("📍 AwaitAll - Pending approvers who can act:", canApprove.size);
-
-        } else if (isSequential) {
-          // SEQUENTIAL: Only the FIRST pending user who hasn't responded can act
-          // Flow will mark complete when all stages done OR anyone rejects
-          const firstPending = sortedRequests.find(r => {
-            const hasResponded = responses.some(resp =>
-              resp["_ownerid_value"] === r["_ownerid_value"]
-            );
-            return r.statecode === 0 && !hasResponded;
-          });
-
-          if (firstPending) {
-            canApprove.add(firstPending["_ownerid_value"]?.toLowerCase());
-            console.log("📍 Sequential - Next approver:", firstPending["_ownerid_value@OData.Community.Display.V1.FormattedValue"]);
-          } else {
-            console.log("📍 Sequential - No pending approvers found");
-          }
-        }
-      }
-
-      console.log("✅ Final decision - Users who can approve:", Array.from(canApprove));
-      console.log("✅ Approval state:", result ? `COMPLETED (${result})` : "PENDING");
-      console.log("✅ Total responses so far:", responses.length);
-
-      // ✅ RENDER EACH APPROVER
-      
-      sortedRequests.forEach((req, index) => {
-        const name = req["_ownerid_value@OData.Community.Display.V1.FormattedValue"] ?? "—";
-        const initial = name.charAt(0).toUpperCase();
-        const assignedOn = req.createdon;
-        const ownerId = req["_ownerid_value"]?.toLowerCase();
-        const stage = req.msdyn_flow_approvalrequest_stage;
-
-        const resp = responses.find(r => r["_ownerid_value"] === req["_ownerid_value"]);
-        const decision = resp?.msdyn_flow_approvalresponse_response;
-        const comment = resp?.msdyn_flow_approvalresponse_comments?.trim();
-        const actionOn = resp?.createdon;
-
-        const rowPending = !resp;
-        const rowApproved = decision === "Approve";
-
-        const ownerEmail = userEmailMap[ownerId] ?? "";
-        const isCurrentUser = ownerEmail === currentUser;
-
-        // ✅ Check if this user can take action
-        const showActions = isCurrentUser && canApprove.has(ownerId);
-
-        const dotClass = rowPending ? "pending" : rowApproved ? "approved" : "rejected";
-        const dotChar = rowPending ? initial : rowApproved ? "✓" : "✕";
-
-        html += `
-        <div class="timeline-item">
-          <div class="timeline-dot ${dotClass}">
-            ${dotChar}
-          </div>
-
-          <div class="timeline-content">
-            <div class="approver-info">
-              <div>
-                <span class="approver-name">${name}</span>
-                ${isCurrentUser ? `<span class="you-badge">You</span>` : ""}
-                ${isSequential && stage != null ? `<span style="margin-left:8px;font-size:11px;color:#6b7280;font-weight:normal">Stage ${stage}</span>` : ""}
-              </div>
-              ${!rowPending ? `
-                <span class="decision-badge ${rowApproved ? "approved" : "rejected"}">
-                  ${rowApproved ? "Approved" : "Rejected"}
-                </span>` : ""}
-            </div>
-
-            <div class="timeline-dates">
-              Assigned ${formatDate(assignedOn)}
-              ${actionOn ? ` • ${rowApproved ? "Approved" : "Rejected"} ${formatDate(actionOn)}` : ""}
-            </div>
-
-            <p class="timeline-comment ${!comment && !rowPending ? "empty" : ""}">
-              ${rowPending
-                ? (() => {
-                  // CASE 1: Approval is complete (has result)
-                  if (result) {
-                    if (isRejected) {
-                      return '<span style="color:#ef4444;font-style:italic">⛔ Approval rejected - no action required</span>';
-                    } else {
-                      return '<span style="color:#10b981;font-style:italic">✓ Approval approved - no action required</span>';
-                    }
-                  }
-
-                  // CASE 2: Approval still pending - Current user can take action
-                  if (isCurrentUser && showActions) {
-                    return '<span style="color:#3b82f6;font-weight:500">⏰ Your approval is required</span>';
-                  }
-
-                  // CASE 3: Approval still pending - Current user cannot take action
-                  if (isCurrentUser && !showActions) {
-                    if (isSequential) {
-                      return '<span style="color:#f59e0b;font-style:italic">⏳ Waiting for previous stage approver</span>';
-                    } else {
-                      return '<span style="color:#9ca3af;font-style:italic">Already decided by another approver</span>';
-                    }
-                  }
-
-                  // CASE 4: Not current user - just show pending
-                  return '<span style="color:#9ca3af;font-style:italic">Awaiting response</span>';
-                })()
-                : comment || '<span style="font-style:italic">No comments added</span>'}
-            </p>
-
-            ${showActions ? `
-              <div class="action-panel">
-                <textarea id="approval-comments" class="comment-textarea" rows="2" placeholder="Add a comment (optional)"></textarea>
-                <div class="action-buttons">
-                  <button id="btn-approve" data-request-id="${req.msdyn_flow_approvalrequestid}" onclick="window.submitResponse('Approve')" class="btn btn-approve">
-                    Approve
-                  </button>
-                  <button id="btn-reject" data-request-id="${req.msdyn_flow_approvalrequestid}" onclick="window.submitResponse('Reject')" class="btn btn-reject">
-                    Reject
-                  </button>
-                </div>
-              </div>` : ""}
-          </div>
+      renderEnvelope(envelope);
+
+    } catch (err) {
+      console.error("Signature load error:", err);
+      document.getElementById("signature-body").innerHTML =
+        `<div class="sig-error">
+          Failed to load signature details.
+          <button onclick="window.loadSignatureData()" class="sig-refresh" style="margin-left:12px">Retry</button>
         </div>`;
-      });
-
-      html += `</div></div>`;
-      document.getElementById("approval-body").innerHTML = html;
     }
+  }
 
-    // ── Helpers ────────────────────────────────────────────────────────────────
-    function skeletonHTML() {
-      return `
-      <div class="approval-card">
-        <div class="approval-header">
-          <div class="skeleton" style="height:18px;width:200px;margin-bottom:12px"></div>
-          <div class="skeleton" style="height:12px;width:150px"></div>
-        </div>
-        <div class="approval-timeline">
-          <div class="timeline-item">
-            <div class="skeleton" style="width:40px;height:40px;border-radius:50%"></div>
-            <div style="flex:1">
-              <div class="skeleton" style="height:14px;width:60%;margin-bottom:8px"></div>
-              <div class="skeleton" style="height:12px;width:40%"></div>
-            </div>
+  function renderEnvelope(envelope) {
+    const isCompleted = envelope.allCompleted === true;
+    const isDeclined  = (envelope.declinedCount || 0) > 0 && !isCompleted;
+
+    const statusClass = isCompleted ? "sig-badge-completed"
+                      : isDeclined  ? "sig-badge-declined"
+                      :               "sig-badge-pending";
+    const statusLabel = isCompleted ? "Completed"
+                      : isDeclined  ? "Declined"
+                      :               "Pending";
+
+    const recipients = envelope.recipients || [];
+    const sortedRecipients = [...recipients].sort(
+      (a, b) => (parseInt(a.order, 10) || 1) - (parseInt(b.order, 10) || 1)
+    );
+
+    let html = `
+    <div class="sig-card">
+      <div class="sig-header">
+        <div style="flex:1;min-width:0">
+          <h3 class="sig-title">Signature Envelope</h3>
+          <div class="sig-meta">
+            <span class="sig-badge ${statusClass}">${statusLabel}</span>
+            <span class="sig-badge sig-badge-type">${envelope.completedCount ?? 0} of ${envelope.totalCount ?? recipients.length} completed</span>
           </div>
-          <div class="timeline-item">
-            <div class="skeleton" style="width:40px;height:40px;border-radius:50%"></div>
-            <div style="flex:1">
-              <div class="skeleton" style="height:14px;width:50%;margin-bottom:8px"></div>
-              <div class="skeleton" style="height:12px;width:35%"></div>
-            </div>
+        </div>
+        <button onclick="window.loadSignatureData(false)" class="sig-refresh">Refresh</button>
+      </div>
+      <div class="sig-list">`;
+
+    sortedRecipients.forEach(rec => {
+      const recStatus    = (rec.status || "").toLowerCase();
+      const rowCompleted = recStatus === "completed";
+      const rowDeclined  = recStatus === "declined";
+
+      const avatarClass = rowCompleted ? "sig-avatar-completed"
+                        : rowDeclined  ? "sig-avatar-declined"
+                        :                "sig-avatar-pending";
+      const avatarChar  = rowCompleted ? "✓" : rowDeclined ? "✕" : (rec.role || "—").charAt(0).toUpperCase();
+
+      html += `
+      <div class="sig-row">
+        <div class="sig-avatar ${avatarClass}">${avatarChar}</div>
+        <div class="sig-row-body">
+          <div class="sig-row-top">
+            <span class="sig-name">${rec.role ?? "—"}</span>
+            <span class="sig-decision ${rowCompleted ? "sig-decision-completed" : rowDeclined ? "sig-decision-declined" : "sig-badge-pending"}">
+              ${(rec.status ? rec.status.charAt(0).toUpperCase() + rec.status.slice(1) : "Pending")}
+            </span>
+          </div>
+          <div class="sig-date">${rec.email ?? "—"}</div>
+          <div class="sig-date">
+            ${rec.sentDateTime ? `Sent ${formatDate(rec.sentDateTime)}` : "Not yet sent"}
+            ${rec.completedDateTime ? `&nbsp;·&nbsp; ${rowCompleted ? "Signed" : "Actioned"} ${formatDate(rec.completedDateTime)}` : ""}
           </div>
         </div>
       </div>`;
-    }
+    });
 
-    function formatDate(dateStr) {
-      if (!dateStr) return "—";
-      return new Date(dateStr).toLocaleString("en-GB", {
-        day: "2-digit", month: "short", year: "numeric",
-        hour: "2-digit", minute: "2-digit"
-      });
-    }
+    html += `</div></div>`;
+    document.getElementById("signature-body").innerHTML = html;
+  }
 
-    // function showToast(message, type) {
-    //   document.querySelectorAll('.toast').forEach(t => t.remove());
-      
-    //   const t = document.createElement("div");
-    //   t.className = `toast ${type}`;
-    //   t.textContent = message;
-    //   document.body.appendChild(t);
-    //   setTimeout(() => t.remove(), 4000);
-    // }
+  function skeletonHTML() {
+    const row = `
+    <div class="sig-row">
+      <div class="sig-skeleton" style="width:36px;height:36px;border-radius:50%;flex-shrink:0"></div>
+      <div style="flex:1">
+        <div class="sig-skeleton" style="height:13px;width:55%;margin-bottom:8px"></div>
+        <div class="sig-skeleton" style="height:11px;width:38%"></div>
+      </div>
+    </div>`;
+    return `
+    <div class="sig-card">
+      <div class="sig-header">
+        <div style="flex:1">
+          <div class="sig-skeleton" style="height:14px;width:220px;margin-bottom:10px"></div>
+          <div class="sig-skeleton" style="height:11px;width:140px"></div>
+        </div>
+      </div>
+      <div class="sig-list">${row}${row}</div>
+    </div>`;
+  }
 
-    // Expose to window for onclick handlers
-    window.loadApprovalData = loadApprovalData;
-    window.submitResponse = submitResponse;
+  function formatDate(dateStr) {
+    if (!dateStr) return "—";
+    return new Date(dateStr).toLocaleString("en-GB", {
+      day: "2-digit", month: "short", year: "numeric",
+      hour: "2-digit", minute: "2-digit"
+    });
+  }
 
-    // Initial load
-    loadApprovalData();
-
-  })();
+  window.loadSignatureData = loadSignatureData;
+  loadSignatureData();
+})();
 </script>
-{% endcomment %}
+{% endif %}

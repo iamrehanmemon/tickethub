@@ -2,6 +2,7 @@ adx_calendar_enabled: false
 adx_calendar_initialview: 756150001
 adx_calendar_style: 756150000
 adx_calendar_timezonemode: 756150000
+adx_emptylisttext: ''
 adx_entitylistid: 54bac456-d642-f111-88b3-6045bd69be5f
 adx_entityname: sh_ticket
 adx_entitypermissionsenabled: true
@@ -19,8 +20,9 @@ adx_map_type: 756150000
 adx_map_zoom: 12
 adx_name: P2P Tickets List
 adx_odata_enabled: false
-adx_pagesize: 50
-adx_searchenabled: false
+adx_pagesize: 100
+adx_searchenabled: true
+adx_searchplaceholdertext: ''
 adx_settings: >-
   {
     "Type": "CrmEntityFormView-GridMetadata",

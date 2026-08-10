@@ -11,14 +11,9 @@
 {%- assign hasCS  = false -%}
 {%- assign hasP2P = false -%}
 
-{%- if userEmail == "g.blythe@starlinks-me.com" or userEmail == "quentin.naylor@starlinks-me.com" or userEmail == "maxim.sychevskiy@starlinks-me.com" or userEmail == "rehan.memon@starlinks-me.com" -%}
+{%- if userEmail == "g.blythe@starlinks-me.com" or userEmail == "quentin.naylor@starlinks-me.com" or userEmail == "tamer.alamad@starlinks-me.com" or userEmail == "maxim.sychevskiy@starlinks-me.com" or userEmail == "rehan.memon@starlinks-me.com" -%}
   {%- assign isAllowedAllAccess = true -%}
   {%- assign defaultDept = "HR" -%}
-{%- endif -%}
-
-{%- if userEmail == "tamer.alamad@starlinks-me.com" -%}
-  {%- assign isAllowedAllAccess = true -%}
-  {%- assign defaultDept = "IT" -%}
 {%- endif -%}
 
 {%- if user.roles contains "Starlinks Procurement Team" -%}
@@ -30,7 +25,6 @@
   {%- assign hasP2P = true -%}
   {%- assign defaultDept = "P2P" -%}
 {%- endif -%}
-
 
 {%- if user.roles contains "Starlinks HR Team" -%}
   {%- assign hasHR = true -%}
@@ -56,217 +50,6 @@
   {% include "Starlinks - Access Not Enabled" title: "Dashboard access not enabled" subtitle: "You don't currently have access to any department dashboards. Please contact the Administrator if this is unexpected." primaryUrl: "/" primaryText: "Back to home" secondaryUrl: "mailto:rehan.memon@starlinks-me.com?subject=Dashboard%20Access%20Request&body=Hi%20Team,%0A%0AI%20do%20not%20have%20access%20to%20the%20Analytics%20Dashboard.%0A%0AThanks" secondaryText: "Contact Administrator" %}
 {%- else -%}
 
-{%- if user.roles contains "ABC" -%}
-<!-- Analytics Header -->
-<div class="topbar">
-  <div class="topbar-left">
-    <div class="topbar-title">Starlinks One Dashboard</div>
-    <div class="topbar-sub">Insights on workload, SLA health, trends, and bottlenecks.</div>
-    <div class="topbar-meta">
-      <span class="chip"><span class="dot"></span><span id="debugMsg">Ready</span></span>
-      <span class="chip"><span class="dot"></span>Executive View</span>
-    </div>
-  </div>
-
-  <!-- RIGHT: Controls -->
-  <div class="topbar-right" style="align-items: flex-end;">
-    <div class="control">
-      <label class="form-label">Department</label>
-      <select id="a_module" class="form-select form-select-sm">
-        <!-- <option value="ALL">All Departments</option> -->
-        {%- if hasPROC or isAllowedAllAccess -%}
-          <option value="PROC" {% if defaultDept == "PROC" %}selected{% endif %}>Procurement</option>
-        {%- endif -%}
-
-        {%- if isAllowedAllAccess -%}
-        <option value="P2P" {% if defaultDept=="P2P" %}selected{% endif %}>
-          Finance (P2P)
-        </option>
-        {%- endif -%}
-        {%- if isAllowedAllAccess or user.roles contains "Starlinks Finance Team" -%}
-          <option value="P2P" {% if defaultDept == "P2P" %}selected{% endif %}>Finance (P2P)</option>
-        {%- endif -%}
-
-        {%- if hasHR or isAllowedAllAccess -%}
-          <option value="HR" {% if defaultDept == "HR" %}selected{% endif %}>
-            HR
-          </option>
-        {%- endif -%}
-        {%- if hasLEGAL or isAllowedAllAccess -%}
-          <option value="LEGAL" {% if defaultDept == "LEGAL" %}selected{% endif %}>
-            Legal
-          </option>
-        {%- endif -%}
-
-        {%- if hasIT or isAllowedAllAccess -%}
-          <option value="IT" {% if defaultDept == "IT" %}selected{% endif %}>
-            IT
-          </option>
-        {%- endif -%}
-
-        {%- if hasCS or isAllowedAllAccess -%}
-          <option value="CS" {% if defaultDept == "CS" %}selected{% endif %}>
-            Customer Service
-          </option>
-        {%- endif -%}
-      </select>
-    </div>
-    <div class="control" style="min-width:240px;">
-      <label class="form-label">Date Range</label>
-      <select id="a_dateRange" class="form-select form-select-sm">
-        <option value="today">Today</option>
-        <option value="yesterday">Yesterday</option>
-        <option value="last7">Last 7 Days</option>
-        <option value="thisMonth">This Month</option>
-        <option value="lastMonth">Last Month</option>
-        <option value="lastQuarter">Last Quarter</option>
-        <option value="thisYear">This Year</option>
-        <option value="last90" selected>Last 90 Days (recommended)</option>
-        <option value="last365">Last 365 Days</option>
-        <option value="custom">Custom Range</option>
-      </select>
-    </div>
-    <!-- Date Range Filter -->
-    <div id="a_customRange" class="d-none d-flex gap-3">
-      <div class="control" style="min-width:240px;">
-        <label class="form-label">Start Date</label>
-        <input type="date" id="a_startDate" class="form-control form-control-sm">
-      </div>
-
-      <div class="control" style="min-width:240px;">
-        <label class="form-label">End Date</label>
-        <input type="date" id="a_endDate" class="form-control form-control-sm">
-      </div>
-    </div>
-
-    </div>
-
-    <!-- Dynamic filter 1
-    <div class="control" id="dyn_filter1_wrap" style="display:none; min-width:180px; max-width:220px;">
-      <label class="form-label mb-0" id="dyn_filter1_label">Filter 1</label>
-      <select id="dyn_filter1" class="form-select form-select-sm">
-        <option value="">All</option>
-      </select>
-    </div>
-
-    <!-- Dynamic filter 2 
-    <div class="control" id="dyn_filter2_wrap" style="display:none; min-width:180px; max-width:220px;">
-      <label class="form-label mb-0" id="dyn_filter2_label">Filter 2</label>
-      <select id="dyn_filter2" class="form-select form-select-sm">
-        <option value="">All</option>
-      </select>
-    </div>
-
-    <button id="a_apply" class="btn btn-primary" style="height:38px;">Apply</button>-->
-    <!-- <button id="a_apply" class="btn btn-primary" style="height:38px;">Apply</button> -->
-
-    <!-- Dynamic filters mount point -->
-    <div id="dyn_filters_container" style="display:contents;"></div>
-
-    <button id="a_apply" class="btn btn-primary" style="height:38px; align-self:flex-end;">Apply</button>
-    <span id="dyn_results_badge" style="display:none;" class="chip">
-      <span class="dot"></span>
-      <span id="dyn_results_count">—</span> records
-    </span>
-  </div>
-</div>
-
-
-<div class="topbar">
-  <div class="topbar-left">
-    <div class="topbar-title">Starlinks One Dashboard</div>
-    <div class="topbar-sub">Insights on workload, SLA health, trends, and bottlenecks.</div>
-    <div class="topbar-meta">
-      <span class="chip"><span class="dot"></span><span id="debugMsg">Ready</span></span>
-      <span class="chip"><span class="dot"></span>Executive View</span>
-      <!-- <span id="dyn_results_badge" style="display:none; align-self:flex-end;"> -->
-        <span class="chip" id="dyn_results_badge"><span class="dot"></span><span id="dyn_results_count">—</span> records</span>
-      <!-- </span> -->
-    </div>
-  </div>
-
-  <div class="topbar-right" style="display:flex; flex-wrap:wrap; align-items:flex-end; gap:12px;">
-
-    <div style="display:flex; flex-direction:column; gap:4px;">
-      <label class="form-label" style="margin-bottom:0;">Department</label>
-      <select id="a_module" class="form-select form-select-sm" style="min-width:160px;">
-        {%- if hasPROC or isAllowedAllAccess -%}
-          <option value="PROC" {% if defaultDept == "PROC" %}selected{% endif %}>Procurement</option>
-        {%- endif -%}
-        {%- if isAllowedAllAccess -%}
-          <option value="P2P" {% if defaultDept == "P2P" %}selected{% endif %}>Finance (P2P)</option>
-        {%- endif -%}
-        {%- if hasHR or isAllowedAllAccess -%}
-          <option value="HR" {% if defaultDept == "HR" %}selected{% endif %}>HR</option>
-        {%- endif -%}
-        {%- if hasLEGAL or isAllowedAllAccess -%}
-          <option value="LEGAL" {% if defaultDept == "LEGAL" %}selected{% endif %}>Legal</option>
-        {%- endif -%}
-        {%- if hasIT or isAllowedAllAccess -%}
-          <option value="IT" {% if defaultDept == "IT" %}selected{% endif %}>IT</option>
-        {%- endif -%}
-        {%- if hasCS or isAllowedAllAccess -%}
-          <option value="CS" {% if defaultDept == "CS" %}selected{% endif %}>Customer Service</option>
-        {%- endif -%}
-      </select>
-    </div>
-
-    <div style="display:flex; flex-direction:column; gap:4px;">
-      <label class="form-label" style="margin-bottom:0;">Date Range</label>
-      <select id="a_dateRange" class="form-select form-select-sm" style="min-width:220px;">
-        <option value="today">Today</option>
-        <option value="yesterday">Yesterday</option>
-        <option value="last7">Last 7 Days</option>
-        <option value="thisMonth">This Month</option>
-        <option value="lastMonth">Last Month</option>
-        <option value="lastQuarter">Last Quarter</option>
-        <option value="thisYear">This Year</option>
-        <option value="last90" selected>Last 90 Days (recommended)</option>
-        <option value="last365">Last 365 Days</option>
-        <option value="custom">Custom Range</option>
-      </select>
-    </div>
-
-    <!-- Custom date range inputs -->
-    <div id="a_customRange" class="d-none" style="display:none; gap:12px;">
-      <div style="display:flex; flex-direction:column; gap:4px;">
-        <label class="form-label" style="margin-bottom:0;">Start Date</label>
-        <input type="date" id="a_startDate" class="form-control form-control-sm" style="min-width:160px;">
-      </div>
-      <div style="display:flex; flex-direction:column; gap:4px;">
-        <label class="form-label" style="margin-bottom:0;">End Date</label>
-        <input type="date" id="a_endDate" class="form-control form-control-sm" style="min-width:160px;">
-      </div>
-    </div>
-
-    <!-- Dynamic filter 1 -->
-    <!-- <div style="display:none; flex-direction:column; gap:4px;" id="dyn_filter1_wrap">
-      <label class="form-label" style="margin-bottom:0;" id="dyn_filter1_label">Filter 1</label>
-      <select id="dyn_filter1" class="form-select form-select-sm" style="min-width:160px;">
-        <option value="">All</option>
-      </select>
-    </div> -->
-
-    <!-- Dynamic filter 2 -->
-    <!-- <div style="display:none; flex-direction:column; gap:4px;" id="dyn_filter2_wrap">
-      <label class="form-label" style="margin-bottom:0;" id="dyn_filter2_label">Filter 2</label>
-      <select id="dyn_filter2" class="form-select form-select-sm" style="min-width:160px;">
-        <option value="">All</option>
-      </select>
-    </div> -->
-
-    <div id="dyn_filters_container" style="display:contents;"></div>
-
-    <!-- <button id="a_apply" class="btn btn-primary" style="height:38px; align-self:flex-end;">Apply</button> -->
-    <button id="a_apply" class="btn btn-primary" style="height:38px; align-self:flex-end;">Apply</button>
-    
-  </div>
-</div>
-
-<div id="dyn_active_filters" style="display:none; flex-wrap:wrap; gap:8px; margin-top:8px; padding:10px 20px; align-items:center; justify-content:flex-end;">
-</div>
-{%- endif -%}
-
 <!-- Topbar — title and meta only -->
 <div class="topbar">
   <div class="topbar-left">
@@ -289,7 +72,7 @@
         {%- if hasPROC or isAllowedAllAccess -%}
           <option value="PROC" {% if defaultDept == "PROC" %}selected{% endif %}>Procurement</option>
         {%- endif -%}
-        {%- if isAllowedAllAccess -%}
+        {%- if hasP2P or isAllowedAllAccess -%}
           <option value="P2P" {% if defaultDept == "P2P" %}selected{% endif %}>Finance (P2P)</option>
         {%- endif -%}
         {%- if hasHR or isAllowedAllAccess -%}
